@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-cream text-charcoal antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  .container-site {
+    @apply mx-auto w-full max-w-6xl px-6;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-full bg-clay px-6 py-3 text-sm font-medium tracking-wide text-cream transition hover:bg-charcoal;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-full border border-charcoal/20 px-6 py-3 text-sm font-medium tracking-wide text-charcoal transition hover:border-charcoal;
+  }
+
+  .section-title {
+    @apply text-3xl md:text-4xl font-serif text-charcoal;
+  }
+}

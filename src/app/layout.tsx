@@ -1,0 +1,39 @@
+import type { Metadata } from "next";
+import { Playfair_Display, Work_Sans } from "next/font/google";
+import "./globals.css";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  display: "swap",
+});
+
+const workSans = Work_Sans({
+  subsets: ["latin"],
+  variable: "--font-worksans",
+  display: "swap",
+});
+
+export const metadata: Metadata = {
+  title: "Nombre del Artista — Arte orgánico",
+  description:
+    "Cuadros de arte orgánico hechos con materiales naturales. Descubre la colección, la historia y las técnicas del artista.",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="es" className={`${playfair.variable} ${workSans.variable}`}>
+      <body className="font-sans">
+        <Navbar />
+        <main className="min-h-[70vh] bg-organic-texture">{children}</main>
+        <Footer />
+      </body>
+    </html>
+  );
+}
