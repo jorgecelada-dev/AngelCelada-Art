@@ -113,3 +113,5 @@ git push -u origin main
 - Mover los textos de "Sobre mí" a una tabla de Supabase editable desde `/admin`, si quieres poder cambiarlos sin tocar código.
 - Emails automáticos de confirmación de compra (Resend, Postmark…).
 - Analítica (Plausible, Vercel Analytics).
+
+<!-- prueba de sincronización con GitHub Desktop -->
