@@ -1,10 +1,18 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { Obra } from "@/types";
+import type { Entorno, Obra } from "@/types";
 import BuyButton from "./BuyButton";
+import VisualizacionObra from "@/components/VisualizacionObra";
 
 export const revalidate = 0;
+
+const ESTADO_LABEL: Record<string, string> = {
+  "en venta": "En venta",
+  "no se vende": "No se vende",
+  vendido: "Vendida",
+  oferta: "En oferta",
+};
 
 export default async function ObraDetailPage({
   params,
@@ -25,10 +33,24 @@ export default async function ObraDetailPage({
     notFound();
   }
 
+  const { data: entornosData } = await supabase
+    .from("entornos")
+    .select("*")
+    .order("tipo")
+    .order("orden");
+
+  const entornos = (entornosData ?? []) as Entorno[];
+
   const precioFormateado = new Intl.NumberFormat("es-ES", {
     style: "currency",
     currency: "EUR",
   }).format(obra.precio);
+
+  const estadoLabel = obra.estado
+    ? ESTADO_LABEL[obra.estado] ?? obra.estado
+    : obra.disponible
+    ? "En venta"
+    : "Vendida";
 
   return (
     <section className="container-site grid grid-cols-1 gap-12 py-16 md:grid-cols-2">
@@ -59,6 +81,7 @@ export default async function ObraDetailPage({
         )}
 
         <p className="mt-6 text-2xl font-medium">{precioFormateado}</p>
+        <p className="mt-1 text-sm text-charcoal/60">{estadoLabel}</p>
 
         <dl className="mt-8 space-y-3 text-sm text-charcoal/70">
           {obra.tecnica && (
@@ -96,6 +119,12 @@ export default async function ObraDetailPage({
             </span>
           )}
         </div>
+
+        {obra.ancho_cm && obra.alto_cm && (
+          <div className="mt-10">
+            <VisualizacionObra obra={obra} entornos={entornos} />
+          </div>
+        )}
       </div>
     </section>
   );
