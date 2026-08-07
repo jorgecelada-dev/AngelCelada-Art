@@ -46,14 +46,21 @@ export default function ObraForm({
         imagen_url = publicUrl;
       }
 
+      const estado = (fd.get("estado") as string) || "en venta";
+      const disponible = estado === "en venta" || estado === "oferta";
+
       const payload = {
         titulo: fd.get("titulo") as string,
         descripcion: fd.get("descripcion") as string,
         tecnica: fd.get("tecnica") as string,
         medidas: fd.get("medidas") as string,
+        ancho_cm: fd.get("ancho_cm") ? Number(fd.get("ancho_cm")) : null,
+        alto_cm: fd.get("alto_cm") ? Number(fd.get("alto_cm")) : null,
         anio: fd.get("anio") ? Number(fd.get("anio")) : null,
+        fecha_creacion: (fd.get("fecha_creacion") as string) || null,
         precio: Number(fd.get("precio")),
-        disponible: fd.get("disponible") === "on",
+        estado,
+        disponible,
         destacada: fd.get("destacada") === "on",
         categoria_id: (fd.get("categoria_id") as string) || null,
         imagen_url,
@@ -127,6 +134,29 @@ export default function ObraForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div>
+          <label className="block text-sm font-medium">Ancho real (cm)</label>
+          <input
+            name="ancho_cm"
+            type="number"
+            step="0.01"
+            defaultValue={obra?.ancho_cm ?? ""}
+            className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium">Alto real (cm)</label>
+          <input
+            name="alto_cm"
+            type="number"
+            step="0.01"
+            defaultValue={obra?.alto_cm ?? ""}
+            className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
           <label className="block text-sm font-medium">Año</label>
           <input
             name="anio"
@@ -135,6 +165,18 @@ export default function ObraForm({
             className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3"
           />
         </div>
+        <div>
+          <label className="block text-sm font-medium">Fecha de creación</label>
+          <input
+            name="fecha_creacion"
+            type="date"
+            defaultValue={obra?.fecha_creacion ?? ""}
+            className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium">Precio (€)</label>
           <input
@@ -145,6 +187,19 @@ export default function ObraForm({
             required
             className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3"
           />
+        </div>
+        <div>
+          <label className="block text-sm font-medium">Estado</label>
+          <select
+            name="estado"
+            defaultValue={obra?.estado ?? "en venta"}
+            className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3"
+          >
+            <option value="en venta">En venta</option>
+            <option value="no se vende">No se vende</option>
+            <option value="vendido">Vendido</option>
+            <option value="oferta">Oferta</option>
+          </select>
         </div>
       </div>
 
@@ -177,14 +232,6 @@ export default function ObraForm({
       </div>
 
       <div className="flex gap-8">
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            name="disponible"
-            defaultChecked={obra?.disponible ?? true}
-          />
-          Disponible para la venta
-        </label>
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"

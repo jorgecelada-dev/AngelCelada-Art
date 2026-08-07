@@ -60,7 +60,7 @@ export default async function AdminDashboardPage() {
                   }).format(obra.precio)}
                 </td>
                 <td className="p-4">
-                  {obra.disponible ? "Disponible" : "Vendida"}
+                  {obra.estado ?? (obra.disponible ? "En venta" : "Vendida")}
                 </td>
                 <td className="p-4">{obra.destacada ? "Sí" : "No"}</td>
                 <td className="p-4">

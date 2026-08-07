@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { stripe } from "@/lib/stripe";
+import { getStripeClient } from "@/lib/stripe";
 
 export async function POST(request: Request) {
   const { obraId } = await request.json();
@@ -9,7 +9,32 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Falta obraId" }, { status: 400 });
   }
 
+  const supabaseConfigured = Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
+  if (!supabaseConfigured) {
+    return NextResponse.json(
+      {
+        error:
+          "Supabase no está configurado todavía. Añade NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY y SUPABASE_SERVICE_ROLE_KEY para habilitar el checkout.",
+      },
+      { status: 503 }
+    );
+  }
+
   const supabase = createAdminClient();
+  const stripeClient = getStripeClient();
+
+  if (!stripeClient) {
+    return NextResponse.json(
+      {
+        error:
+          "Stripe no está configurado todavía. Añade STRIPE_SECRET_KEY y STRIPE_WEBHOOK_SECRET para habilitar el checkout.",
+      },
+      { status: 503 }
+    );
+  }
 
   const { data: obra, error } = await supabase
     .from("obras")
@@ -29,7 +54,7 @@ export async function POST(request: Request) {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await stripeClient.checkout.sessions.create({
     mode: "payment",
     payment_method_types: ["card"],
     // Bizum se activa desde el Dashboard de Stripe (Settings > Payment

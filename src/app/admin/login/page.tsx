@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export default function AdminLoginPage() {
+function AdminLoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,6 +40,11 @@ export default function AdminLoginPage() {
         <p className="mt-2 text-sm text-charcoal/60">
           Panel exclusivo para el artista.
         </p>
+        {searchParams.get("error") === "not-authorized" && (
+          <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+            Este panel está reservado para Ángel Celada y su cuenta autorizada.
+          </p>
+        )}
 
         <form onSubmit={onSubmit} className="mt-8 space-y-5">
           <div>
@@ -81,5 +87,13 @@ export default function AdminLoginPage() {
         </form>
       </div>
     </section>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={<div className="container-site py-16">Cargando…</div>}>
+      <AdminLoginContent />
+    </Suspense>
   );
 }

@@ -20,6 +20,12 @@ export default function AdminLayout({
             <Link href="/admin/nueva-obra" className="hover:underline">
               Añadir obra
             </Link>
+            <Link href="/admin/entornos" className="hover:underline">
+              Entornos
+            </Link>
+            <Link href="/admin/pedidos" className="hover:underline">
+              Pedidos
+            </Link>
             <Link href="/admin/mensajes" className="hover:underline">
               Mensajes
             </Link>

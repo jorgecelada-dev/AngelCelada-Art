@@ -11,8 +11,12 @@ export type Obra = {
   descripcion: string | null;
   tecnica: string | null;
   medidas: string | null;
+  ancho_cm: number | null;
+  alto_cm: number | null;
   anio: number | null;
+  fecha_creacion: string | null;
   precio: number;
+  estado: string | null;
   disponible: boolean;
   destacada: boolean;
   imagen_url: string | null;
@@ -20,6 +24,21 @@ export type Obra = {
   created_at: string;
   updated_at: string;
   categorias?: Categoria | null;
+};
+
+export type Entorno = {
+  id: string;
+  tipo: "salon" | "comedor" | "oficina" | "despacho";
+  imagen_url: string | null;
+  pared_x: number | null;
+  pared_y: number | null;
+  pared_ancho: number | null;
+  pared_alto: number | null;
+  escala_cm_por_px: number | null;
+  overlay_luz_url: string | null;
+  orden: number | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type MensajeContacto = {
@@ -42,4 +61,5 @@ export type Pedido = {
   importe: number | null;
   estado: "pendiente" | "pagado" | "cancelado";
   created_at: string;
+  obras?: Pick<Obra, "titulo" | "imagen_url"> | null;
 };

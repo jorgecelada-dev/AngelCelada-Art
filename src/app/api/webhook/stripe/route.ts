@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { stripe } from "@/lib/stripe";
+import { getStripeClient } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type Stripe from "stripe";
 
@@ -14,10 +14,22 @@ export async function POST(request: Request) {
   const body = await request.text();
   const signature = headers().get("stripe-signature");
 
+  const stripeClient = getStripeClient();
+
+  if (!stripeClient) {
+    return NextResponse.json(
+      {
+        error:
+          "Stripe no está configurado todavía. Añade STRIPE_SECRET_KEY y STRIPE_WEBHOOK_SECRET para recibir eventos del webhook.",
+      },
+      { status: 503 }
+    );
+  }
+
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(
+    event = stripeClient.webhooks.constructEvent(
       body,
       signature!,
       process.env.STRIPE_WEBHOOK_SECRET!
@@ -46,7 +58,7 @@ export async function POST(request: Request) {
     if (obraId) {
       await supabase
         .from("obras")
-        .update({ disponible: false })
+        .update({ disponible: false, estado: "vendido" })
         .eq("id", obraId);
     }
   }

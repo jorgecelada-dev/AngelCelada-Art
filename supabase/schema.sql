@@ -25,8 +25,12 @@ create table if not exists obras (
   descripcion text,
   tecnica text,               -- ej: "óleo sobre lino", "acrílico y pigmentos naturales"
   medidas text,                -- ej: "80 x 100 cm"
+  ancho_cm numeric(10, 2),
+  alto_cm numeric(10, 2),
   anio integer,
+  fecha_creacion date,
   precio numeric(10, 2) not null default 0,
+  estado text not null default 'en venta', -- en venta | no se vende | vendido | oferta
   disponible boolean not null default true,   -- false = vendido / no disponible
   destacada boolean not null default false,   -- para mostrar en portada
   imagen_url text,             -- URL pública en Supabase Storage
@@ -37,6 +41,27 @@ create table if not exists obras (
 
 create index if not exists idx_obras_disponible on obras(disponible);
 create index if not exists idx_obras_destacada on obras(destacada);
+
+-- ------------------------------------------------------------
+-- Tabla: entornos (fondos para previsualizar la obra en espacios)
+-- ------------------------------------------------------------
+create table if not exists entornos (
+  id uuid primary key default uuid_generate_v4(),
+  tipo text not null check (tipo in ('salon', 'comedor', 'oficina', 'despacho')),
+  imagen_url text,
+  pared_x numeric(5, 2) not null default 20,
+  pared_y numeric(5, 2) not null default 20,
+  pared_ancho numeric(5, 2) not null default 60,
+  pared_alto numeric(5, 2) not null default 60,
+  escala_cm_por_px numeric(10, 4) not null default 0.1,
+  overlay_luz_url text,
+  orden integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists idx_entornos_tipo on entornos(tipo);
+create index if not exists idx_entornos_orden on entornos(orden);
 
 -- ------------------------------------------------------------
 -- Tabla: mensajes_contacto (formulario de contacto)
@@ -71,38 +96,55 @@ create table if not exists pedidos (
 -- ------------------------------------------------------------
 alter table categorias enable row level security;
 alter table obras enable row level security;
+alter table entornos enable row level security;
 alter table mensajes_contacto enable row level security;
 alter table pedidos enable row level security;
 
 -- Lectura pública de categorías y obras disponibles (para la web pública)
+drop policy if exists "categorias_lectura_publica" on categorias;
 create policy "categorias_lectura_publica" on categorias
   for select using (true);
 
+drop policy if exists "obras_lectura_publica" on obras;
 create policy "obras_lectura_publica" on obras
   for select using (true);
 
--- Solo usuarios autenticados (el artista) pueden insertar/editar/borrar obras y categorías.
+drop policy if exists "entornos_lectura_publica" on entornos;
+create policy "entornos_lectura_publica" on entornos
+  for select using (true);
+
+-- Solo usuarios autenticados (el artista) pueden insertar/editar/borrar obras, categorías y entornos.
 -- El panel admin usa la clave de servicio (service role) desde el servidor,
 -- que se salta RLS, así que estas políticas son una capa extra de seguridad
 -- por si en el futuro se usa el cliente autenticado directamente.
+drop policy if exists "obras_escritura_autenticados" on obras;
 create policy "obras_escritura_autenticados" on obras
   for all using (auth.role() = 'authenticated')
   with check (auth.role() = 'authenticated');
 
+drop policy if exists "categorias_escritura_autenticados" on categorias;
 create policy "categorias_escritura_autenticados" on categorias
+  for all using (auth.role() = 'authenticated')
+  with check (auth.role() = 'authenticated');
+
+drop policy if exists "entornos_escritura_autenticados" on entornos;
+create policy "entornos_escritura_autenticados" on entornos
   for all using (auth.role() = 'authenticated')
   with check (auth.role() = 'authenticated');
 
 -- Cualquiera puede enviar un mensaje de contacto, pero solo el artista
 -- autenticado puede leerlos (esto se gestiona vía service role en el servidor).
+drop policy if exists "mensajes_insertar_publico" on mensajes_contacto;
 create policy "mensajes_insertar_publico" on mensajes_contacto
   for insert with check (true);
 
+drop policy if exists "mensajes_lectura_autenticados" on mensajes_contacto;
 create policy "mensajes_lectura_autenticados" on mensajes_contacto
   for select using (auth.role() = 'authenticated');
 
 -- Los pedidos solo se crean/leen desde el servidor (service role), no hace
 -- falta política pública.
+drop policy if exists "pedidos_lectura_autenticados" on pedidos;
 create policy "pedidos_lectura_autenticados" on pedidos
   for select using (auth.role() = 'authenticated');
 

@@ -13,7 +13,13 @@ export default function DeleteObraButton({ obraId }: { obraId: string }) {
     );
     if (!confirmado) return;
 
-    await supabase.from("obras").delete().eq("id", obraId);
+    const { error } = await supabase.from("obras").delete().eq("id", obraId);
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
     router.refresh();
   }
 
