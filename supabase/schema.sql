@@ -42,6 +42,14 @@ create table if not exists obras (
 create index if not exists idx_obras_disponible on obras(disponible);
 create index if not exists idx_obras_destacada on obras(destacada);
 
+-- Migración para instalaciones existentes: si la tabla "obras" ya existía
+-- de una versión anterior del esquema, el CREATE TABLE IF NOT EXISTS de
+-- arriba no le añade las columnas nuevas por sí solo.
+alter table obras add column if not exists estado text not null default 'en venta';
+alter table obras add column if not exists ancho_cm numeric(10, 2);
+alter table obras add column if not exists alto_cm numeric(10, 2);
+alter table obras add column if not exists fecha_creacion date;
+
 -- ------------------------------------------------------------
 -- Tabla: entornos (fondos para previsualizar la obra en espacios)
 -- ------------------------------------------------------------
