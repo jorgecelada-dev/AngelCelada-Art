@@ -1,9 +1,20 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Entorno } from "@/types";
+
+// El PreviewCanvas público dibuja siempre sobre un lienzo lógico de
+// 600x450 (ver VisualizacionObra.tsx), así que la escala cm/px se debe
+// calibrar en ese mismo espacio, no en los píxeles reales de la foto
+// subida ni en el tamaño en pantalla de esta previsualización. Como esta
+// previsualización mantiene la misma proporción 4:3, convertir % del
+// contenedor a píxeles de ese lienzo es una simple regla de tres por eje.
+const CANVAS_LOGICO_ANCHO = 600;
+const CANVAS_LOGICO_ALTO = 450;
+
+type Punto = { xPct: number; yPct: number };
 
 const TIPOS = [
   { key: "salon", label: "Salón" },
@@ -24,6 +35,51 @@ export default function EntornoForm({ entorno }: { entorno?: Entorno }) {
   const [paredY, setParedY] = useState(entorno?.pared_y ?? 20);
   const [paredAncho, setParedAncho] = useState(entorno?.pared_ancho ?? 60);
   const [paredAlto, setParedAlto] = useState(entorno?.pared_alto ?? 60);
+  const [escalaCmPorPx, setEscalaCmPorPx] = useState(
+    entorno?.escala_cm_por_px ?? 0.1
+  );
+
+  const previewRef = useRef<HTMLDivElement>(null);
+  const [calibrando, setCalibrando] = useState(false);
+  const [puntoA, setPuntoA] = useState<Punto | null>(null);
+  const [puntoB, setPuntoB] = useState<Punto | null>(null);
+  const [longitudReal, setLongitudReal] = useState("");
+
+  function onClickPreview(e: React.MouseEvent<HTMLDivElement>) {
+    if (!calibrando || !previewRef.current) return;
+    const rect = previewRef.current.getBoundingClientRect();
+    const punto: Punto = {
+      xPct: ((e.clientX - rect.left) / rect.width) * 100,
+      yPct: ((e.clientY - rect.top) / rect.height) * 100,
+    };
+
+    if (!puntoA || (puntoA && puntoB)) {
+      setPuntoA(punto);
+      setPuntoB(null);
+    } else {
+      setPuntoB(punto);
+    }
+  }
+
+  function aplicarCalibracion() {
+    if (!puntoA || !puntoB || !longitudReal) return;
+    const cm = Number(longitudReal);
+    if (!cm || cm <= 0) return;
+
+    // Distancia entre los dos puntos convertida al espacio lógico del
+    // canvas público (600x450), cada eje con su propia escala.
+    const dxCanvas = ((puntoB.xPct - puntoA.xPct) / 100) * CANVAS_LOGICO_ANCHO;
+    const dyCanvas = ((puntoB.yPct - puntoA.yPct) / 100) * CANVAS_LOGICO_ALTO;
+    const distanciaPxCanvas = Math.sqrt(dxCanvas ** 2 + dyCanvas ** 2);
+
+    if (distanciaPxCanvas <= 0) return;
+
+    setEscalaCmPorPx(Number((cm / distanciaPxCanvas).toFixed(4)));
+    setCalibrando(false);
+    setPuntoA(null);
+    setPuntoB(null);
+    setLongitudReal("");
+  }
 
   const esEdicion = Boolean(entorno);
 
@@ -77,7 +133,7 @@ export default function EntornoForm({ entorno }: { entorno?: Entorno }) {
         pared_y: Number(fd.get("pared_y")),
         pared_ancho: Number(fd.get("pared_ancho")),
         pared_alto: Number(fd.get("pared_alto")),
-        escala_cm_por_px: Number(fd.get("escala_cm_por_px")),
+        escala_cm_por_px: escalaCmPorPx,
         imagen_url,
         overlay_luz_url,
       };
@@ -152,7 +208,13 @@ export default function EntornoForm({ entorno }: { entorno?: Entorno }) {
           Ajusta el rectángulo sobre la zona de pared donde debe aparecer la
           obra (en % respecto a la foto)
         </p>
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-charcoal/10 bg-charcoal/5">
+        <div
+          ref={previewRef}
+          onClick={onClickPreview}
+          className={`relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-charcoal/10 bg-charcoal/5 ${
+            calibrando ? "cursor-crosshair" : ""
+          }`}
+        >
           {previewUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -165,15 +227,103 @@ export default function EntornoForm({ entorno }: { entorno?: Entorno }) {
               Sube una foto para previsualizar
             </div>
           )}
-          <div
-            className="absolute border-2 border-clay bg-clay/20"
-            style={{
-              left: `${paredX}%`,
-              top: `${paredY}%`,
-              width: `${paredAncho}%`,
-              height: `${paredAlto}%`,
-            }}
-          />
+          {!calibrando && (
+            <div
+              className="absolute border-2 border-clay bg-clay/20"
+              style={{
+                left: `${paredX}%`,
+                top: `${paredY}%`,
+                width: `${paredAncho}%`,
+                height: `${paredAlto}%`,
+              }}
+            />
+          )}
+
+          {calibrando && puntoA && (
+            <span
+              className="absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-clay shadow"
+              style={{ left: `${puntoA.xPct}%`, top: `${puntoA.yPct}%` }}
+            />
+          )}
+          {calibrando && puntoB && (
+            <span
+              className="absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-clay shadow"
+              style={{ left: `${puntoB.xPct}%`, top: `${puntoB.yPct}%` }}
+            />
+          )}
+          {calibrando && puntoA && puntoB && (
+            <svg className="pointer-events-none absolute inset-0 h-full w-full">
+              <line
+                x1={`${puntoA.xPct}%`}
+                y1={`${puntoA.yPct}%`}
+                x2={`${puntoB.xPct}%`}
+                y2={`${puntoB.yPct}%`}
+                stroke="#C97C5D"
+                strokeWidth={2}
+              />
+            </svg>
+          )}
+        </div>
+
+        <div className="mt-3 rounded-lg border border-charcoal/10 bg-white/60 p-3">
+          {!calibrando ? (
+            <button
+              type="button"
+              onClick={() => {
+                setCalibrando(true);
+                setPuntoA(null);
+                setPuntoB(null);
+              }}
+              className="btn-secondary text-sm"
+              disabled={!previewUrl}
+            >
+              📏 Calibrar escala con un objeto conocido
+            </button>
+          ) : !puntoB ? (
+            <p className="text-sm text-charcoal/70">
+              Haz clic en los dos extremos de un objeto de la foto del que
+              sepas la medida real (por ejemplo, un sofá, una puerta o una
+              mesa).{" "}
+              <button
+                type="button"
+                onClick={() => setCalibrando(false)}
+                className="underline"
+              >
+                Cancelar
+              </button>
+            </p>
+          ) : (
+            <div className="flex flex-wrap items-end gap-3">
+              <div>
+                <label className="block text-sm font-medium">
+                  ¿Cuánto mide ese objeto en la realidad (cm)?
+                </label>
+                <input
+                  type="number"
+                  autoFocus
+                  value={longitudReal}
+                  onChange={(e) => setLongitudReal(e.target.value)}
+                  placeholder="200"
+                  className="mt-1 w-32 rounded-lg border border-charcoal/20 bg-white/60 px-3 py-2"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={aplicarCalibracion}
+                disabled={!longitudReal}
+                className="btn-primary text-sm"
+              >
+                Aplicar
+              </button>
+              <button
+                type="button"
+                onClick={() => setCalibrando(false)}
+                className="text-sm underline"
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -251,13 +401,15 @@ export default function EntornoForm({ entorno }: { entorno?: Entorno }) {
           name="escala_cm_por_px"
           type="number"
           step="0.0001"
-          defaultValue={entorno?.escala_cm_por_px ?? 0.1}
+          value={escalaCmPorPx}
+          onChange={(e) => setEscalaCmPorPx(Number(e.target.value))}
           className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3"
         />
         <p className="mt-1 text-xs text-charcoal/50">
-          Para calcularla: mide en la foto, en píxeles, el ancho de un objeto
-          del que sepas la medida real (por ejemplo un sofá de 200 cm) y
-          divide su tamaño real en cm entre esa medida en píxeles.
+          Se rellena sola al usar &ldquo;Calibrar escala&rdquo; arriba. Si
+          prefieres ponerla a mano: mide en la foto, en píxeles, el ancho de
+          un objeto del que sepas la medida real (por ejemplo un sofá de 200
+          cm) y divide su tamaño real en cm entre esa medida en píxeles.
         </p>
       </div>
 

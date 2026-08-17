@@ -15,6 +15,39 @@ function getLabel(tipo: Entorno["tipo"]) {
   return TABS.find((tab) => tab.key === tipo)?.label ?? tipo;
 }
 
+// Dibuja recortando al centro, igual que el object-cover de CSS, en vez
+// de estirar la imagen para rellenar el recuadro (lo que la deformaría).
+function dibujarCover(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  dx: number,
+  dy: number,
+  dw: number,
+  dh: number
+) {
+  const imgRatio = img.naturalWidth / img.naturalHeight;
+  const boxRatio = dw / dh;
+
+  let sx: number;
+  let sy: number;
+  let sw: number;
+  let sh: number;
+
+  if (imgRatio > boxRatio) {
+    sh = img.naturalHeight;
+    sw = sh * boxRatio;
+    sx = (img.naturalWidth - sw) / 2;
+    sy = 0;
+  } else {
+    sw = img.naturalWidth;
+    sh = sw / boxRatio;
+    sx = 0;
+    sy = (img.naturalHeight - sh) / 2;
+  }
+
+  ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+}
+
 export default function VisualizacionObra({
   obra,
   entornos,
@@ -127,7 +160,7 @@ function PreviewCanvas({
     bg.src = entorno.imagen_url ?? "";
     bg.onload = () => {
       ctx.clearRect(0, 0, width, height);
-      ctx.drawImage(bg, 0, 0, width, height);
+      dibujarCover(ctx, bg, 0, 0, width, height);
 
       const rectX = (Number(entorno.pared_x ?? 20) / 100) * width;
       const rectY = (Number(entorno.pared_y ?? 20) / 100) * height;
@@ -190,7 +223,7 @@ function PreviewCanvas({
             ctx.save();
             ctx.globalAlpha = 0.35;
             ctx.globalCompositeOperation = "multiply";
-            ctx.drawImage(overlay, 0, 0, width, height);
+            dibujarCover(ctx, overlay, 0, 0, width, height);
             ctx.restore();
             setCanvasReady(true);
           };
