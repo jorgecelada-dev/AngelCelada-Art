@@ -128,28 +128,53 @@ export default function ObraCard({ obra }: { obra: Obra }) {
         href={`/obras/${obra.id}`}
         className="group block overflow-hidden rounded-2xl bg-white/40 shadow-sm transition duration-300 hover:shadow-xl"
       >
-        <div className="relative aspect-[4/5] w-full overflow-hidden bg-charcoal/5">
-          {obra.imagen_url ? (
-            <Image
-              src={obra.imagen_url}
-              alt={obra.titulo}
-              fill
-              className="object-cover"
-              sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-              quality={95}
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-charcoal/30">
-              Sin imagen
+        {obra.imagen_url ? (
+          obra.imagen_ancho_px && obra.imagen_alto_px ? (
+            // Proporción real de la obra, sin recortar.
+            <div className="relative w-full overflow-hidden bg-charcoal/5">
+              <Image
+                src={obra.imagen_url}
+                alt={obra.titulo}
+                width={obra.imagen_ancho_px}
+                height={obra.imagen_alto_px}
+                className="h-auto w-full"
+                sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                quality={95}
+              />
+              {!obra.disponible && (
+                <span className="absolute left-3 top-3 rounded-full bg-charcoal px-3 py-1 text-xs tracking-wide text-cream">
+                  Vendida
+                </span>
+              )}
             </div>
-          )}
-
-          {!obra.disponible && (
-            <span className="absolute left-3 top-3 rounded-full bg-charcoal px-3 py-1 text-xs tracking-wide text-cream">
-              Vendida
-            </span>
-          )}
-        </div>
+          ) : (
+            // Obras antiguas sin dimensiones guardadas: recorte de respaldo.
+            <div className="relative aspect-[4/5] w-full overflow-hidden bg-charcoal/5">
+              <Image
+                src={obra.imagen_url}
+                alt={obra.titulo}
+                fill
+                className="object-cover"
+                sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                quality={95}
+              />
+              {!obra.disponible && (
+                <span className="absolute left-3 top-3 rounded-full bg-charcoal px-3 py-1 text-xs tracking-wide text-cream">
+                  Vendida
+                </span>
+              )}
+            </div>
+          )
+        ) : (
+          <div className="relative flex aspect-[4/5] w-full items-center justify-center bg-charcoal/5 text-charcoal/30">
+            Sin imagen
+            {!obra.disponible && (
+              <span className="absolute left-3 top-3 rounded-full bg-charcoal px-3 py-1 text-xs tracking-wide text-cream">
+                Vendida
+              </span>
+            )}
+          </div>
+        )}
 
         <div className="p-4">
           <h3 className="font-serif text-lg">{obra.titulo}</h3>
