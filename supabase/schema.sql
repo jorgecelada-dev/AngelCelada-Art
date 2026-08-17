@@ -49,6 +49,11 @@ alter table obras add column if not exists estado text not null default 'en vent
 alter table obras add column if not exists ancho_cm numeric(10, 2);
 alter table obras add column if not exists alto_cm numeric(10, 2);
 alter table obras add column if not exists fecha_creacion date;
+-- Dimensiones reales en píxeles del archivo de imagen subido, para poder
+-- mostrarlo a ancho completo sin recortar ni deformar, adaptando el alto
+-- según sea una obra vertical u horizontal.
+alter table obras add column if not exists imagen_ancho_px integer;
+alter table obras add column if not exists imagen_alto_px integer;
 
 -- ------------------------------------------------------------
 -- Tabla: entornos (fondos para previsualizar la obra en espacios)

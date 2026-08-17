@@ -135,8 +135,26 @@ function PreviewCanvas({
       const rectH = (Number(entorno.pared_alto ?? 60) / 100) * height;
 
       const scale = Number(entorno.escala_cm_por_px ?? 0.1);
-      const obraW = Math.max(60, Math.min(220, obra.ancho_cm! / scale));
-      const obraH = Math.max(60, Math.min(220, obra.alto_cm! / scale));
+
+      // Tamaño "real" del cuadro sobre el lienzo, a la escala del entorno.
+      let obraW = obra.ancho_cm! / scale;
+      let obraH = obra.alto_cm! / scale;
+
+      // Si se sale de la pared, se reduce manteniendo su proporción real
+      // (nunca se estira ni se deforma por eje independiente).
+      const maxW = rectW * 0.95;
+      const maxH = rectH * 0.95;
+      const factorReduccion = Math.min(1, maxW / obraW, maxH / obraH);
+      obraW *= factorReduccion;
+      obraH *= factorReduccion;
+
+      // Si queda demasiado pequeño para verse, se agranda igual de
+      // proporcionalmente hasta un mínimo visible.
+      const minDim = 50;
+      const factorMinimo = Math.max(1, minDim / Math.min(obraW, obraH));
+      obraW *= factorMinimo;
+      obraH *= factorMinimo;
+
       const offsetX = rectX + rectW / 2 - obraW / 2;
       const offsetY = rectY + rectH / 2 - obraH / 2;
 

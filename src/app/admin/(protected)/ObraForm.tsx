@@ -5,6 +5,24 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Categoria, Obra } from "@/types";
 
+function leerDimensionesImagen(
+  file: File
+): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new window.Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("No se pudo leer la imagen"));
+    };
+    img.src = url;
+  });
+}
+
 export default function ObraForm({
   categorias,
   obra,
@@ -30,8 +48,14 @@ export default function ObraForm({
 
     try {
       let imagen_url = obra?.imagen_url ?? null;
+      let imagen_ancho_px = obra?.imagen_ancho_px ?? null;
+      let imagen_alto_px = obra?.imagen_alto_px ?? null;
 
       if (imagenFile) {
+        const dimensiones = await leerDimensionesImagen(imagenFile);
+        imagen_ancho_px = dimensiones.width;
+        imagen_alto_px = dimensiones.height;
+
         const nombreArchivo = `${Date.now()}-${imagenFile.name}`;
         const { error: uploadError } = await supabase.storage
           .from("obras")
@@ -64,6 +88,8 @@ export default function ObraForm({
         destacada: fd.get("destacada") === "on",
         categoria_id: (fd.get("categoria_id") as string) || null,
         imagen_url,
+        imagen_ancho_px,
+        imagen_alto_px,
       };
 
       if (esEdicion && obra) {

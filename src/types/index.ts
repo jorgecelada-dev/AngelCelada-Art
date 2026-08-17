@@ -20,6 +20,8 @@ export type Obra = {
   disponible: boolean;
   destacada: boolean;
   imagen_url: string | null;
+  imagen_ancho_px: number | null;
+  imagen_alto_px: number | null;
   categoria_id: string | null;
   created_at: string;
   updated_at: string;

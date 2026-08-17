@@ -52,76 +52,100 @@ export default async function ObraDetailPage({
     ? "En venta"
     : "Vendida";
 
+  const tieneDimensionesReales = Boolean(
+    obra.imagen_ancho_px && obra.imagen_alto_px
+  );
+
   return (
-    <section className="container-site grid grid-cols-1 gap-12 py-16 md:grid-cols-2">
-      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-charcoal/5">
+    <section className="container-site py-16">
+      <div className="flex w-full items-center justify-center overflow-hidden rounded-2xl bg-charcoal/5">
         {obra.imagen_url ? (
-          <Image
-            src={obra.imagen_url}
-            alt={obra.titulo}
-            fill
-            className="object-cover"
-            sizes="(min-width: 768px) 50vw, 100vw"
-            priority
-          />
+          tieneDimensionesReales ? (
+            <Image
+              src={obra.imagen_url}
+              alt={obra.titulo}
+              width={obra.imagen_ancho_px!}
+              height={obra.imagen_alto_px!}
+              className="max-h-[80vh] w-auto max-w-full object-contain"
+              sizes="(min-width: 1024px) 1024px, 100vw"
+              quality={100}
+              priority
+            />
+          ) : (
+            // Obras antiguas sin dimensiones guardadas: recorte de respaldo
+            // hasta que se vuelvan a guardar desde el panel.
+            <div className="relative aspect-[4/5] w-full max-w-xl">
+              <Image
+                src={obra.imagen_url}
+                alt={obra.titulo}
+                fill
+                className="object-cover"
+                sizes="(min-width: 768px) 50vw, 100vw"
+                quality={100}
+                priority
+              />
+            </div>
+          )
         ) : (
-          <div className="flex h-full items-center justify-center text-charcoal/30">
+          <div className="flex aspect-[4/5] w-full max-w-xl items-center justify-center text-charcoal/30">
             Sin imagen
           </div>
         )}
       </div>
 
-      <div>
-        <h1 className="section-title">{obra.titulo}</h1>
+      <div className="mt-12 grid grid-cols-1 gap-12 md:grid-cols-2">
+        <div>
+          <h1 className="section-title">{obra.titulo}</h1>
 
-        {obra.categorias?.nombre && (
-          <p className="mt-2 text-sm uppercase tracking-widest text-clay">
-            {obra.categorias.nombre}
-          </p>
-        )}
-
-        <p className="mt-6 text-2xl font-medium">{precioFormateado}</p>
-        <p className="mt-1 text-sm text-charcoal/60">{estadoLabel}</p>
-
-        <dl className="mt-8 space-y-3 text-sm text-charcoal/70">
-          {obra.tecnica && (
-            <div className="flex gap-2">
-              <dt className="font-medium text-charcoal">Técnica:</dt>
-              <dd>{obra.tecnica}</dd>
-            </div>
+          {obra.categorias?.nombre && (
+            <p className="mt-2 text-sm uppercase tracking-widest text-clay">
+              {obra.categorias.nombre}
+            </p>
           )}
-          {obra.medidas && (
-            <div className="flex gap-2">
-              <dt className="font-medium text-charcoal">Medidas:</dt>
-              <dd>{obra.medidas}</dd>
-            </div>
-          )}
-          {obra.anio && (
-            <div className="flex gap-2">
-              <dt className="font-medium text-charcoal">Año:</dt>
-              <dd>{obra.anio}</dd>
-            </div>
-          )}
-        </dl>
 
-        {obra.descripcion && (
-          <p className="mt-8 leading-relaxed text-charcoal/80">
-            {obra.descripcion}
-          </p>
-        )}
+          <p className="mt-6 text-2xl font-medium">{precioFormateado}</p>
+          <p className="mt-1 text-sm text-charcoal/60">{estadoLabel}</p>
 
-        <div className="mt-10">
-          {obra.disponible ? (
-            <BuyButton obraId={obra.id} />
-          ) : (
-            <span className="btn-secondary pointer-events-none opacity-60">
-              Obra vendida
-            </span>
+          <dl className="mt-8 space-y-3 text-sm text-charcoal/70">
+            {obra.tecnica && (
+              <div className="flex gap-2">
+                <dt className="font-medium text-charcoal">Técnica:</dt>
+                <dd>{obra.tecnica}</dd>
+              </div>
+            )}
+            {obra.medidas && (
+              <div className="flex gap-2">
+                <dt className="font-medium text-charcoal">Medidas:</dt>
+                <dd>{obra.medidas}</dd>
+              </div>
+            )}
+            {obra.anio && (
+              <div className="flex gap-2">
+                <dt className="font-medium text-charcoal">Año:</dt>
+                <dd>{obra.anio}</dd>
+              </div>
+            )}
+          </dl>
+
+          {obra.descripcion && (
+            <p className="mt-8 leading-relaxed text-charcoal/80">
+              {obra.descripcion}
+            </p>
           )}
+
+          <div className="mt-10">
+            {obra.disponible ? (
+              <BuyButton obraId={obra.id} />
+            ) : (
+              <span className="btn-secondary pointer-events-none opacity-60">
+                Obra vendida
+              </span>
+            )}
+          </div>
         </div>
 
         {obra.ancho_cm && obra.alto_cm && (
-          <div className="mt-10">
+          <div>
             <VisualizacionObra obra={obra} entornos={entornos} />
           </div>
         )}
