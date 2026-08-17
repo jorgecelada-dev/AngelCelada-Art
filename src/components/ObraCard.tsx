@@ -8,16 +8,30 @@ import type { Obra } from "@/types";
 
 type Rect = { top: number; left: number; width: number; height: number };
 
+function rectDeCard(cardRect: DOMRect): Rect {
+  return {
+    top: cardRect.top,
+    left: cardRect.left,
+    width: cardRect.width,
+    height: cardRect.height,
+  };
+}
+
+// El hueco expandido siempre se abre con el lado largo de la obra en
+// horizontal (si la obra es vertical, se rota 90º al mostrarla ahí).
 function calcularRectExpandido(
   cardRect: DOMRect,
   anchoNatural: number | null,
   altoNatural: number | null
 ): Rect {
-  const aspecto =
-    anchoNatural && altoNatural ? anchoNatural / altoNatural : 4 / 5;
+  const largo = Math.max(anchoNatural ?? 4, altoNatural ?? 5);
+  const corto = Math.min(anchoNatural ?? 4, altoNatural ?? 5);
+  const aspecto = largo / corto;
 
-  const maxW = Math.min(window.innerWidth * 0.85, 640);
-  const maxH = Math.min(window.innerHeight * 0.85, 640);
+  // Tamaño contenido para que el crecimiento se sienta cercano a la
+  // tarjeta original, no un salto grande por la pantalla.
+  const maxW = Math.min(window.innerWidth * 0.6, 480);
+  const maxH = Math.min(window.innerHeight * 0.6, 380);
 
   let width = maxW;
   let height = width / aspecto;
@@ -45,28 +59,51 @@ function calcularRectExpandido(
 export default function ObraCard({ obra }: { obra: Obra }) {
   const cardRef = useRef<HTMLAnchorElement>(null);
   const [rect, setRect] = useState<Rect | null>(null);
+  const [expandido, setExpandido] = useState(false);
   const [previewCargada, setPreviewCargada] = useState(false);
-  const timeoutRef = useRef<number | null>(null);
+  const enterTimeoutRef = useRef<number | null>(null);
+  const frameRef = useRef<number | null>(null);
+
+  function limpiarTimers() {
+    if (enterTimeoutRef.current) window.clearTimeout(enterTimeoutRef.current);
+    if (frameRef.current) window.cancelAnimationFrame(frameRef.current);
+  }
 
   function onMouseEnter() {
     if (!cardRef.current) return;
+    limpiarTimers();
     const cardRect = cardRef.current.getBoundingClientRect();
-    timeoutRef.current = window.setTimeout(() => {
-      setRect(
-        calcularRectExpandido(
-          cardRect,
-          obra.imagen_ancho_px,
-          obra.imagen_alto_px
-        )
-      );
-    }, 150);
+
+    enterTimeoutRef.current = window.setTimeout(() => {
+      // Arranca desde el tamaño/posición exactos de la tarjeta, para que
+      // el crecimiento se sienta como una continuación fluida de ella.
+      setRect(rectDeCard(cardRect));
+      setExpandido(false);
+      frameRef.current = window.requestAnimationFrame(() => {
+        setRect(
+          calcularRectExpandido(
+            cardRect,
+            obra.imagen_ancho_px,
+            obra.imagen_alto_px
+          )
+        );
+        setExpandido(true);
+      });
+    }, 120);
   }
 
   function onMouseLeave() {
-    if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+    limpiarTimers();
     setRect(null);
+    setExpandido(false);
     setPreviewCargada(false);
   }
+
+  const esVertical = Boolean(
+    obra.imagen_ancho_px &&
+      obra.imagen_alto_px &&
+      obra.imagen_alto_px > obra.imagen_ancho_px
+  );
 
   const precioFormateado = obra.disponible
     ? new Intl.NumberFormat("es-ES", {
@@ -133,49 +170,82 @@ export default function ObraCard({ obra }: { obra: Obra }) {
               left: rect.left,
               width: rect.width,
               height: rect.height,
+              transition:
+                "top 280ms cubic-bezier(0.22,1,0.36,1), left 280ms cubic-bezier(0.22,1,0.36,1), width 280ms cubic-bezier(0.22,1,0.36,1), height 280ms cubic-bezier(0.22,1,0.36,1)",
             }}
             className="z-50 block overflow-hidden rounded-2xl bg-charcoal/5 shadow-2xl ring-1 ring-charcoal/10"
           >
-            {obra.imagen_url && (
-              <Image
-                src={obra.imagen_url}
-                alt={obra.titulo}
-                fill
-                className={`object-cover transition-opacity duration-300 ${
-                  previewCargada ? "opacity-100" : "opacity-0"
-                }`}
-                sizes="640px"
-                quality={100}
-                onLoad={() => setPreviewCargada(true)}
-              />
-            )}
+            {obra.imagen_url &&
+              (esVertical ? (
+                // Lado largo siempre en horizontal: se renderiza la
+                // imagen a sus dimensiones naturales (intercambiadas) y
+                // se rota 90º, sin recortar ni perder calidad.
+                <div
+                  className="absolute left-1/2 top-1/2"
+                  style={{
+                    width: rect.height,
+                    height: rect.width,
+                    transform: "translate(-50%, -50%) rotate(90deg)",
+                  }}
+                >
+                  <Image
+                    src={obra.imagen_url}
+                    alt={obra.titulo}
+                    fill
+                    className={`object-contain transition-opacity duration-300 ${
+                      expandido && previewCargada ? "opacity-100" : "opacity-0"
+                    }`}
+                    sizes="520px"
+                    quality={100}
+                    onLoad={() => setPreviewCargada(true)}
+                  />
+                </div>
+              ) : (
+                <Image
+                  src={obra.imagen_url}
+                  alt={obra.titulo}
+                  fill
+                  className={`object-contain transition-opacity duration-300 ${
+                    expandido && previewCargada ? "opacity-100" : "opacity-0"
+                  }`}
+                  sizes="520px"
+                  quality={100}
+                  onLoad={() => setPreviewCargada(true)}
+                />
+              ))}
 
-            <div className="absolute left-0 top-0 max-w-[80%] rounded-br-2xl bg-cream/95 px-5 py-4 shadow-md">
-              <h3 className="font-serif text-xl">{obra.titulo}</h3>
-              {obra.tecnica && (
-                <p className="mt-1 text-xs uppercase tracking-widest text-clay">
-                  {obra.tecnica}
-                </p>
-              )}
-            </div>
+            {expandido && (
+              <>
+                <div className="absolute left-0 top-0 max-w-[80%] rounded-br-2xl bg-cream/95 px-5 py-4 shadow-md">
+                  <h3 className="font-serif text-xl">{obra.titulo}</h3>
+                  {obra.tecnica && (
+                    <p className="mt-1 text-xs uppercase tracking-widest text-clay">
+                      {obra.tecnica}
+                    </p>
+                  )}
+                </div>
 
-            {(obra.medidas || obra.anio) && (
-              <div className="absolute bottom-4 left-4 space-y-1 rounded-xl bg-cream/95 px-4 py-3 text-xs shadow-md">
-                {obra.medidas && (
-                  <p>
-                    <span className="font-medium text-charcoal">
-                      Medidas:
-                    </span>{" "}
-                    {obra.medidas}
-                  </p>
+                {(obra.medidas || obra.anio) && (
+                  <div className="absolute bottom-4 left-4 space-y-1 rounded-xl bg-cream/95 px-4 py-3 text-xs shadow-md">
+                    {obra.medidas && (
+                      <p>
+                        <span className="font-medium text-charcoal">
+                          Medidas:
+                        </span>{" "}
+                        {obra.medidas}
+                      </p>
+                    )}
+                    {obra.anio && (
+                      <p>
+                        <span className="font-medium text-charcoal">
+                          Año:
+                        </span>{" "}
+                        {obra.anio}
+                      </p>
+                    )}
+                  </div>
                 )}
-                {obra.anio && (
-                  <p>
-                    <span className="font-medium text-charcoal">Año:</span>{" "}
-                    {obra.anio}
-                  </p>
-                )}
-              </div>
+              </>
             )}
           </Link>,
           document.body
