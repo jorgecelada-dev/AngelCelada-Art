@@ -1,7 +1,7 @@
 import ContactoForm from "./ContactoForm";
 
 export const metadata = {
-  title: "Contacto — Nombre del Artista",
+  title: "Contacto — ArteCelada",
 };
 
 export default function ContactoPage() {

@@ -11,8 +11,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-40 border-b border-charcoal/10 bg-cream/90 backdrop-blur">
       <div className="container-site flex h-20 items-center justify-between">
         <Link href="/" className="font-serif text-xl tracking-wide">
-          {/* Sustituye por el nombre real del artista */}
-          Nombre del Artista
+          ArteCelada
         </Link>
 
         <nav className="hidden gap-8 md:flex">

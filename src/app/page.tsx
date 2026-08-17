@@ -32,7 +32,7 @@ export default async function HomePage() {
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Link href="/obras" className="btn-primary">
-            Ver la colección
+            Ver colecciones
           </Link>
           <Link href="/sobre-mi" className="btn-secondary">
             Conocer mi historia

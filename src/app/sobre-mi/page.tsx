@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Sobre mí — Nombre del Artista",
+  title: "Sobre mí — ArteCelada",
 };
 
 export default function SobreMiPage() {

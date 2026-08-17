@@ -6,7 +6,7 @@ export default function ObraCard({ obra }: { obra: Obra }) {
   return (
     <Link
       href={`/obras/${obra.id}`}
-      className="group block overflow-hidden rounded-2xl bg-white/40 shadow-sm transition hover:shadow-md"
+      className="group block overflow-hidden rounded-2xl bg-white/40 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
     >
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-charcoal/5">
         {obra.imagen_url ? (
@@ -14,8 +14,9 @@ export default function ObraCard({ obra }: { obra: Obra }) {
             src={obra.imagen_url}
             alt={obra.titulo}
             fill
-            className="object-cover transition duration-500 group-hover:scale-105"
-            sizes="(min-width: 768px) 33vw, 100vw"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-125"
+            sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+            quality={95}
           />
         ) : (
           <div className="flex h-full items-center justify-center text-charcoal/30">

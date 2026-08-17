@@ -18,9 +18,9 @@ const workSans = Work_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Nombre del Artista — Arte orgánico",
+  title: "ArteCelada — Arte orgánico",
   description:
-    "Cuadros de arte orgánico hechos con materiales naturales. Descubre la colección, la historia y las técnicas del artista.",
+    "Cuadros de arte orgánico de Ángel Celada, hechos con materiales naturales. Descubre las colecciones, la historia y las técnicas del artista.",
 };
 
 export default function RootLayout({

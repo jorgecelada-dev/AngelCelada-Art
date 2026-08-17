@@ -230,13 +230,13 @@ export default function ObraForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium">Categoría</label>
+        <label className="block text-sm font-medium">Colección</label>
         <select
           name="categoria_id"
           defaultValue={obra?.categoria_id ?? ""}
           className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3"
         >
-          <option value="">Sin categoría</option>
+          <option value="">Sin colección</option>
           {categorias.map((cat) => (
             <option key={cat.id} value={cat.id}>
               {cat.nombre}
