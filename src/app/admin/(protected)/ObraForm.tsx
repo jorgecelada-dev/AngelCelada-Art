@@ -110,6 +110,7 @@ export default function ObraForm({
         imagen_url,
         imagen_ancho_px,
         imagen_alto_px,
+        orientacion: (fd.get("orientacion") as string) || null,
       };
 
       if (esEdicion && obra) {
@@ -201,6 +202,27 @@ export default function ObraForm({
           ? `Se guardará como "Medidas: ${formatearCm(Number(anchoCm))} x ${formatearCm(Number(altoCm))} cm". También es lo que se usa para encajarla en "Visualiza en tu espacio".`
           : "Rellena ambos campos para calcular las medidas que se mostrarán."}
       </p>
+
+      <div>
+        <label className="block text-sm font-medium">
+          Orientación de la obra
+        </label>
+        <select
+          name="orientacion"
+          defaultValue={obra?.orientacion ?? ""}
+          className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3"
+        >
+          <option value="">Automática (según la foto)</option>
+          <option value="horizontal">Forzar horizontal</option>
+          <option value="vertical">Forzar vertical</option>
+        </select>
+        <p className="mt-1 text-xs text-charcoal/50">
+          Solo hace falta tocarlo si la foto subida no refleja bien cómo es
+          la obra en realidad (ej. una obra horizontal fotografiada con
+          margen que la hace parecer cuadrada). Afecta a cómo se rota al
+          verla ampliada.
+        </p>
+      </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>

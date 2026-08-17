@@ -22,6 +22,7 @@ export type Obra = {
   imagen_url: string | null;
   imagen_ancho_px: number | null;
   imagen_alto_px: number | null;
+  orientacion: "horizontal" | "vertical" | null;
   categoria_id: string | null;
   created_at: string;
   updated_at: string;

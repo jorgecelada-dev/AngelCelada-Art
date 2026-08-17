@@ -99,11 +99,16 @@ export default function ObraCard({ obra }: { obra: Obra }) {
     setPreviewCargada(false);
   }
 
-  const esVertical = Boolean(
-    obra.imagen_ancho_px &&
-      obra.imagen_alto_px &&
-      obra.imagen_alto_px > obra.imagen_ancho_px
-  );
+  const esVertical =
+    obra.orientacion === "vertical"
+      ? true
+      : obra.orientacion === "horizontal"
+      ? false
+      : Boolean(
+          obra.imagen_ancho_px &&
+            obra.imagen_alto_px &&
+            obra.imagen_alto_px > obra.imagen_ancho_px
+        );
 
   const precioFormateado = obra.disponible
     ? new Intl.NumberFormat("es-ES", {

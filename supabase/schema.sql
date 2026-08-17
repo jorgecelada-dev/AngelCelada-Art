@@ -54,6 +54,9 @@ alter table obras add column if not exists fecha_creacion date;
 -- según sea una obra vertical u horizontal.
 alter table obras add column if not exists imagen_ancho_px integer;
 alter table obras add column if not exists imagen_alto_px integer;
+-- Orientación real del cuadro, para forzarla a mano cuando la foto no la
+-- refleje bien (si no se indica, se deduce de imagen_ancho_px/alto_px).
+alter table obras add column if not exists orientacion text check (orientacion in ('horizontal', 'vertical'));
 
 -- ------------------------------------------------------------
 -- Tabla: entornos (fondos para previsualizar la obra en espacios)
