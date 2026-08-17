@@ -1,8 +1,12 @@
+import { headers } from "next/headers";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminAllowed } from "@/lib/admin";
 
 export default async function AdminBar() {
+  const pathname = headers().get("x-pathname") ?? "";
+  if (pathname.startsWith("/admin")) return null;
+
   const supabase = createClient();
   const {
     data: { user },

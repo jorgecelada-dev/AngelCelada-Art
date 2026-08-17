@@ -45,6 +45,44 @@ export default function ObraForm({
   const [altoCm, setAltoCm] = useState<string>(
     obra?.alto_cm?.toString() ?? ""
   );
+  const [orientacion, setOrientacion] = useState(obra?.orientacion ?? "");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    obra?.imagen_url ?? null
+  );
+  const [previewDims, setPreviewDims] = useState<{
+    width: number;
+    height: number;
+  } | null>(
+    obra?.imagen_ancho_px && obra?.imagen_alto_px
+      ? { width: obra.imagen_ancho_px, height: obra.imagen_alto_px }
+      : null
+  );
+
+  async function onImagenChange(file: File | null) {
+    setImagenFile(file);
+    if (!file) {
+      setPreviewUrl(obra?.imagen_url ?? null);
+      setPreviewDims(
+        obra?.imagen_ancho_px && obra?.imagen_alto_px
+          ? { width: obra.imagen_ancho_px, height: obra.imagen_alto_px }
+          : null
+      );
+      return;
+    }
+    setPreviewUrl(URL.createObjectURL(file));
+    try {
+      setPreviewDims(await leerDimensionesImagen(file));
+    } catch {
+      setPreviewDims(null);
+    }
+  }
+
+  const previewEsVertical =
+    orientacion === "vertical"
+      ? true
+      : orientacion === "horizontal"
+      ? false
+      : Boolean(previewDims && previewDims.height > previewDims.width);
 
   const esEdicion = Boolean(obra);
 
@@ -62,7 +100,7 @@ export default function ObraForm({
       let imagen_alto_px = obra?.imagen_alto_px ?? null;
 
       if (imagenFile) {
-        const dimensiones = await leerDimensionesImagen(imagenFile);
+        const dimensiones = previewDims ?? (await leerDimensionesImagen(imagenFile));
         imagen_ancho_px = dimensiones.width;
         imagen_alto_px = dimensiones.height;
 
@@ -209,7 +247,8 @@ export default function ObraForm({
         </label>
         <select
           name="orientacion"
-          defaultValue={obra?.orientacion ?? ""}
+          value={orientacion}
+          onChange={(e) => setOrientacion(e.target.value)}
           className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3"
         >
           <option value="">Automática (según la foto)</option>
@@ -222,6 +261,27 @@ export default function ObraForm({
           margen que la hace parecer cuadrada). Afecta a cómo se rota al
           verla ampliada.
         </p>
+
+        {previewUrl && (
+          <div className="mt-3">
+            <p className="mb-2 text-xs font-medium text-charcoal/60">
+              Previsualización ({previewEsVertical ? "vertical" : "horizontal"})
+            </p>
+            <div
+              className={`relative overflow-hidden rounded-xl border border-charcoal/10 bg-charcoal/5 ${
+                previewEsVertical ? "aspect-[3/4] w-40" : "aspect-[4/3] w-64"
+              }`}
+            >
+              {/* Imagen local (blob:) o ya subida: no pasa por next/image */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={previewUrl}
+                alt="Previsualización de la obra"
+                className="h-full w-full object-contain"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -295,7 +355,7 @@ export default function ObraForm({
         <input
           type="file"
           accept="image/*"
-          onChange={(e) => setImagenFile(e.target.files?.[0] ?? null)}
+          onChange={(e) => onImagenChange(e.target.files?.[0] ?? null)}
           className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3"
         />
       </div>
