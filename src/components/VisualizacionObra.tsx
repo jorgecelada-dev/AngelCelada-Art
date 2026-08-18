@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import NextImage from "next/image";
 import type { Entorno, Obra } from "@/types";
+import { dibujarCover } from "@/lib/canvas";
 
 const TABS = [
   { key: "salon", label: "Salón" },
@@ -13,39 +14,6 @@ const TABS = [
 
 function getLabel(tipo: Entorno["tipo"]) {
   return TABS.find((tab) => tab.key === tipo)?.label ?? tipo;
-}
-
-// Dibuja recortando al centro, igual que el object-cover de CSS, en vez
-// de estirar la imagen para rellenar el recuadro (lo que la deformaría).
-function dibujarCover(
-  ctx: CanvasRenderingContext2D,
-  img: HTMLImageElement,
-  dx: number,
-  dy: number,
-  dw: number,
-  dh: number
-) {
-  const imgRatio = img.naturalWidth / img.naturalHeight;
-  const boxRatio = dw / dh;
-
-  let sx: number;
-  let sy: number;
-  let sw: number;
-  let sh: number;
-
-  if (imgRatio > boxRatio) {
-    sh = img.naturalHeight;
-    sw = sh * boxRatio;
-    sx = (img.naturalWidth - sw) / 2;
-    sy = 0;
-  } else {
-    sw = img.naturalWidth;
-    sh = sw / boxRatio;
-    sx = 0;
-    sy = (img.naturalHeight - sh) / 2;
-  }
-
-  ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
 export default function VisualizacionObra({
