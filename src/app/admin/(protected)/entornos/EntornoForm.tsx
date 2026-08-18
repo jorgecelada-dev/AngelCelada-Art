@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Entorno } from "@/types";
+import { OBJETOS_REFERENCIA } from "@/lib/referencias";
 
 // El PreviewCanvas público dibuja siempre sobre un lienzo lógico de
 // 600x450 (ver VisualizacionObra.tsx), así que la escala cm/px se debe
@@ -43,15 +44,27 @@ export default function EntornoForm({ entorno }: { entorno?: Entorno }) {
   const [calibrando, setCalibrando] = useState(false);
   const [puntoA, setPuntoA] = useState<Punto | null>(null);
   const [puntoB, setPuntoB] = useState<Punto | null>(null);
-  const [longitudReal, setLongitudReal] = useState("");
+  const [punteroActual, setPunteroActual] = useState<Punto | null>(null);
+  const [referenciaLabel, setReferenciaLabel] = useState<string>(
+    OBJETOS_REFERENCIA[0].label
+  );
+  const [longitudReal, setLongitudReal] = useState(
+    String(OBJETOS_REFERENCIA[0].cm ?? "")
+  );
 
-  function onClickPreview(e: React.MouseEvent<HTMLDivElement>) {
-    if (!calibrando || !previewRef.current) return;
+  function puntoDesdeEvento(e: React.MouseEvent<HTMLDivElement>): Punto | null {
+    if (!previewRef.current) return null;
     const rect = previewRef.current.getBoundingClientRect();
-    const punto: Punto = {
+    return {
       xPct: ((e.clientX - rect.left) / rect.width) * 100,
       yPct: ((e.clientY - rect.top) / rect.height) * 100,
     };
+  }
+
+  function onClickPreview(e: React.MouseEvent<HTMLDivElement>) {
+    if (!calibrando) return;
+    const punto = puntoDesdeEvento(e);
+    if (!punto) return;
 
     if (!puntoA || (puntoA && puntoB)) {
       setPuntoA(punto);
@@ -59,6 +72,11 @@ export default function EntornoForm({ entorno }: { entorno?: Entorno }) {
     } else {
       setPuntoB(punto);
     }
+  }
+
+  function onMoverPreview(e: React.MouseEvent<HTMLDivElement>) {
+    if (!calibrando || !puntoA || puntoB) return;
+    setPunteroActual(puntoDesdeEvento(e));
   }
 
   function aplicarCalibracion() {
@@ -211,6 +229,7 @@ export default function EntornoForm({ entorno }: { entorno?: Entorno }) {
         <div
           ref={previewRef}
           onClick={onClickPreview}
+          onMouseMove={onMoverPreview}
           className={`relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-charcoal/10 bg-charcoal/5 ${
             calibrando ? "cursor-crosshair" : ""
           }`}
@@ -251,6 +270,19 @@ export default function EntornoForm({ entorno }: { entorno?: Entorno }) {
               style={{ left: `${puntoB.xPct}%`, top: `${puntoB.yPct}%` }}
             />
           )}
+          {calibrando && puntoA && !puntoB && punteroActual && (
+            <svg className="pointer-events-none absolute inset-0 h-full w-full">
+              <line
+                x1={`${puntoA.xPct}%`}
+                y1={`${puntoA.yPct}%`}
+                x2={`${punteroActual.xPct}%`}
+                y2={`${punteroActual.yPct}%`}
+                stroke="#C97C5D"
+                strokeWidth={1.5}
+                strokeDasharray="4 4"
+              />
+            </svg>
+          )}
           {calibrando && puntoA && puntoB && (
             <svg className="pointer-events-none absolute inset-0 h-full w-full">
               <line
@@ -279,49 +311,78 @@ export default function EntornoForm({ entorno }: { entorno?: Entorno }) {
             >
               📏 Calibrar escala con un objeto conocido
             </button>
-          ) : !puntoB ? (
-            <p className="text-sm text-charcoal/70">
-              Haz clic en los dos extremos de un objeto de la foto del que
-              sepas la medida real (por ejemplo, un sofá, una puerta o una
-              mesa).{" "}
-              <button
-                type="button"
-                onClick={() => setCalibrando(false)}
-                className="underline"
-              >
-                Cancelar
-              </button>
-            </p>
           ) : (
-            <div className="flex flex-wrap items-end gap-3">
+            <div className="space-y-3">
               <div>
                 <label className="block text-sm font-medium">
-                  ¿Cuánto mide ese objeto en la realidad (cm)?
+                  ¿Qué vas a medir en la foto?
                 </label>
-                <input
-                  type="number"
-                  autoFocus
-                  value={longitudReal}
-                  onChange={(e) => setLongitudReal(e.target.value)}
-                  placeholder="200"
-                  className="mt-1 w-32 rounded-lg border border-charcoal/20 bg-white/60 px-3 py-2"
-                />
+                <select
+                  value={referenciaLabel}
+                  onChange={(e) => {
+                    const ref = OBJETOS_REFERENCIA.find(
+                      (o) => o.label === e.target.value
+                    );
+                    setReferenciaLabel(e.target.value);
+                    if (ref?.cm) setLongitudReal(String(ref.cm));
+                    setPuntoA(null);
+                    setPuntoB(null);
+                  }}
+                  className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white px-3 py-2 text-sm"
+                >
+                  {OBJETOS_REFERENCIA.map((o) => (
+                    <option key={o.label} value={o.label}>
+                      {o.label}
+                      {o.cm ? ` (${o.cm} cm)` : ""}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <button
-                type="button"
-                onClick={aplicarCalibracion}
-                disabled={!longitudReal}
-                className="btn-primary text-sm"
-              >
-                Aplicar
-              </button>
-              <button
-                type="button"
-                onClick={() => setCalibrando(false)}
-                className="text-sm underline"
-              >
-                Cancelar
-              </button>
+
+              {!puntoB ? (
+                <p className="text-sm text-charcoal/70">
+                  Haz clic en los dos extremos de ese objeto en la foto, lo
+                  más pegado posible a sus bordes.{" "}
+                  <button
+                    type="button"
+                    onClick={() => setCalibrando(false)}
+                    className="underline"
+                  >
+                    Cancelar
+                  </button>
+                </p>
+              ) : (
+                <div className="flex flex-wrap items-end gap-3">
+                  <div>
+                    <label className="block text-sm font-medium">
+                      ¿Cuánto mide en la realidad (cm)?
+                    </label>
+                    <input
+                      type="number"
+                      autoFocus
+                      value={longitudReal}
+                      onChange={(e) => setLongitudReal(e.target.value)}
+                      placeholder="200"
+                      className="mt-1 w-32 rounded-lg border border-charcoal/20 bg-white/60 px-3 py-2"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={aplicarCalibracion}
+                    disabled={!longitudReal}
+                    className="btn-primary text-sm"
+                  >
+                    Aplicar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCalibrando(false)}
+                    className="text-sm underline"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

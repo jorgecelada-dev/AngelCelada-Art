@@ -9,14 +9,7 @@ import { anchoTarjetaPx, calcularAspectoYRotacion } from "@/lib/orientacion";
 
 type Rect = { top: number; left: number; width: number; height: number };
 
-function calcularRectExpandido(
-  cardRect: DOMRect,
-  anchoNatural: number | null,
-  altoNatural: number | null
-): Rect {
-  const aspecto =
-    anchoNatural && altoNatural ? anchoNatural / altoNatural : 4 / 5;
-
+function calcularRectExpandido(cardRect: DOMRect, aspecto: number): Rect {
   // Crece de forma clara respecto al tamaño actual de la tarjeta en
   // pantalla (el mosaico ya puede tener tarjetas grandes de por sí).
   const ladoMayorActual = Math.max(cardRect.width, cardRect.height);
@@ -52,14 +45,19 @@ export default function ObraCard({ obra }: { obra: Obra }) {
   const [cargada, setCargada] = useState(false);
   const timeoutRef = useRef<number | null>(null);
 
+  const { aspecto, necesitaRotarFoto } = calcularAspectoYRotacion(obra);
+  const anchoBox = anchoTarjetaPx(obra);
+  const altoBox = Math.round(anchoBox / aspecto);
+
   function onMouseEnter() {
     if (!cardRef.current) return;
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
     const cardRect = cardRef.current.getBoundingClientRect();
     timeoutRef.current = window.setTimeout(() => {
-      setRect(
-        calcularRectExpandido(cardRect, obra.imagen_ancho_px, obra.imagen_alto_px)
-      );
+      // Misma proporción real (cm) que la tarjeta, para que la vista
+      // ampliada no "desencaje" respecto a lo que se ve antes de pasar
+      // el ratón.
+      setRect(calcularRectExpandido(cardRect, aspecto));
     }, 150);
   }
 
@@ -75,10 +73,6 @@ export default function ObraCard({ obra }: { obra: Obra }) {
         currency: "EUR",
       }).format(obra.precio)
     : "No disponible";
-
-  const { aspecto, necesitaRotarFoto } = calcularAspectoYRotacion(obra);
-  const anchoBox = anchoTarjetaPx(obra);
-  const altoBox = Math.round(anchoBox / aspecto);
 
   return (
     <div
@@ -173,17 +167,42 @@ export default function ObraCard({ obra }: { obra: Obra }) {
             }}
             className="z-50 block overflow-hidden rounded-2xl bg-charcoal/5 shadow-2xl ring-1 ring-charcoal/10"
           >
-            <Image
-              src={obra.imagen_url}
-              alt={obra.titulo}
-              fill
-              className={`object-contain transition-opacity duration-200 ${
-                cargada ? "opacity-100" : "opacity-0"
-              }`}
-              sizes="780px"
-              quality={100}
-              onLoad={() => setCargada(true)}
-            />
+            {necesitaRotarFoto ? (
+              // Misma proporción real que la tarjeta: si hace falta rotar
+              // ahí, también hace falta rotar aquí.
+              <div
+                className="absolute left-1/2 top-1/2"
+                style={{
+                  width: `${(1 / aspecto) * 100}%`,
+                  height: `${aspecto * 100}%`,
+                  transform: "translate(-50%, -50%) rotate(90deg)",
+                }}
+              >
+                <Image
+                  src={obra.imagen_url}
+                  alt={obra.titulo}
+                  fill
+                  className={`object-contain transition-opacity duration-200 ${
+                    cargada ? "opacity-100" : "opacity-0"
+                  }`}
+                  sizes="780px"
+                  quality={100}
+                  onLoad={() => setCargada(true)}
+                />
+              </div>
+            ) : (
+              <Image
+                src={obra.imagen_url}
+                alt={obra.titulo}
+                fill
+                className={`object-contain transition-opacity duration-200 ${
+                  cargada ? "opacity-100" : "opacity-0"
+                }`}
+                sizes="780px"
+                quality={100}
+                onLoad={() => setCargada(true)}
+              />
+            )}
 
             <div className="absolute bottom-0 left-0 right-0 bg-cream px-5 py-4">
               <h3 className="font-serif text-xl">{obra.titulo}</h3>
