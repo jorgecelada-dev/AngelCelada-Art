@@ -5,6 +5,9 @@ import type { Entorno, Obra, ObraDetalle } from "@/types";
 import BuyButton from "./BuyButton";
 import VisualizacionObra from "@/components/VisualizacionObra";
 import ImagenObraRotada from "@/components/ImagenObraRotada";
+import EntradaImagen from "@/components/EntradaImagen";
+import RevelarEnVista from "@/components/RevelarEnVista";
+import GaleriaDetalles from "@/components/GaleriaDetalles";
 
 export const revalidate = 0;
 
@@ -134,7 +137,7 @@ export default async function ObraDetailPage({
   );
 
   const datos = (
-    <div>
+    <RevelarEnVista delay={0.15}>
       <h1 className="section-title">{obra.titulo}</h1>
 
       {obra.categorias?.nombre && (
@@ -188,7 +191,7 @@ export default async function ObraDetailPage({
           <VisualizacionObra obra={obra} entornos={entornos} />
         </div>
       )}
-    </div>
+    </RevelarEnVista>
   );
 
   // Las obras verticales desperdician mucho ancho si la foto va a ancho
@@ -196,16 +199,16 @@ export default async function ObraDetailPage({
   // muestran en dos columnas, imagen contenida junto a los datos.
   const principal = esVertical ? (
     <section className="container-site grid grid-cols-1 gap-12 py-16 md:grid-cols-2">
-      <div className="flex items-start justify-center overflow-hidden rounded-2xl bg-charcoal/5">
+      <EntradaImagen className="flex items-start justify-center overflow-hidden rounded-2xl bg-charcoal/5">
         {imagen}
-      </div>
+      </EntradaImagen>
       {datos}
     </section>
   ) : (
     <section className="container-site py-16">
-      <div className="flex w-full items-center justify-center overflow-hidden rounded-2xl bg-charcoal/5">
+      <EntradaImagen className="flex w-full items-center justify-center overflow-hidden rounded-2xl bg-charcoal/5">
         {imagen}
-      </div>
+      </EntradaImagen>
 
       <div className="mt-12 grid grid-cols-1 gap-12 md:grid-cols-[1fr_1.3fr]">
         {datos}
@@ -225,27 +228,10 @@ export default async function ObraDetailPage({
 
       {detalles.length > 0 && (
         <section className="container-site pb-16">
-          <h2 className="section-title text-2xl">Detalles de la obra</h2>
-          <div className="mt-6 grid grid-flow-row-dense grid-cols-3 gap-2 md:gap-4">
-            {detalles.map((detalle) => (
-              <div
-                key={detalle.id}
-                className={`relative overflow-hidden rounded-xl bg-charcoal/5 ${
-                  detalle.tamano === "1x2"
-                    ? "row-span-2 aspect-[1/2]"
-                    : "aspect-square"
-                }`}
-              >
-                <Image
-                  src={detalle.imagen_url}
-                  alt={`Detalle de ${obra.titulo}`}
-                  fill
-                  className="object-cover"
-                  sizes="(min-width: 768px) 33vw, 33vw"
-                />
-              </div>
-            ))}
-          </div>
+          <RevelarEnVista>
+            <h2 className="section-title text-2xl">Detalles de la obra</h2>
+          </RevelarEnVista>
+          <GaleriaDetalles detalles={detalles} titulo={obra.titulo} />
         </section>
       )}
     </>

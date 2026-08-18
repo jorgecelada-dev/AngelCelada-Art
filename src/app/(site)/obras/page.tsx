@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import MosaicoObras from "@/components/MosaicoObras";
+import RevelarEnVista from "@/components/RevelarEnVista";
 import type { Categoria, Obra } from "@/types";
 
 export const revalidate = 0;
@@ -36,16 +37,16 @@ export default async function ObrasPage({
 
   return (
     <section className="container-site py-16">
-      <div className="mb-10 text-center">
+      <RevelarEnVista className="mb-10 text-center">
         <h1 className="section-title">Colecciones</h1>
         <p className="mx-auto mt-4 max-w-2xl text-charcoal/70">
           Cada pieza es única e irrepetible, elaborada con pigmentos y
           materiales de origen natural.
         </p>
-      </div>
+      </RevelarEnVista>
 
       {colecciones.length > 0 && (
-        <div className="mb-12 flex flex-wrap justify-center gap-2">
+        <RevelarEnVista delay={0.1} className="mb-12 flex flex-wrap justify-center gap-2">
           <Link
             href="/obras"
             className={`rounded-full px-4 py-2 text-sm transition ${
@@ -69,7 +70,7 @@ export default async function ObrasPage({
               {coleccion.nombre}
             </Link>
           ))}
-        </div>
+        </RevelarEnVista>
       )}
 
       {error && (

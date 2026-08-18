@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import NextImage from "next/image";
 import type { Entorno, Obra } from "@/types";
 import { dibujarCover } from "@/lib/canvas";
@@ -27,6 +28,7 @@ export default function VisualizacionObra({
   const [loading, setLoading] = useState(true);
   const [slideIndex, setSlideIndex] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
+  const [trackWidth, setTrackWidth] = useState(0);
   const filtered = useMemo(
     () => entornos.filter((entorno) => entorno.tipo === activeTab),
     [activeTab, entornos]
@@ -39,19 +41,27 @@ export default function VisualizacionObra({
     return () => window.clearTimeout(timer);
   }, [activeTab, obra.id]);
 
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    const medir = () => setTrackWidth(el.offsetWidth);
+    medir();
+    const observer = new ResizeObserver(medir);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loading]);
+
   function irASlide(indice: number) {
-    const track = trackRef.current;
-    if (!track) return;
-    const destino = Math.max(0, Math.min(indice, filtered.length - 1));
-    track.scrollTo({ left: destino * track.clientWidth, behavior: "smooth" });
-    setSlideIndex(destino);
+    setSlideIndex(Math.max(0, Math.min(indice, filtered.length - 1)));
   }
 
-  function onScrollTrack() {
-    const track = trackRef.current;
-    if (!track || track.clientWidth === 0) return;
-    const indice = Math.round(track.scrollLeft / track.clientWidth);
-    setSlideIndex(indice);
+  function onDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
+    const umbral = trackWidth * 0.2;
+    if (info.offset.x < -umbral) {
+      irASlide(slideIndex + 1);
+    } else if (info.offset.x > umbral) {
+      irASlide(slideIndex - 1);
+    }
   }
 
   if (!obra.ancho_cm || !obra.alto_cm) {
@@ -64,105 +74,155 @@ export default function VisualizacionObra({
         <h2 className="text-lg font-medium">Visualiza esta obra en tu espacio</h2>
         <div className="flex flex-wrap gap-2">
           {TABS.map((tab) => (
-            <button
+            <motion.button
               key={tab.key}
               type="button"
               onClick={() => setActiveTab(tab.key)}
-              className={`rounded-full px-3 py-1.5 text-sm transition ${
-                activeTab === tab.key
-                  ? "bg-charcoal text-white"
-                  : "bg-white text-charcoal/70"
+              whileTap={{ scale: 0.92 }}
+              className={`relative rounded-full px-3 py-1.5 text-sm transition-colors ${
+                activeTab === tab.key ? "text-white" : "text-charcoal/70"
               }`}
             >
-              {tab.label}
-            </button>
+              {activeTab === tab.key && (
+                <motion.span
+                  layoutId="tab-activa-entorno"
+                  className="absolute inset-0 rounded-full bg-charcoal"
+                  transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                />
+              )}
+              <span className="relative">{tab.label}</span>
+            </motion.button>
           ))}
         </div>
       </div>
 
-      <div className="mt-4 rounded-2xl border border-charcoal/10 bg-white p-3">
-        {loading ? (
-          <div className="flex min-h-[280px] items-center justify-center text-sm text-charcoal/60">
-            Componiendo la vista…
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex min-h-[280px] items-center justify-center text-sm text-charcoal/60">
-            Aún no hay entornos de este tipo.
-          </div>
-        ) : (
-          <div className="relative">
-            <div
-              ref={trackRef}
-              onScroll={onScrollTrack}
-              className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      <div className="mt-4 overflow-hidden rounded-2xl border border-charcoal/10 bg-white p-3">
+        <AnimatePresence mode="wait">
+          {loading ? (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex min-h-[280px] items-center justify-center text-sm text-charcoal/60"
             >
-              {filtered.map((entorno) => (
-                <div
-                  key={entorno.id}
-                  className="w-full flex-shrink-0 snap-start px-1"
+              Componiendo la vista…
+            </motion.div>
+          ) : filtered.length === 0 ? (
+            <motion.div
+              key="vacio"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex min-h-[280px] items-center justify-center text-sm text-charcoal/60"
+            >
+              Aún no hay entornos de este tipo.
+            </motion.div>
+          ) : (
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+              className="relative"
+            >
+              <div ref={trackRef} className="overflow-hidden">
+                <motion.div
+                  className="flex"
+                  drag={filtered.length > 1 ? "x" : false}
+                  dragConstraints={{
+                    left: -trackWidth * (filtered.length - 1),
+                    right: 0,
+                  }}
+                  dragElastic={0.12}
+                  dragMomentum={false}
+                  onDragEnd={onDragEnd}
+                  animate={{ x: -slideIndex * trackWidth }}
+                  transition={{ type: "spring", stiffness: 300, damping: 32 }}
                 >
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-charcoal/5">
-                    {entorno.imagen_url ? (
-                      <NextImage
-                        src={entorno.imagen_url}
-                        alt={getLabel(entorno.tipo)}
-                        fill
-                        className="object-cover"
-                        sizes="(min-width: 768px) 45vw, 100vw"
-                        priority
-                      />
-                    ) : null}
-                    <PreviewCanvas obra={obra} entorno={entorno} />
-                  </div>
-                  <p className="mt-2 text-center text-xs uppercase tracking-[0.2em] text-charcoal/60">
-                    {getLabel(entorno.tipo)}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {filtered.length > 1 && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => irASlide(slideIndex - 1)}
-                  disabled={slideIndex === 0}
-                  aria-label="Entorno anterior"
-                  className="absolute left-2 top-[calc(50%-1rem)] hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-charcoal shadow-md transition hover:bg-white disabled:opacity-0 md:flex"
-                >
-                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => irASlide(slideIndex + 1)}
-                  disabled={slideIndex === filtered.length - 1}
-                  aria-label="Entorno siguiente"
-                  className="absolute right-2 top-[calc(50%-1rem)] hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-charcoal shadow-md transition hover:bg-white disabled:opacity-0 md:flex"
-                >
-                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-
-                <div className="mt-3 flex justify-center gap-1.5">
-                  {filtered.map((entorno, i) => (
-                    <button
+                  {filtered.map((entorno) => (
+                    <div
                       key={entorno.id}
-                      type="button"
-                      onClick={() => irASlide(i)}
-                      aria-label={`Ir al entorno ${i + 1}`}
-                      className={`h-1.5 rounded-full transition-all ${
-                        i === slideIndex ? "w-5 bg-charcoal" : "w-1.5 bg-charcoal/20"
-                      }`}
-                    />
+                      style={{ width: trackWidth || "100%" }}
+                      className="flex-shrink-0 px-1"
+                    >
+                      <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-charcoal/5">
+                        {entorno.imagen_url ? (
+                          <NextImage
+                            src={entorno.imagen_url}
+                            alt={getLabel(entorno.tipo)}
+                            fill
+                            className="pointer-events-none object-cover"
+                            sizes="(min-width: 768px) 45vw, 100vw"
+                            priority
+                            draggable={false}
+                          />
+                        ) : null}
+                        <PreviewCanvas obra={obra} entorno={entorno} />
+                      </div>
+                      <p className="mt-2 text-center text-xs uppercase tracking-[0.2em] text-charcoal/60">
+                        {getLabel(entorno.tipo)}
+                      </p>
+                    </div>
                   ))}
-                </div>
-              </>
-            )}
-          </div>
-        )}
+                </motion.div>
+              </div>
+
+              {filtered.length > 1 && (
+                <>
+                  <motion.button
+                    type="button"
+                    onClick={() => irASlide(slideIndex - 1)}
+                    disabled={slideIndex === 0}
+                    aria-label="Entorno anterior"
+                    whileHover={{ scale: 1.08 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="absolute left-2 top-[calc(50%-1rem)] hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-charcoal shadow-md transition-opacity hover:bg-white disabled:opacity-0 md:flex"
+                  >
+                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </motion.button>
+                  <motion.button
+                    type="button"
+                    onClick={() => irASlide(slideIndex + 1)}
+                    disabled={slideIndex === filtered.length - 1}
+                    aria-label="Entorno siguiente"
+                    whileHover={{ scale: 1.08 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="absolute right-2 top-[calc(50%-1rem)] hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-charcoal shadow-md transition-opacity hover:bg-white disabled:opacity-0 md:flex"
+                  >
+                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </motion.button>
+
+                  <div className="mt-3 flex justify-center gap-1.5">
+                    {filtered.map((entorno, i) => (
+                      <button
+                        key={entorno.id}
+                        type="button"
+                        onClick={() => irASlide(i)}
+                        aria-label={`Ir al entorno ${i + 1}`}
+                        className="relative h-1.5 w-5"
+                      >
+                        <span className="absolute inset-0 rounded-full bg-charcoal/20" />
+                        {i === slideIndex && (
+                          <motion.span
+                            layoutId="dot-activo-entorno"
+                            className="absolute inset-0 rounded-full bg-charcoal"
+                            transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                          />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

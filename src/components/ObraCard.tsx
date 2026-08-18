@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import type { Obra } from "@/types";
@@ -44,10 +45,15 @@ export default function ObraCard({ obra }: { obra: Obra }) {
   const [rect, setRect] = useState<Rect | null>(null);
   const [cargada, setCargada] = useState(false);
   const timeoutRef = useRef<number | null>(null);
+  const cierreTimeoutRef = useRef<number | null>(null);
 
   const { aspecto, necesitaRotarFoto } = calcularAspectoYRotacion(obra);
 
   function onMouseEnter() {
+    if (cierreTimeoutRef.current) {
+      window.clearTimeout(cierreTimeoutRef.current);
+      cierreTimeoutRef.current = null;
+    }
     if (!cardRef.current) return;
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
     const cardRect = cardRef.current.getBoundingClientRect();
@@ -61,8 +67,14 @@ export default function ObraCard({ obra }: { obra: Obra }) {
 
   function onMouseLeave() {
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
-    setRect(null);
-    setCargada(false);
+    if (cierreTimeoutRef.current) window.clearTimeout(cierreTimeoutRef.current);
+    // Pequeño margen antes de cerrar: da tiempo a que el cursor llegue
+    // desde la tarjeta pequeña hasta la vista ampliada sin que se cierre
+    // de golpe por el hueco entre ambas.
+    cierreTimeoutRef.current = window.setTimeout(() => {
+      setRect(null);
+      setCargada(false);
+    }, 150);
   }
 
   const precioFormateado = obra.disponible
@@ -84,9 +96,11 @@ export default function ObraCard({ obra }: { obra: Obra }) {
         className="block overflow-hidden bg-white/40 shadow-sm transition duration-300 hover:shadow-xl"
       >
         {obra.imagen_url ? (
-          <div
+          <motion.div
             className="relative w-full overflow-hidden bg-charcoal/5"
             style={{ aspectRatio: aspecto }}
+            whileHover={{ scale: 1.04 }}
+            transition={{ type: "spring", stiffness: 300, damping: 24 }}
           >
             {necesitaRotarFoto ? (
               // La foto es lo contrario de la proporción real del cuadro
@@ -124,7 +138,7 @@ export default function ObraCard({ obra }: { obra: Obra }) {
                 Vendida
               </span>
             )}
-          </div>
+          </motion.div>
         ) : (
           <div className="relative flex aspect-[4/5] w-full items-center justify-center bg-charcoal/5 text-charcoal/30">
             Sin imagen
@@ -147,70 +161,78 @@ export default function ObraCard({ obra }: { obra: Obra }) {
         </div>
       </Link>
 
-      {rect &&
-        obra.imagen_url &&
-        typeof document !== "undefined" &&
+      {typeof document !== "undefined" &&
         createPortal(
-          <Link
-            href={`/obras/${obra.id}`}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
-            style={{
-              position: "fixed",
-              top: rect.top,
-              left: rect.left,
-              width: rect.width,
-              height: rect.height,
-            }}
-            className="z-50 block overflow-hidden bg-charcoal/5 shadow-2xl ring-1 ring-charcoal/10"
-          >
-            {necesitaRotarFoto ? (
-              // Misma proporción real que la tarjeta: si hace falta rotar
-              // ahí, también hace falta rotar aquí.
-              <div
-                className="absolute left-1/2 top-1/2"
+          <AnimatePresence>
+            {rect && obra.imagen_url && (
+              <motion.div
+                key="hover-expandido"
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
                 style={{
-                  width: `${(1 / aspecto) * 100}%`,
-                  height: `${aspecto * 100}%`,
-                  transform: "translate(-50%, -50%) rotate(90deg)",
+                  position: "fixed",
+                  top: rect.top,
+                  left: rect.left,
+                  width: rect.width,
+                  height: rect.height,
                 }}
+                className="z-50 overflow-hidden bg-charcoal/5 shadow-2xl ring-1 ring-charcoal/10"
+                onMouseEnter={onMouseEnter}
+                onMouseLeave={onMouseLeave}
               >
-                <Image
-                  src={obra.imagen_url}
-                  alt={obra.titulo}
-                  fill
-                  className={`object-contain transition-opacity duration-200 ${
-                    cargada ? "opacity-100" : "opacity-0"
-                  }`}
-                  sizes="780px"
-                  quality={100}
-                  onLoad={() => setCargada(true)}
-                />
-              </div>
-            ) : (
-              <Image
-                src={obra.imagen_url}
-                alt={obra.titulo}
-                fill
-                className={`object-contain transition-opacity duration-200 ${
-                  cargada ? "opacity-100" : "opacity-0"
-                }`}
-                sizes="780px"
-                quality={100}
-                onLoad={() => setCargada(true)}
-              />
-            )}
+                <Link href={`/obras/${obra.id}`} className="block h-full w-full">
+                  {necesitaRotarFoto ? (
+                    // Misma proporción real que la tarjeta: si hace falta rotar
+                    // ahí, también hace falta rotar aquí.
+                    <div
+                      className="absolute left-1/2 top-1/2"
+                      style={{
+                        width: `${(1 / aspecto) * 100}%`,
+                        height: `${aspecto * 100}%`,
+                        transform: "translate(-50%, -50%) rotate(90deg)",
+                      }}
+                    >
+                      <Image
+                        src={obra.imagen_url}
+                        alt={obra.titulo}
+                        fill
+                        className={`object-contain transition-opacity duration-200 ${
+                          cargada ? "opacity-100" : "opacity-0"
+                        }`}
+                        sizes="780px"
+                        quality={100}
+                        onLoad={() => setCargada(true)}
+                      />
+                    </div>
+                  ) : (
+                    <Image
+                      src={obra.imagen_url}
+                      alt={obra.titulo}
+                      fill
+                      className={`object-contain transition-opacity duration-200 ${
+                        cargada ? "opacity-100" : "opacity-0"
+                      }`}
+                      sizes="780px"
+                      quality={100}
+                      onLoad={() => setCargada(true)}
+                    />
+                  )}
 
-            <div className="absolute bottom-0 left-0 right-0 bg-cream px-5 py-4">
-              <h3 className="font-serif text-xl">{obra.titulo}</h3>
-              <p className="mt-1 text-clay">{precioFormateado}</p>
-              {obra.medidas && (
-                <p className="mt-1 text-sm text-charcoal/60">
-                  {obra.medidas}
-                </p>
-              )}
-            </div>
-          </Link>,
+                  <div className="absolute bottom-0 left-0 right-0 bg-cream px-5 py-4">
+                    <h3 className="font-serif text-xl">{obra.titulo}</h3>
+                    <p className="mt-1 text-clay">{precioFormateado}</p>
+                    {obra.medidas && (
+                      <p className="mt-1 text-sm text-charcoal/60">
+                        {obra.medidas}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              </motion.div>
+            )}
+          </AnimatePresence>,
           document.body
         )}
     </div>

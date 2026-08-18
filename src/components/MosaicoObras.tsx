@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { motion } from "framer-motion";
 import type { Obra } from "@/types";
 import { calcularAspectoYRotacion } from "@/lib/orientacion";
 import ObraCard from "./ObraCard";
@@ -33,16 +34,30 @@ function distribuirEnColumnas(obras: Obra[], numColumnas: number): Obra[][] {
 function Columnas({
   columnas,
   className,
+  orden,
 }: {
   columnas: Obra[][];
   className: string;
+  orden: Map<string, number>;
 }) {
   return (
     <div className={`gap-8 ${className}`}>
       {columnas.map((columna, i) => (
         <div key={i} className="flex flex-1 flex-col gap-8">
           {columna.map((obra) => (
-            <ObraCard key={obra.id} obra={obra} />
+            <motion.div
+              key={obra.id}
+              initial={{ opacity: 0, y: 32 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{
+                duration: 0.55,
+                ease: "easeOut",
+                delay: Math.min(orden.get(obra.id) ?? 0, 8) * 0.06,
+              }}
+            >
+              <ObraCard obra={obra} />
+            </motion.div>
           ))}
         </div>
       ))}
@@ -54,12 +69,16 @@ export default function MosaicoObras({ obras }: { obras: Obra[] }) {
   const col1 = useMemo(() => distribuirEnColumnas(obras, 1), [obras]);
   const col2 = useMemo(() => distribuirEnColumnas(obras, 2), [obras]);
   const col3 = useMemo(() => distribuirEnColumnas(obras, 3), [obras]);
+  const orden = useMemo(
+    () => new Map(obras.map((obra, i) => [obra.id, i])),
+    [obras]
+  );
 
   return (
     <>
-      <Columnas columnas={col1} className="flex sm:hidden" />
-      <Columnas columnas={col2} className="hidden sm:flex lg:hidden" />
-      <Columnas columnas={col3} className="hidden lg:flex" />
+      <Columnas columnas={col1} className="flex sm:hidden" orden={orden} />
+      <Columnas columnas={col2} className="hidden sm:flex lg:hidden" orden={orden} />
+      <Columnas columnas={col3} className="hidden lg:flex" orden={orden} />
     </>
   );
 }

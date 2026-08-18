@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import LogoutButton from "./LogoutButton";
 
@@ -14,6 +15,16 @@ const links = [
   { href: "/admin/ajustes", label: "Ajustes" },
 ];
 
+const contenedor = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.04, delayChildren: 0.04 } },
+};
+
+const item = {
+  hidden: { opacity: 0, x: -12 },
+  show: { opacity: 1, x: 0 },
+};
+
 export default function AdminMobileMenu() {
   const [abierto, setAbierto] = useState(false);
 
@@ -26,49 +37,65 @@ export default function AdminMobileMenu() {
         aria-expanded={abierto}
         className="flex h-10 w-10 flex-col items-center justify-center gap-1.5"
       >
-        <span
-          className={`block h-0.5 w-6 bg-charcoal transition-transform ${
-            abierto ? "translate-y-2 rotate-45" : ""
-          }`}
+        <motion.span
+          animate={abierto ? { y: 8, rotate: 45 } : { y: 0, rotate: 0 }}
+          transition={{ duration: 0.25 }}
+          className="block h-0.5 w-6 bg-charcoal"
         />
-        <span
-          className={`block h-0.5 w-6 bg-charcoal transition-opacity ${
-            abierto ? "opacity-0" : ""
-          }`}
+        <motion.span
+          animate={{ opacity: abierto ? 0 : 1 }}
+          transition={{ duration: 0.2 }}
+          className="block h-0.5 w-6 bg-charcoal"
         />
-        <span
-          className={`block h-0.5 w-6 bg-charcoal transition-transform ${
-            abierto ? "-translate-y-2 -rotate-45" : ""
-          }`}
+        <motion.span
+          animate={abierto ? { y: -8, rotate: -45 } : { y: 0, rotate: 0 }}
+          transition={{ duration: 0.25 }}
+          className="block h-0.5 w-6 bg-charcoal"
         />
       </button>
 
-      {abierto && (
-        <div className="absolute left-0 right-0 top-full z-40 border-b border-charcoal/10 bg-[#DDD5C4] shadow-lg">
-          <nav className="container-site flex flex-col py-2">
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setAbierto(false)}
-                className="border-b border-charcoal/10 py-3 text-sm"
-              >
-                {link.label}
-              </Link>
-            ))}
-            <Link
-              href="/"
-              onClick={() => setAbierto(false)}
-              className="border-b border-charcoal/10 py-3 text-sm text-clay"
+      <AnimatePresence>
+        {abierto && (
+          <motion.div
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="absolute left-0 right-0 top-full z-40 border-b border-charcoal/10 bg-[#DDD5C4] shadow-lg"
+          >
+            <motion.nav
+              variants={contenedor}
+              initial="hidden"
+              animate="show"
+              className="container-site flex flex-col py-2"
             >
-              ← Ver web pública
-            </Link>
-            <div className="pt-3">
-              <LogoutButton />
-            </div>
-          </nav>
-        </div>
-      )}
+              {links.map((link) => (
+                <motion.div key={link.href} variants={item}>
+                  <Link
+                    href={link.href}
+                    onClick={() => setAbierto(false)}
+                    className="block border-b border-charcoal/10 py-3 text-sm"
+                  >
+                    {link.label}
+                  </Link>
+                </motion.div>
+              ))}
+              <motion.div variants={item}>
+                <Link
+                  href="/"
+                  onClick={() => setAbierto(false)}
+                  className="block border-b border-charcoal/10 py-3 text-sm text-clay"
+                >
+                  ← Ver web pública
+                </Link>
+              </motion.div>
+              <motion.div variants={item} className="pt-3">
+                <LogoutButton />
+              </motion.div>
+            </motion.nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
