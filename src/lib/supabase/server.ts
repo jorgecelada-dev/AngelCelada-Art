@@ -38,6 +38,7 @@ function createFallbackClient() {
       getUser: async () => ({ data: { user: null }, error: null }),
       signInWithPassword: async () => ({ data: { user: null }, error: null }),
       signOut: async () => ({ error: null }),
+      resetPasswordForEmail: async () => ({ data: null, error: null }),
     },
     storage: {
       from: () => ({

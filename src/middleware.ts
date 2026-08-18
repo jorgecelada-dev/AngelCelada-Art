@@ -13,12 +13,7 @@ function createFallbackSupabaseAuth() {
 }
 
 export async function middleware(request: NextRequest) {
-  // Propaga la ruta actual en una cabecera, para que los Server Components
-  // (como AdminBar) puedan saber si están dentro de /admin sin repetir la
-  // comprobación de sesión que ya hace este middleware.
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-pathname", request.nextUrl.pathname);
-  let response = NextResponse.next({ request: { headers: requestHeaders } });
+  let response = NextResponse.next();
 
   if (!request.nextUrl.pathname.startsWith("/admin")) {
     return response;
@@ -41,9 +36,7 @@ export async function middleware(request: NextRequest) {
             cookiesToSet.forEach(({ name, value }) =>
               request.cookies.set(name, value)
             );
-            response = NextResponse.next({
-              request: { headers: requestHeaders },
-            });
+            response = NextResponse.next({ request });
             cookiesToSet.forEach(({ name, value, options }) =>
               response.cookies.set(name, value, options)
             );
@@ -81,7 +74,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Corre en todas las rutas (para poder propagar x-pathname a AdminBar),
-  // pero la comprobación de sesión de arriba solo se ejecuta para /admin.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/admin/:path*"],
 };

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import ObraCard from "@/components/ObraCard";
+import MosaicoObras from "@/components/MosaicoObras";
 import type { Obra } from "@/types";
 
 export default async function HomePage() {
@@ -49,11 +49,7 @@ export default async function HomePage() {
               Ver todas
             </Link>
           </div>
-          <div className="flex flex-wrap justify-center gap-8">
-            {obras.map((obra) => (
-              <ObraCard key={obra.id} obra={obra} />
-            ))}
-          </div>
+          <MosaicoObras obras={obras} />
         </section>
       )}
 

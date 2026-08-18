@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -82,6 +83,12 @@ function AdminLoginContent() {
           >
             {loading ? "Entrando…" : "Entrar"}
           </button>
+
+          <div className="mt-3 text-center">
+            <Link href="/auth/forgot-password" className="text-sm text-clay hover:underline">
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
 
           {error && <p className="text-sm text-red-600">{error}</p>}
         </form>

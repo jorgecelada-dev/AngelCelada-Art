@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import type { Obra } from "@/types";
-import { anchoTarjetaPx, calcularAspectoYRotacion } from "@/lib/orientacion";
+import { calcularAspectoYRotacion } from "@/lib/orientacion";
 
 type Rect = { top: number; left: number; width: number; height: number };
 
@@ -46,8 +46,6 @@ export default function ObraCard({ obra }: { obra: Obra }) {
   const timeoutRef = useRef<number | null>(null);
 
   const { aspecto, necesitaRotarFoto } = calcularAspectoYRotacion(obra);
-  const anchoBox = anchoTarjetaPx(obra);
-  const altoBox = Math.round(anchoBox / aspecto);
 
   function onMouseEnter() {
     if (!cardRef.current) return;
@@ -76,10 +74,9 @@ export default function ObraCard({ obra }: { obra: Obra }) {
 
   return (
     <div
-      className="relative"
+      className="relative w-full"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      style={{ width: anchoBox, maxWidth: "100%" }}
     >
       <Link
         ref={cardRef}
@@ -89,7 +86,7 @@ export default function ObraCard({ obra }: { obra: Obra }) {
         {obra.imagen_url ? (
           <div
             className="relative w-full overflow-hidden bg-charcoal/5"
-            style={{ aspectRatio: `${anchoBox} / ${altoBox}` }}
+            style={{ aspectRatio: aspecto }}
           >
             {necesitaRotarFoto ? (
               // La foto es lo contrario de la proporción real del cuadro
@@ -98,8 +95,8 @@ export default function ObraCard({ obra }: { obra: Obra }) {
               <div
                 className="absolute left-1/2 top-1/2"
                 style={{
-                  width: altoBox,
-                  height: anchoBox,
+                  width: `${(1 / aspecto) * 100}%`,
+                  height: `${aspecto * 100}%`,
                   transform: "translate(-50%, -50%) rotate(90deg)",
                 }}
               >
@@ -108,7 +105,7 @@ export default function ObraCard({ obra }: { obra: Obra }) {
                   alt={obra.titulo}
                   fill
                   className="object-cover"
-                  sizes="440px"
+                  sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                   quality={95}
                 />
               </div>

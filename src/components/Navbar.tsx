@@ -1,4 +1,5 @@
 import Link from "next/link";
+import MobileMenu from "./MobileMenu";
 
 const links = [
   { href: "/obras", label: "Obras" },
@@ -10,7 +11,7 @@ const links = [
 export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-charcoal/10 bg-cream/90 backdrop-blur">
-      <div className="container-site flex h-20 items-center justify-between">
+      <div className="container-site relative flex h-20 items-center justify-between">
         <Link href="/" className="font-serif text-xl tracking-wide">
           ArteCelada
         </Link>
@@ -30,6 +31,8 @@ export default function Navbar() {
         <Link href="/obras" className="btn-primary hidden md:inline-flex">
           Comprar obra
         </Link>
+
+        <MobileMenu links={links} />
       </div>
     </header>
   );

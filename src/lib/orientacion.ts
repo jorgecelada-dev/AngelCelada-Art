@@ -39,14 +39,3 @@ export function calcularAspectoYRotacion(obra: Obra) {
 
   return { aspecto, necesitaRotarFoto, tieneCm };
 }
-
-// Ancho de la tarjeta en el mosaico, proporcional al tamaño real del
-// cuadro (raíz cuadrada del área, para que crezca de forma suave), o un
-// valor por defecto si no hay medidas.
-export function anchoTarjetaPx(obra: Obra): number {
-  if (obra.ancho_cm && obra.alto_cm) {
-    const px = Math.sqrt(obra.ancho_cm * obra.alto_cm) * 2.4;
-    return Math.round(Math.min(Math.max(px, 200), 440));
-  }
-  return 280;
-}
