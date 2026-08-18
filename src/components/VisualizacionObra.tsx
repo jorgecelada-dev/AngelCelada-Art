@@ -25,6 +25,8 @@ export default function VisualizacionObra({
 }) {
   const [activeTab, setActiveTab] = useState<Entorno["tipo"]>("salon");
   const [loading, setLoading] = useState(true);
+  const [slideIndex, setSlideIndex] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
   const filtered = useMemo(
     () => entornos.filter((entorno) => entorno.tipo === activeTab),
     [activeTab, entornos]
@@ -32,9 +34,25 @@ export default function VisualizacionObra({
 
   useEffect(() => {
     setLoading(true);
+    setSlideIndex(0);
     const timer = window.setTimeout(() => setLoading(false), 180);
     return () => window.clearTimeout(timer);
   }, [activeTab, obra.id]);
+
+  function irASlide(indice: number) {
+    const track = trackRef.current;
+    if (!track) return;
+    const destino = Math.max(0, Math.min(indice, filtered.length - 1));
+    track.scrollTo({ left: destino * track.clientWidth, behavior: "smooth" });
+    setSlideIndex(destino);
+  }
+
+  function onScrollTrack() {
+    const track = trackRef.current;
+    if (!track || track.clientWidth === 0) return;
+    const indice = Math.round(track.scrollLeft / track.clientWidth);
+    setSlideIndex(indice);
+  }
 
   if (!obra.ancho_cm || !obra.alto_cm) {
     return null;
@@ -72,29 +90,77 @@ export default function VisualizacionObra({
             Aún no hay entornos de este tipo.
           </div>
         ) : (
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {filtered.map((entorno) => (
-              <div
-                key={entorno.id}
-                className="min-w-[320px] flex-1 rounded-xl border border-charcoal/10 p-2"
-              >
-                <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-charcoal/5">
-                  {entorno.imagen_url ? (
-                    <NextImage
-                      src={entorno.imagen_url}
-                      alt={getLabel(entorno.tipo)}
-                      fill
-                      className="object-cover"
-                      sizes="(min-width: 768px) 33vw, 100vw"
-                    />
-                  ) : null}
-                  <PreviewCanvas obra={obra} entorno={entorno} />
+          <div className="relative">
+            <div
+              ref={trackRef}
+              onScroll={onScrollTrack}
+              className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {filtered.map((entorno) => (
+                <div
+                  key={entorno.id}
+                  className="w-full flex-shrink-0 snap-start px-1"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-charcoal/5">
+                    {entorno.imagen_url ? (
+                      <NextImage
+                        src={entorno.imagen_url}
+                        alt={getLabel(entorno.tipo)}
+                        fill
+                        className="object-cover"
+                        sizes="(min-width: 768px) 45vw, 100vw"
+                        priority
+                      />
+                    ) : null}
+                    <PreviewCanvas obra={obra} entorno={entorno} />
+                  </div>
+                  <p className="mt-2 text-center text-xs uppercase tracking-[0.2em] text-charcoal/60">
+                    {getLabel(entorno.tipo)}
+                  </p>
                 </div>
-                <p className="mt-2 text-center text-xs uppercase tracking-[0.2em] text-charcoal/60">
-                  {getLabel(entorno.tipo)}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            {filtered.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => irASlide(slideIndex - 1)}
+                  disabled={slideIndex === 0}
+                  aria-label="Entorno anterior"
+                  className="absolute left-2 top-[calc(50%-1rem)] hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-charcoal shadow-md transition hover:bg-white disabled:opacity-0 md:flex"
+                >
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => irASlide(slideIndex + 1)}
+                  disabled={slideIndex === filtered.length - 1}
+                  aria-label="Entorno siguiente"
+                  className="absolute right-2 top-[calc(50%-1rem)] hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-charcoal shadow-md transition hover:bg-white disabled:opacity-0 md:flex"
+                >
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+
+                <div className="mt-3 flex justify-center gap-1.5">
+                  {filtered.map((entorno, i) => (
+                    <button
+                      key={entorno.id}
+                      type="button"
+                      onClick={() => irASlide(i)}
+                      aria-label={`Ir al entorno ${i + 1}`}
+                      className={`h-1.5 rounded-full transition-all ${
+                        i === slideIndex ? "w-5 bg-charcoal" : "w-1.5 bg-charcoal/20"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>
