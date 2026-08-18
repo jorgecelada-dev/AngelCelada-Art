@@ -77,12 +77,22 @@ export default function ObraForm({
     }
   }
 
+  const previewNaturalEsVertical = previewDims
+    ? previewDims.height > previewDims.width
+    : null;
+
   const previewEsVertical =
     orientacion === "vertical"
       ? true
       : orientacion === "horizontal"
       ? false
-      : Boolean(previewDims && previewDims.height > previewDims.width);
+      : Boolean(previewNaturalEsVertical);
+
+  // Si se fuerza una orientación contraria a la real de la foto, hay que
+  // rotarla en la previsualización para que se vea de verdad así.
+  const previewNecesitaRotar =
+    previewNaturalEsVertical !== null &&
+    previewNaturalEsVertical !== previewEsVertical;
 
   const esEdicion = Boolean(obra);
 
@@ -266,19 +276,43 @@ export default function ObraForm({
           <div className="mt-3">
             <p className="mb-2 text-xs font-medium text-charcoal/60">
               Previsualización ({previewEsVertical ? "vertical" : "horizontal"})
+              {previewNecesitaRotar && " — foto rotada para forzar esta orientación"}
             </p>
             <div
               className={`relative overflow-hidden rounded-xl border border-charcoal/10 bg-charcoal/5 ${
-                previewEsVertical ? "aspect-[3/4] w-40" : "aspect-[4/3] w-64"
+                previewEsVertical
+                  ? "h-[213px] w-40"
+                  : "h-48 w-64"
               }`}
             >
-              {/* Imagen local (blob:) o ya subida: no pasa por next/image */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={previewUrl}
-                alt="Previsualización de la obra"
-                className="h-full w-full object-contain"
-              />
+              {previewNecesitaRotar ? (
+                // La foto es naturalmente lo contrario de lo forzado: se
+                // rota 90º dentro del recuadro en vez de solo encajarla
+                // (que dejaría márgenes vacíos sin representar bien el
+                // resultado real).
+                <div
+                  className="absolute left-1/2 top-1/2"
+                  style={{
+                    width: previewEsVertical ? 213 : 192,
+                    height: previewEsVertical ? 160 : 256,
+                    transform: "translate(-50%, -50%) rotate(90deg)",
+                  }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={previewUrl}
+                    alt="Previsualización de la obra"
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={previewUrl}
+                  alt="Previsualización de la obra"
+                  className="h-full w-full object-contain"
+                />
+              )}
             </div>
           </div>
         )}

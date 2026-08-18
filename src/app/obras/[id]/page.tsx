@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Entorno, Obra } from "@/types";
 import BuyButton from "./BuyButton";
 import VisualizacionObra from "@/components/VisualizacionObra";
+import ImagenObraRotada from "@/components/ImagenObraRotada";
 
 export const revalidate = 0;
 
@@ -56,35 +57,53 @@ export default async function ObraDetailPage({
     obra.imagen_ancho_px && obra.imagen_alto_px
   );
 
+  const naturalEsVertical = tieneDimensionesReales
+    ? obra.imagen_alto_px! > obra.imagen_ancho_px!
+    : null;
+
   const esVertical =
     obra.orientacion === "vertical"
       ? true
       : obra.orientacion === "horizontal"
       ? false
-      : Boolean(
-          tieneDimensionesReales && obra.imagen_alto_px! > obra.imagen_ancho_px!
-        );
+      : Boolean(naturalEsVertical);
+
+  // Si se fuerza una orientación contraria a la real de la foto, hay que
+  // rotarla de verdad (no solo cambiar el recuadro), igual que en la
+  // previsualización del panel de edición.
+  const necesitaRotar =
+    naturalEsVertical !== null && naturalEsVertical !== esVertical;
 
   const imagen = obra.imagen_url ? (
     tieneDimensionesReales ? (
-      <Image
-        src={obra.imagen_url}
-        alt={obra.titulo}
-        width={obra.imagen_ancho_px!}
-        height={obra.imagen_alto_px!}
-        className={
-          esVertical
-            ? "max-h-[75vh] w-auto max-w-full object-contain"
-            : "max-h-[80vh] w-auto max-w-full object-contain"
-        }
-        sizes={
-          esVertical
-            ? "(min-width: 768px) 50vw, 100vw"
-            : "(min-width: 1024px) 1024px, 100vw"
-        }
-        quality={100}
-        priority
-      />
+      necesitaRotar ? (
+        <ImagenObraRotada
+          src={obra.imagen_url}
+          alt={obra.titulo}
+          anchoNatural={obra.imagen_ancho_px!}
+          altoNatural={obra.imagen_alto_px!}
+          vertical={esVertical}
+        />
+      ) : (
+        <Image
+          src={obra.imagen_url}
+          alt={obra.titulo}
+          width={obra.imagen_ancho_px!}
+          height={obra.imagen_alto_px!}
+          className={
+            esVertical
+              ? "max-h-[75vh] w-auto max-w-full object-contain"
+              : "max-h-[80vh] w-auto max-w-full object-contain"
+          }
+          sizes={
+            esVertical
+              ? "(min-width: 768px) 50vw, 100vw"
+              : "(min-width: 1024px) 1024px, 100vw"
+          }
+          quality={100}
+          priority
+        />
+      )
     ) : (
       // Obras antiguas sin dimensiones guardadas: recorte de respaldo
       // hasta que se vuelvan a guardar desde el panel.
