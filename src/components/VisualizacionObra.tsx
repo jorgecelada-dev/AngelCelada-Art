@@ -164,7 +164,7 @@ function PreviewCanvas({
       ctx.shadowBlur = 16;
       ctx.shadowOffsetY = 10;
       ctx.translate(offsetX, offsetY);
-      ctx.roundRect(0, 0, obraW, obraH, 10);
+      ctx.rect(0, 0, obraW, obraH);
       ctx.fillStyle = "rgba(255,255,255,0.95)";
       ctx.fill();
       ctx.restore();
@@ -179,7 +179,7 @@ function PreviewCanvas({
         ctx.shadowOffsetY = 8;
         ctx.translate(offsetX, offsetY);
         ctx.beginPath();
-        ctx.roundRect(0, 0, obraW, obraH, 10);
+        ctx.rect(0, 0, obraW, obraH);
         ctx.clip();
         ctx.drawImage(img, 0, 0, obraW, obraH);
         ctx.restore();

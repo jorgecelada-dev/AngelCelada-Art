@@ -74,7 +74,7 @@ export default function EspacioObraViewer({
 
         {obra.imagen_url && (
           <div
-            className={`absolute overflow-hidden rounded-md shadow-xl transition-opacity duration-200 ${
+            className={`absolute overflow-hidden shadow-xl transition-opacity duration-200 ${
               visible ? "opacity-100" : "opacity-0"
             }`}
             style={{

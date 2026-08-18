@@ -84,7 +84,7 @@ export default function ObraCard({ obra }: { obra: Obra }) {
       <Link
         ref={cardRef}
         href={`/obras/${obra.id}`}
-        className="block overflow-hidden rounded-2xl bg-white/40 shadow-sm transition duration-300 hover:shadow-xl"
+        className="block overflow-hidden bg-white/40 shadow-sm transition duration-300 hover:shadow-xl"
       >
         {obra.imagen_url ? (
           <div
@@ -165,7 +165,7 @@ export default function ObraCard({ obra }: { obra: Obra }) {
               width: rect.width,
               height: rect.height,
             }}
-            className="z-50 block overflow-hidden rounded-2xl bg-charcoal/5 shadow-2xl ring-1 ring-charcoal/10"
+            className="z-50 block overflow-hidden bg-charcoal/5 shadow-2xl ring-1 ring-charcoal/10"
           >
             {necesitaRotarFoto ? (
               // Misma proporción real que la tarjeta: si hace falta rotar

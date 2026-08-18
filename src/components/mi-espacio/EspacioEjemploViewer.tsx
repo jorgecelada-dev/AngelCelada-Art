@@ -161,7 +161,7 @@ function CicladorObras({
       ctx.shadowBlur = 20;
       ctx.shadowOffsetY = 12;
       ctx.translate(offsetX, offsetY);
-      ctx.roundRect(0, 0, obraW, obraH, 10);
+      ctx.rect(0, 0, obraW, obraH);
       ctx.fillStyle = "rgba(255,255,255,0.95)";
       ctx.fill();
       ctx.restore();
@@ -174,7 +174,7 @@ function CicladorObras({
         ctx.save();
         ctx.translate(offsetX, offsetY);
         ctx.beginPath();
-        ctx.roundRect(0, 0, obraW, obraH, 10);
+        ctx.rect(0, 0, obraW, obraH);
         ctx.clip();
         dibujarCover(ctx, img, 0, 0, obraW, obraH);
         ctx.restore();
