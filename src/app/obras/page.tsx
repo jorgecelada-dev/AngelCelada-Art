@@ -87,11 +87,9 @@ export default async function ObrasPage({
         </p>
       )}
 
-      <div className="columns-1 gap-8 sm:columns-2 lg:columns-3">
+      <div className="flex flex-wrap justify-center gap-8">
         {obras.map((obra) => (
-          <div key={obra.id} className="mb-8 break-inside-avoid">
-            <ObraCard obra={obra} />
-          </div>
+          <ObraCard key={obra.id} obra={obra} />
         ))}
       </div>
     </section>

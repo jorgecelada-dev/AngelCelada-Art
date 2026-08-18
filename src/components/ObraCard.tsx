@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import type { Obra } from "@/types";
+import { anchoTarjetaPx, calcularAspectoYRotacion } from "@/lib/orientacion";
 
 type Rect = { top: number; left: number; width: number; height: number };
 
@@ -75,11 +76,16 @@ export default function ObraCard({ obra }: { obra: Obra }) {
       }).format(obra.precio)
     : "No disponible";
 
+  const { aspecto, necesitaRotarFoto } = calcularAspectoYRotacion(obra);
+  const anchoBox = anchoTarjetaPx(obra);
+  const altoBox = Math.round(anchoBox / aspecto);
+
   return (
     <div
       className="relative"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      style={{ width: anchoBox, maxWidth: "100%" }}
     >
       <Link
         ref={cardRef}
@@ -87,27 +93,32 @@ export default function ObraCard({ obra }: { obra: Obra }) {
         className="block overflow-hidden rounded-2xl bg-white/40 shadow-sm transition duration-300 hover:shadow-xl"
       >
         {obra.imagen_url ? (
-          obra.imagen_ancho_px && obra.imagen_alto_px ? (
-            // Proporción real de la obra, sin recortar.
-            <div className="relative w-full overflow-hidden bg-charcoal/5">
-              <Image
-                src={obra.imagen_url}
-                alt={obra.titulo}
-                width={obra.imagen_ancho_px}
-                height={obra.imagen_alto_px}
-                className="h-auto w-full"
-                sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-                quality={95}
-              />
-              {!obra.disponible && (
-                <span className="absolute left-3 top-3 rounded-full bg-charcoal px-3 py-1 text-xs tracking-wide text-cream">
-                  Vendida
-                </span>
-              )}
-            </div>
-          ) : (
-            // Obras antiguas sin dimensiones guardadas: recorte de respaldo.
-            <div className="relative aspect-[4/5] w-full overflow-hidden bg-charcoal/5">
+          <div
+            className="relative w-full overflow-hidden bg-charcoal/5"
+            style={{ aspectRatio: `${anchoBox} / ${altoBox}` }}
+          >
+            {necesitaRotarFoto ? (
+              // La foto es lo contrario de la proporción real del cuadro
+              // (en cm): se rota 90º para que encaje bien, en vez de
+              // recortarla o dejarla mal orientada.
+              <div
+                className="absolute left-1/2 top-1/2"
+                style={{
+                  width: altoBox,
+                  height: anchoBox,
+                  transform: "translate(-50%, -50%) rotate(90deg)",
+                }}
+              >
+                <Image
+                  src={obra.imagen_url}
+                  alt={obra.titulo}
+                  fill
+                  className="object-cover"
+                  sizes="440px"
+                  quality={95}
+                />
+              </div>
+            ) : (
               <Image
                 src={obra.imagen_url}
                 alt={obra.titulo}
@@ -116,13 +127,13 @@ export default function ObraCard({ obra }: { obra: Obra }) {
                 sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                 quality={95}
               />
-              {!obra.disponible && (
-                <span className="absolute left-3 top-3 rounded-full bg-charcoal px-3 py-1 text-xs tracking-wide text-cream">
-                  Vendida
-                </span>
-              )}
-            </div>
-          )
+            )}
+            {!obra.disponible && (
+              <span className="absolute left-3 top-3 rounded-full bg-charcoal px-3 py-1 text-xs tracking-wide text-cream">
+                Vendida
+              </span>
+            )}
+          </div>
         ) : (
           <div className="relative flex aspect-[4/5] w-full items-center justify-center bg-charcoal/5 text-charcoal/30">
             Sin imagen
