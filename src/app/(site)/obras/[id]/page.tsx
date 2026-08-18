@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { Entorno, Obra } from "@/types";
+import type { Entorno, Obra, ObraDetalle } from "@/types";
 import BuyButton from "./BuyButton";
 import VisualizacionObra from "@/components/VisualizacionObra";
 import ImagenObraRotada from "@/components/ImagenObraRotada";
@@ -41,6 +41,14 @@ export default async function ObraDetailPage({
     .order("orden");
 
   const entornos = (entornosData ?? []) as Entorno[];
+
+  const { data: detallesData } = await supabase
+    .from("obra_detalles")
+    .select("*")
+    .eq("obra_id", obra.id)
+    .order("orden");
+
+  const detalles = (detallesData ?? []) as ObraDetalle[];
 
   const precioFormateado = new Intl.NumberFormat("es-ES", {
     style: "currency",
@@ -186,18 +194,14 @@ export default async function ObraDetailPage({
   // Las obras verticales desperdician mucho ancho si la foto va a ancho
   // completo arriba (queda mucho hueco vacío a los lados); en su lugar se
   // muestran en dos columnas, imagen contenida junto a los datos.
-  if (esVertical) {
-    return (
-      <section className="container-site grid grid-cols-1 gap-12 py-16 md:grid-cols-2">
-        <div className="flex items-start justify-center overflow-hidden rounded-2xl bg-charcoal/5">
-          {imagen}
-        </div>
-        {datos}
-      </section>
-    );
-  }
-
-  return (
+  const principal = esVertical ? (
+    <section className="container-site grid grid-cols-1 gap-12 py-16 md:grid-cols-2">
+      <div className="flex items-start justify-center overflow-hidden rounded-2xl bg-charcoal/5">
+        {imagen}
+      </div>
+      {datos}
+    </section>
+  ) : (
     <section className="container-site py-16">
       <div className="flex w-full items-center justify-center overflow-hidden rounded-2xl bg-charcoal/5">
         {imagen}
@@ -213,5 +217,37 @@ export default async function ObraDetailPage({
         )}
       </div>
     </section>
+  );
+
+  return (
+    <>
+      {principal}
+
+      {detalles.length > 0 && (
+        <section className="container-site pb-16">
+          <h2 className="section-title text-2xl">Detalles de la obra</h2>
+          <div className="mt-6 grid grid-flow-row-dense grid-cols-3 gap-2 md:gap-4">
+            {detalles.map((detalle) => (
+              <div
+                key={detalle.id}
+                className={`relative overflow-hidden rounded-xl bg-charcoal/5 ${
+                  detalle.tamano === "1x2"
+                    ? "row-span-2 aspect-[1/2]"
+                    : "aspect-square"
+                }`}
+              >
+                <Image
+                  src={detalle.imagen_url}
+                  alt={`Detalle de ${obra.titulo}`}
+                  fill
+                  className="object-cover"
+                  sizes="(min-width: 768px) 33vw, 33vw"
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+    </>
   );
 }

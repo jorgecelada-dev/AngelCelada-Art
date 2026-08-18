@@ -7,9 +7,10 @@ function createFallbackClient() {
     from: () => ({
       select: () => ({
         eq: () => ({
-          order: () => ({
-            limit: () => Promise.resolve({ data: [], error: null }),
-          }),
+          order: () =>
+            Object.assign(Promise.resolve({ data: [], error: null }), {
+              limit: () => Promise.resolve({ data: [], error: null }),
+            }),
         }),
         single: () => Promise.resolve({ data: null, error: null }),
       }),

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Categoria, Obra } from "@/types";
+import DetalleImagenesManager from "./DetalleImagenesManager";
 
 function formatearCm(valor: number): string {
   return Number(valor.toFixed(2)).toString();
@@ -185,6 +186,7 @@ export default function ObraForm({
   }
 
   return (
+    <>
     <form onSubmit={onSubmit} className="max-w-2xl space-y-6">
       <div>
         <label className="block text-sm font-medium">Título</label>
@@ -411,5 +413,16 @@ export default function ObraForm({
 
       {error && <p className="text-sm text-red-600">{error}</p>}
     </form>
+
+      {obra ? (
+        <div className="mt-8 max-w-2xl">
+          <DetalleImagenesManager obraId={obra.id} />
+        </div>
+      ) : (
+        <p className="mt-8 max-w-2xl text-xs text-charcoal/50">
+          Guarda la obra para poder añadir fotos de detalle.
+        </p>
+      )}
+    </>
   );
 }

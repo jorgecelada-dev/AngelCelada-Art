@@ -29,6 +29,15 @@ export type Obra = {
   categorias?: Categoria | null;
 };
 
+export type ObraDetalle = {
+  id: string;
+  obra_id: string;
+  imagen_url: string;
+  orden: number;
+  tamano: "1x1" | "1x2";
+  created_at: string;
+};
+
 export type Entorno = {
   id: string;
   tipo: "salon" | "comedor" | "oficina" | "despacho";

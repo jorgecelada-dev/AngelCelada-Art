@@ -59,6 +59,22 @@ alter table obras add column if not exists imagen_alto_px integer;
 alter table obras add column if not exists orientacion text check (orientacion in ('horizontal', 'vertical'));
 
 -- ------------------------------------------------------------
+-- Tabla: obra_detalles (fotos de detalle/proceso de cada obra,
+-- mostradas en la ficha pública bajo "Detalles de la obra")
+-- ------------------------------------------------------------
+create table if not exists obra_detalles (
+  id uuid primary key default uuid_generate_v4(),
+  obra_id uuid not null references obras(id) on delete cascade,
+  imagen_url text not null,
+  orden integer not null default 0,
+  tamano text not null default '1x1' check (tamano in ('1x1', '1x2')),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_obra_detalles_obra_id on obra_detalles(obra_id);
+create index if not exists idx_obra_detalles_orden on obra_detalles(orden);
+
+-- ------------------------------------------------------------
 -- Tabla: entornos (fondos para previsualizar la obra en espacios)
 -- ------------------------------------------------------------
 create table if not exists entornos (
@@ -112,6 +128,7 @@ create table if not exists pedidos (
 -- ------------------------------------------------------------
 alter table categorias enable row level security;
 alter table obras enable row level security;
+alter table obra_detalles enable row level security;
 alter table entornos enable row level security;
 alter table mensajes_contacto enable row level security;
 alter table pedidos enable row level security;
@@ -127,6 +144,10 @@ create policy "obras_lectura_publica" on obras
 
 drop policy if exists "entornos_lectura_publica" on entornos;
 create policy "entornos_lectura_publica" on entornos
+  for select using (true);
+
+drop policy if exists "obra_detalles_lectura_publica" on obra_detalles;
+create policy "obra_detalles_lectura_publica" on obra_detalles
   for select using (true);
 
 -- Solo usuarios autenticados (el artista) pueden insertar/editar/borrar obras, categorías y entornos.
@@ -145,6 +166,11 @@ create policy "categorias_escritura_autenticados" on categorias
 
 drop policy if exists "entornos_escritura_autenticados" on entornos;
 create policy "entornos_escritura_autenticados" on entornos
+  for all using (auth.role() = 'authenticated')
+  with check (auth.role() = 'authenticated');
+
+drop policy if exists "obra_detalles_escritura_autenticados" on obra_detalles;
+create policy "obra_detalles_escritura_autenticados" on obra_detalles
   for all using (auth.role() = 'authenticated')
   with check (auth.role() = 'authenticated');
 
