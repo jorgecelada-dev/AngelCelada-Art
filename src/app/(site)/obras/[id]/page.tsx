@@ -207,7 +207,7 @@ export default async function ObraDetailPage({
         {imagen}
       </div>
 
-      <div className="mt-12 grid grid-cols-1 gap-12 md:grid-cols-2">
+      <div className="mt-12 grid grid-cols-1 gap-12 md:grid-cols-[1fr_1.3fr]">
         {datos}
 
         {obra.ancho_cm && obra.alto_cm && (

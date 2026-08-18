@@ -76,7 +76,7 @@ export default function VisualizacionObra({
             {filtered.map((entorno) => (
               <div
                 key={entorno.id}
-                className="min-w-[240px] flex-1 rounded-xl border border-charcoal/10 p-2"
+                className="min-w-[320px] flex-1 rounded-xl border border-charcoal/10 p-2"
               >
                 <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-charcoal/5">
                   {entorno.imagen_url ? (
