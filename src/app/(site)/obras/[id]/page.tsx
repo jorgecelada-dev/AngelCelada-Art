@@ -215,7 +215,7 @@ export default async function ObraDetailPage({
   // completo arriba (queda mucho hueco vacío a los lados); en su lugar se
   // muestran en dos columnas, imagen contenida junto a los datos.
   const principal = esVertical ? (
-    <section className="container-site grid grid-cols-1 gap-12 py-16 md:grid-cols-2">
+    <section className="container-site grid grid-cols-1 items-start gap-12 py-16 md:grid-cols-2">
       <EntradaImagen className="flex items-start justify-center overflow-hidden rounded-2xl bg-charcoal/5">
         {imagen}
       </EntradaImagen>
@@ -227,7 +227,7 @@ export default async function ObraDetailPage({
         {imagen}
       </EntradaImagen>
 
-      <div className="mt-12 grid grid-cols-1 gap-12 md:grid-cols-[1fr_1.3fr]">
+      <div className="mt-12 grid grid-cols-1 items-start gap-12 md:grid-cols-[1fr_1.3fr]">
         {datos}
 
         {obra.ancho_cm && obra.alto_cm && (
