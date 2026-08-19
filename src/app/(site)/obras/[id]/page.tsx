@@ -8,7 +8,6 @@ import ImagenObraRotada from "@/components/ImagenObraRotada";
 import EntradaImagen from "@/components/EntradaImagen";
 import RevelarEnVista from "@/components/RevelarEnVista";
 import GaleriaDetalles from "@/components/GaleriaDetalles";
-import FondoParallax from "@/components/FondoParallax";
 import { formatearEUR, precioFinal, tieneDescuentoActivo } from "@/lib/precio";
 import { calcularAspectoYRotacion } from "@/lib/orientacion";
 
@@ -242,7 +241,6 @@ export default async function ObraDetailPage({
 
   return (
     <>
-      <FondoParallax />
       {principal}
 
       {detalles.length > 0 && (

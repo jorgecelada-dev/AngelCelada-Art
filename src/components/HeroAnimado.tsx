@@ -1,10 +1,12 @@
 import Link from "next/link";
+import FondoParallax from "./FondoParallax";
 
 // CSS puro (sin JS): se aplica desde el primer pintado del HTML, sin
 // depender de que React hidrate antes.
 export default function HeroAnimado() {
   return (
-    <section className="container-site flex flex-col items-center gap-8 overflow-x-clip py-24 text-center md:py-32">
+    <section className="container-site relative flex flex-col items-center gap-8 overflow-x-clip py-24 text-center md:py-32">
+      <FondoParallax />
       <span
         className="animate-entrada-izquierda text-sm uppercase tracking-[0.3em] text-clay"
         style={{ animationDelay: "0.05s" }}
