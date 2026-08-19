@@ -27,7 +27,27 @@
     @apply inline-flex items-center justify-center rounded-full border border-charcoal/20 px-6 py-3 text-sm font-medium tracking-wide text-charcoal transition hover:border-charcoal;
   }
 
+  .texto-brillo {
+    background: linear-gradient(100deg, #2b2b28 40%, #b08d57 50%, #2b2b28 60%);
+    background-size: 250% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: brillo-texto 7s ease-in-out infinite;
+  }
+
   .section-title {
-    @apply text-3xl md:text-4xl font-serif text-charcoal;
+    @apply text-3xl md:text-4xl font-serif texto-brillo;
+  }
+}
+
+@keyframes brillo-texto {
+  0%,
+  15% {
+    background-position: 200% 0;
+  }
+  55%,
+  100% {
+    background-position: -200% 0;
   }
 }

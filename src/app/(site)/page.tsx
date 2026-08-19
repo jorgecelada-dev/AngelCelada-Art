@@ -5,6 +5,8 @@ import HeroAnimado from "@/components/HeroAnimado";
 import RevelarEnVista from "@/components/RevelarEnVista";
 import type { Obra } from "@/types";
 
+export const revalidate = 0;
+
 export default async function HomePage() {
   const supabase = createClient();
 

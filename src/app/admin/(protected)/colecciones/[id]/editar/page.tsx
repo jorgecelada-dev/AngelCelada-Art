@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import ColeccionForm from "../../ColeccionForm";
 import type { Categoria } from "@/types";
 
+export const revalidate = 0;
+
 export default async function EditarColeccionPage({
   params,
 }: {

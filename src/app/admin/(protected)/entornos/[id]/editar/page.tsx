@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import EntornoForm from "../../EntornoForm";
 import type { Entorno } from "@/types";
 
+export const revalidate = 0;
+
 export default async function EditarEntornoPage({
   params,
 }: {

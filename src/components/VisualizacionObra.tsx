@@ -245,6 +245,12 @@ function PreviewCanvas({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // Si el usuario cambia de pestaña antes de que terminen de cargar estas
+    // imágenes, esta carga queda obsoleta: sin este freno, podría terminar
+    // de cargar más tarde y pintar el entorno equivocado sobre el lienzo
+    // (que para entonces ya muestra la pestaña recién seleccionada).
+    let cancelado = false;
+
     const width = 600;
     const height = 450;
     canvas.width = width;
@@ -253,6 +259,7 @@ function PreviewCanvas({
     const bg = new window.Image();
     bg.src = entorno.imagen_url ?? "";
     bg.onload = () => {
+      if (cancelado) return;
       ctx.clearRect(0, 0, width, height);
       dibujarCover(ctx, bg, 0, 0, width, height);
 
@@ -299,6 +306,7 @@ function PreviewCanvas({
       img.crossOrigin = "anonymous";
       img.src = obra.imagen_url ?? "";
       img.onload = () => {
+        if (cancelado) return;
         ctx.save();
         ctx.shadowColor = "rgba(0,0,0,0.18)";
         ctx.shadowBlur = 12;
@@ -314,6 +322,7 @@ function PreviewCanvas({
           const overlay = new window.Image();
           overlay.src = entorno.overlay_luz_url;
           overlay.onload = () => {
+            if (cancelado) return;
             ctx.save();
             ctx.globalAlpha = 0.35;
             ctx.globalCompositeOperation = "multiply";
@@ -328,6 +337,7 @@ function PreviewCanvas({
     };
 
     return () => {
+      cancelado = true;
       setCanvasReady(false);
     };
   }, [entorno, obra]);

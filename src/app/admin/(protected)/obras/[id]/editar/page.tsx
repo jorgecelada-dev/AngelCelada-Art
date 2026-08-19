@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import ObraForm from "../../../ObraForm";
 import type { Obra } from "@/types";
 
+export const revalidate = 0;
+
 export default async function EditarObraPage({
   params,
 }: {

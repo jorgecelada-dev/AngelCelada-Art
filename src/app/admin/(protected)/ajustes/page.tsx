@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import CambiarContrasenaEmail from "./CambiarContrasenaEmail";
 import CambiarContrasenaDirecta from "./CambiarContrasenaDirecta";
 
+export const revalidate = 0;
+
 export default async function AjustesPage() {
   const supabase = createClient();
   const {

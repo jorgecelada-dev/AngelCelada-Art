@@ -15,7 +15,9 @@ export default function HeroAnimado() {
         className="animate-entrada-derecha max-w-3xl text-4xl leading-tight md:text-6xl"
         style={{ animationDelay: "0.15s" }}
       >
-        Cuadros que nacen de la tierra, el color y el tiempo.
+        <span className="texto-brillo">
+          Cuadros que nacen de la tierra, el color y el tiempo.
+        </span>
       </h1>
       <p
         className="animate-entrada-izquierda max-w-xl text-charcoal/70"
