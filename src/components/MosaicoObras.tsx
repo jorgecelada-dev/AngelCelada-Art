@@ -4,16 +4,14 @@ import type { Obra } from "@/types";
 import { calcularAspectoYRotacion } from "@/lib/orientacion";
 import ObraCard from "./ObraCard";
 
-// Clasifica cada obra en una celda del bento (1x1, 1x2, 1x3, 2x1 o 3x1)
-// según su proporción real, para que el mosaico tenga variedad de
-// tamaños en vez de una cuadrícula uniforme.
+// Clasifica cada obra en una celda del bento (1x1, 1x2 o 2x1) según su
+// proporción real, sobre una cuadrícula imaginaria de 4 columnas, para
+// que el mosaico tenga variedad de tamaños en vez de ser uniforme.
 function claseCelda(obra: Obra): string {
   const { aspecto } = calcularAspectoYRotacion(obra);
-  if (aspecto <= 0.4) return "row-span-3"; // 1x3: muy vertical
-  if (aspecto <= 0.75) return "row-span-2"; // 1x2: vertical
-  if (aspecto < 1.35) return ""; // 1x1: cuadrada
-  if (aspecto < 2.3) return "col-span-2"; // 2x1: horizontal
-  return "col-span-2 sm:col-span-3"; // 3x1: muy horizontal
+  if (aspecto < 0.8) return "row-span-2"; // 1x2: vertical
+  if (aspecto <= 1.25) return ""; // 1x1: cuadrada
+  return "col-span-2"; // 2x1: horizontal
 }
 
 // Alterna la dirección de entrada para que el conjunto converja, sin
@@ -29,9 +27,13 @@ function animacionParaIndice(indice: number): string {
 export default function MosaicoObras({
   obras,
   variante = "obra",
+  compacto = false,
 }: {
   obras: Obra[];
   variante?: "obra" | "lamina";
+  // Columnas más estrechas, para cuando el mosaico convive con un panel
+  // lateral (el filtro de /obras) y hay menos ancho disponible.
+  compacto?: boolean;
 }) {
   if (variante === "lamina") {
     // Las láminas van todas en celdas cuadradas iguales, encajadas en
@@ -41,7 +43,7 @@ export default function MosaicoObras({
         {obras.map((obra, i) => (
           <div
             key={obra.id}
-            className={`aspect-square overflow-hidden rounded-lg ${animacionParaIndice(i)}`}
+            className={`aspect-square overflow-hidden ${animacionParaIndice(i)}`}
             style={{ animationDelay: `${Math.min(i, 8) * 0.06}s` }}
           >
             <ObraCard obra={obra} variante="lamina" />
@@ -51,8 +53,14 @@ export default function MosaicoObras({
     );
   }
 
+  const colsClase = compacto
+    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+    : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4";
+
   return (
-    <div className="grid auto-rows-[170px] grid-cols-2 gap-4 overflow-x-clip [grid-auto-flow:dense] sm:auto-rows-[190px] sm:grid-cols-3 lg:auto-rows-[230px] lg:grid-cols-4">
+    <div
+      className={`grid auto-rows-[170px] gap-4 overflow-x-clip [grid-auto-flow:dense] sm:auto-rows-[190px] lg:auto-rows-[230px] ${colsClase}`}
+    >
       {obras.map((obra, i) => (
         <div
           key={obra.id}

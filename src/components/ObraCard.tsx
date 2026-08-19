@@ -102,7 +102,9 @@ export default function ObraCard({
       <Link
         ref={cardRef}
         href={`/obras/${obra.id}`}
-        className="group relative block h-full w-full overflow-hidden rounded-lg bg-charcoal/5 shadow-sm transition duration-300 hover:shadow-xl"
+        className={`group relative block h-full w-full overflow-hidden bg-charcoal/5 shadow-sm transition duration-300 hover:shadow-xl ${
+          esLamina ? "" : "rounded-lg"
+        }`}
       >
         {obra.imagen_url ? (
           necesitaRotarFoto ? (

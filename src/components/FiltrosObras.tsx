@@ -65,10 +65,10 @@ export default function FiltrosObras({ obras }: { obras: Obra[] }) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-10 lg:grid-cols-[220px_1fr]">
-      <aside className="space-y-8">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-medium uppercase tracking-wide text-charcoal/50">
+    <div className="grid grid-cols-[104px_1fr] items-start gap-4 sm:grid-cols-[170px_1fr] sm:gap-8 lg:grid-cols-[220px_1fr] lg:gap-10">
+      <aside className="space-y-6 rounded-xl bg-charcoal p-3 text-cream sm:space-y-8 sm:p-5">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-xs font-medium uppercase tracking-wide text-cream/50 sm:text-sm">
             Filtrar
           </h2>
           {hayFiltrosActivos && (
@@ -79,7 +79,7 @@ export default function FiltrosObras({ obras }: { obras: Obra[] }) {
                 setColores(new Set());
                 setAnios(new Set());
               }}
-              className="text-xs text-clay underline underline-offset-2 hover:text-charcoal"
+              className="text-xs text-clay underline underline-offset-2 hover:text-cream"
             >
               Borrar
             </button>
@@ -88,17 +88,18 @@ export default function FiltrosObras({ obras }: { obras: Obra[] }) {
 
         {tamanosDisponibles.length > 0 && (
           <div>
-            <h3 className="mb-3 text-sm font-medium">Tamaño</h3>
+            <h3 className="mb-3 text-xs font-medium sm:text-sm">Tamaño</h3>
             <div className="space-y-2">
               {tamanosDisponibles.map((t) => (
                 <label
                   key={t.valor}
-                  className="flex items-center gap-2 text-sm text-charcoal/70"
+                  className="flex items-start gap-2 text-xs text-cream/70 sm:text-sm"
                 >
                   <input
                     type="checkbox"
                     checked={tamanos.has(t.valor)}
                     onChange={() => setTamanos((s) => alternar(s, t.valor))}
+                    className="mt-0.5"
                   />
                   {t.label}
                 </label>
@@ -109,12 +110,12 @@ export default function FiltrosObras({ obras }: { obras: Obra[] }) {
 
         {coloresDisponibles.length > 0 && (
           <div>
-            <h3 className="mb-3 text-sm font-medium">Color principal</h3>
+            <h3 className="mb-3 text-xs font-medium sm:text-sm">Color principal</h3>
             <div className="space-y-2">
               {coloresDisponibles.map((c) => (
                 <label
                   key={c.valor}
-                  className="flex items-center gap-2 text-sm text-charcoal/70"
+                  className="flex items-center gap-2 text-xs text-cream/70 sm:text-sm"
                 >
                   <input
                     type="checkbox"
@@ -122,7 +123,7 @@ export default function FiltrosObras({ obras }: { obras: Obra[] }) {
                     onChange={() => setColores((s) => alternar(s, c.valor))}
                   />
                   <span
-                    className="h-3 w-3 rounded-full border border-charcoal/10"
+                    className="h-3 w-3 flex-none rounded-full border border-cream/20"
                     style={{ background: c.swatch }}
                   />
                   {c.label}
@@ -134,12 +135,12 @@ export default function FiltrosObras({ obras }: { obras: Obra[] }) {
 
         {aniosDisponibles.length > 0 && (
           <div>
-            <h3 className="mb-3 text-sm font-medium">Año</h3>
+            <h3 className="mb-3 text-xs font-medium sm:text-sm">Año</h3>
             <div className="space-y-2">
               {aniosDisponibles.map((a) => (
                 <label
                   key={a}
-                  className="flex items-center gap-2 text-sm text-charcoal/70"
+                  className="flex items-center gap-2 text-xs text-cream/70 sm:text-sm"
                 >
                   <input
                     type="checkbox"
@@ -160,7 +161,7 @@ export default function FiltrosObras({ obras }: { obras: Obra[] }) {
             Ninguna obra coincide con estos filtros.
           </p>
         ) : (
-          <MosaicoObras obras={filtradas} />
+          <MosaicoObras obras={filtradas} compacto />
         )}
       </div>
     </div>
