@@ -30,6 +30,16 @@ function distribuirEnColumnas(obras: Obra[], numColumnas: number): Obra[][] {
   return columnas;
 }
 
+// Las columnas de los extremos entran desde su lado más cercano y
+// convergen hacia el centro; en una sola columna (móvil) alterna
+// izquierda/derecha obra a obra para el mismo efecto de conjunto.
+function animacionParaColumna(indiceColumna: number, numColumnas: number): string {
+  if (numColumnas === 1) return "";
+  if (indiceColumna === 0) return "animate-entrada-izquierda";
+  if (indiceColumna === numColumnas - 1) return "animate-entrada-derecha";
+  return "animate-entrada-subida";
+}
+
 function Columnas({
   columnas,
   className,
@@ -39,21 +49,31 @@ function Columnas({
   className: string;
   orden: Map<string, number>;
 }) {
+  const numColumnas = columnas.length;
+
   return (
-    <div className={`gap-8 ${className}`}>
+    <div className={`gap-8 overflow-x-clip ${className}`}>
       {columnas.map((columna, i) => (
         <div key={i} className="flex flex-1 flex-col gap-8">
-          {columna.map((obra) => (
-            <div
-              key={obra.id}
-              className="animate-entrada-subida"
-              style={{
-                animationDelay: `${Math.min(orden.get(obra.id) ?? 0, 8) * 0.06}s`,
-              }}
-            >
-              <ObraCard obra={obra} />
-            </div>
-          ))}
+          {columna.map((obra) => {
+            const indice = orden.get(obra.id) ?? 0;
+            const animacion =
+              numColumnas === 1
+                ? indice % 2 === 0
+                  ? "animate-entrada-izquierda"
+                  : "animate-entrada-derecha"
+                : animacionParaColumna(i, numColumnas);
+
+            return (
+              <div
+                key={obra.id}
+                className={animacion}
+                style={{ animationDelay: `${Math.min(indice, 8) * 0.06}s` }}
+              >
+                <ObraCard obra={obra} />
+              </div>
+            );
+          })}
         </div>
       ))}
     </div>

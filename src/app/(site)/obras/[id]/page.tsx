@@ -137,7 +137,7 @@ export default async function ObraDetailPage({
   );
 
   const datos = (
-    <RevelarEnVista delay={0.15}>
+    <RevelarEnVista delay={0.15} direccion="derecha" className="overflow-x-clip">
       <h1 className="section-title">{obra.titulo}</h1>
 
       {obra.categorias?.nombre && (

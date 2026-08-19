@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
-// CSS puro (ver RevelarEnVista.tsx): evita el flash de contenido visible
-// antes de que React hidrate.
+// CSS puro (ver RevelarEnVista.tsx): se aplica desde el primer pintado.
 export default function EntradaImagen({
   children,
   className,
@@ -10,7 +9,7 @@ export default function EntradaImagen({
   className?: string;
 }) {
   return (
-    <div className={`animate-entrada-suave ${className ?? ""}`}>
+    <div className={`animate-entrada-izquierda ${className ?? ""}`}>
       {children}
     </div>
   );

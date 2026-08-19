@@ -31,10 +31,20 @@ const config: Config = {
           "0%": { opacity: "0", transform: "scale(0.97)" },
           "100%": { opacity: "1", transform: "scale(1)" },
         },
+        "entrada-izquierda": {
+          "0%": { opacity: "0", transform: "translateX(-48px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
+        "entrada-derecha": {
+          "0%": { opacity: "0", transform: "translateX(48px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
       },
       animation: {
         "entrada-subida": "entrada-subida 0.6s cubic-bezier(0.16, 1, 0.3, 1) both",
         "entrada-suave": "entrada-suave 0.7s cubic-bezier(0.16, 1, 0.3, 1) both",
+        "entrada-izquierda": "entrada-izquierda 0.7s cubic-bezier(0.16, 1, 0.3, 1) both",
+        "entrada-derecha": "entrada-derecha 0.7s cubic-bezier(0.16, 1, 0.3, 1) both",
       },
     },
   },
