@@ -1,19 +1,15 @@
+import CabeceraPagina from "@/components/CabeceraPagina";
+
 export const metadata = {
   title: "Sobre mí — ArteCelada",
 };
 
 export default function SobreMiPage() {
   return (
-    <section className="container-site max-w-3xl py-16">
-      <h1 className="section-title">
-        <span
-          className="efecto-revelado-texto"
-          style={{ animationDelay: "0.15s" }}
-        >
-          Sobre mí
-        </span>
-      </h1>
+    <>
+      <CabeceraPagina titulo="Sobre mí" imagen="/img/cabeceras/verde.png" />
 
+    <section className="container-site max-w-3xl py-16">
       {/*
         TODO (artista): sustituye todos estos textos de ejemplo por tu
         historia, background y técnicas reales. Puedes editarlos aquí
@@ -65,5 +61,6 @@ export default function SobreMiPage() {
         </div>
       </div>
     </section>
+    </>
   );
 }
