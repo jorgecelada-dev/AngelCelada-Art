@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { motion } from "framer-motion";
 import type { Obra } from "@/types";
 import { calcularAspectoYRotacion } from "@/lib/orientacion";
 import ObraCard from "./ObraCard";
@@ -45,19 +44,15 @@ function Columnas({
       {columnas.map((columna, i) => (
         <div key={i} className="flex flex-1 flex-col gap-8">
           {columna.map((obra) => (
-            <motion.div
+            <div
               key={obra.id}
-              initial={{ opacity: 0, y: 32 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{
-                duration: 0.55,
-                ease: "easeOut",
-                delay: Math.min(orden.get(obra.id) ?? 0, 8) * 0.06,
+              className="animate-entrada-subida"
+              style={{
+                animationDelay: `${Math.min(orden.get(obra.id) ?? 0, 8) * 0.06}s`,
               }}
             >
               <ObraCard obra={obra} />
-            </motion.div>
+            </div>
           ))}
         </div>
       ))}

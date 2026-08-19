@@ -1,6 +1,3 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Image from "next/image";
 import type { ObraDetalle } from "@/types";
 
@@ -14,25 +11,14 @@ export default function GaleriaDetalles({
   return (
     <div className="mt-6 grid grid-flow-row-dense grid-cols-3 gap-2 md:gap-4">
       {detalles.map((detalle, i) => (
-        <motion.div
+        <div
           key={detalle.id}
-          initial={{ opacity: 0, y: 28 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{
-            duration: 0.5,
-            ease: "easeOut",
-            delay: Math.min(i, 6) * 0.07,
-          }}
-          className={`relative overflow-hidden rounded-xl bg-charcoal/5 ${
+          className={`animate-entrada-subida group relative overflow-hidden rounded-xl bg-charcoal/5 ${
             detalle.tamano === "1x2" ? "row-span-2 aspect-[1/2]" : "aspect-square"
           }`}
+          style={{ animationDelay: `${Math.min(i, 6) * 0.07}s` }}
         >
-          <motion.div
-            className="relative h-full w-full"
-            whileHover={{ scale: 1.06 }}
-            transition={{ type: "spring", stiffness: 300, damping: 26 }}
-          >
+          <div className="relative h-full w-full transition-transform duration-300 ease-out group-hover:scale-[1.06]">
             <Image
               src={detalle.imagen_url}
               alt={`Detalle de ${titulo}`}
@@ -40,8 +26,8 @@ export default function GaleriaDetalles({
               className="object-cover"
               sizes="(min-width: 768px) 33vw, 33vw"
             />
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       ))}
     </div>
   );

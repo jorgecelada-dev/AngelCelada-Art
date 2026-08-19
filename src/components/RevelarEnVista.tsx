@@ -1,28 +1,25 @@
-"use client";
-
-import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 
+// Animación de entrada por CSS puro (no Framer Motion): se aplica desde el
+// primer pintado del HTML del servidor, sin depender de que React hidrate
+// antes. Con motion/whileInView, el HTML servido no incluye el estado
+// "oculto" inicial, así que el contenido se veía completo un instante,
+// desaparecía de golpe al hidratar y recién ahí empezaba a animar.
 export default function RevelarEnVista({
   children,
   className,
   delay = 0,
-  y = 24,
 }: {
   children: ReactNode;
   className?: string;
   delay?: number;
-  y?: number;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.55, ease: "easeOut", delay }}
-      className={className}
+    <div
+      className={`animate-entrada-subida ${className ?? ""}`}
+      style={{ animationDelay: `${delay}s` }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

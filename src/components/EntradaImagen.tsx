@@ -1,8 +1,7 @@
-"use client";
-
-import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 
+// CSS puro (ver RevelarEnVista.tsx): evita el flash de contenido visible
+// antes de que React hidrate.
 export default function EntradaImagen({
   children,
   className,
@@ -11,13 +10,8 @@ export default function EntradaImagen({
   className?: string;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.97 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.7, ease: "easeOut" }}
-      className={className}
-    >
+    <div className={`animate-entrada-suave ${className ?? ""}`}>
       {children}
-    </motion.div>
+    </div>
   );
 }

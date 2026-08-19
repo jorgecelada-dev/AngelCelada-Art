@@ -22,6 +22,20 @@ const config: Config = {
         "organic-texture":
           "radial-gradient(circle at 20% 20%, rgba(176,141,87,0.08), transparent 40%), radial-gradient(circle at 80% 60%, rgba(124,139,94,0.08), transparent 45%)",
       },
+      keyframes: {
+        "entrada-subida": {
+          "0%": { opacity: "0", transform: "translateY(24px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "entrada-suave": {
+          "0%": { opacity: "0", transform: "scale(0.97)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
+      },
+      animation: {
+        "entrada-subida": "entrada-subida 0.6s cubic-bezier(0.16, 1, 0.3, 1) both",
+        "entrada-suave": "entrada-suave 0.7s cubic-bezier(0.16, 1, 0.3, 1) both",
+      },
     },
   },
   plugins: [],
