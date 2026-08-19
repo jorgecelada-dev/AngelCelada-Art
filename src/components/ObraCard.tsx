@@ -95,83 +95,70 @@ export default function ObraCard({
 
   return (
     <div
-      className="relative w-full"
+      className="relative h-full w-full"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
       <Link
         ref={cardRef}
         href={`/obras/${obra.id}`}
-        className="block overflow-hidden bg-white/40 shadow-sm transition duration-300 hover:shadow-xl"
+        className="group relative block h-full w-full overflow-hidden rounded-lg bg-charcoal/5 shadow-sm transition duration-300 hover:shadow-xl"
       >
         {obra.imagen_url ? (
-          <motion.div
-            className="relative w-full overflow-hidden bg-charcoal/5"
-            style={{ aspectRatio: aspecto }}
-            whileHover={{ scale: 1.04 }}
-            transition={{ type: "spring", stiffness: 300, damping: 24 }}
-          >
-            {necesitaRotarFoto ? (
-              // La foto es lo contrario de la proporción real del cuadro
-              // (en cm): se rota 90º para que encaje bien, en vez de
-              // recortarla o dejarla mal orientada.
-              <div
-                className="absolute left-1/2 top-1/2"
-                style={{
-                  width: `${(1 / aspecto) * 100}%`,
-                  height: `${aspecto * 100}%`,
-                  transform: "translate(-50%, -50%) rotate(90deg)",
-                }}
-              >
-                <Image
-                  src={obra.imagen_url}
-                  alt={obra.titulo}
-                  fill
-                  className="object-cover"
-                  sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-                  quality={95}
-                />
-              </div>
-            ) : (
+          necesitaRotarFoto ? (
+            // La foto es lo contrario de la proporción real del cuadro (en
+            // cm): se rota 90º y se sobredimensiona centrada para que
+            // siga cubriendo toda la celda del mosaico sea cual sea su
+            // forma, en vez de recortarla mal o dejarla mal orientada.
+            <div
+              className="absolute left-1/2 top-1/2 transition-transform duration-300 group-hover:scale-105"
+              style={{
+                width: "300%",
+                height: "300%",
+                transform: "translate(-50%, -50%) rotate(90deg)",
+              }}
+            >
               <Image
                 src={obra.imagen_url}
                 alt={obra.titulo}
                 fill
                 className="object-cover"
-                sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
                 quality={95}
               />
-            )}
-            {mostrarVendida && (
-              <span className="absolute left-3 top-3 rounded-full bg-charcoal px-3 py-1 text-xs tracking-wide text-cream">
-                Vendida
-              </span>
-            )}
-            {enOferta && (
-              <span className="absolute right-3 top-3 rounded-full bg-clay px-3 py-1 text-xs font-medium tracking-wide text-cream">
-                -{obra.descuento_porcentaje}%
-              </span>
-            )}
-          </motion.div>
+            </div>
+          ) : (
+            <Image
+              src={obra.imagen_url}
+              alt={obra.titulo}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+              quality={95}
+            />
+          )
         ) : (
-          <div className="relative flex aspect-[4/5] w-full items-center justify-center bg-charcoal/5 text-charcoal/30">
+          <div className="flex h-full w-full items-center justify-center text-charcoal/30">
             Sin imagen
-            {mostrarVendida && (
-              <span className="absolute left-3 top-3 rounded-full bg-charcoal px-3 py-1 text-xs tracking-wide text-cream">
-                Vendida
-              </span>
-            )}
           </div>
         )}
 
-        <div className="p-4">
-          <h3 className="font-serif text-lg">{obra.titulo}</h3>
-          {obra.tecnica && (
-            <p className="mt-1 text-sm text-charcoal/60">{obra.tecnica}</p>
-          )}
-          <p className="mt-2 flex items-baseline gap-2 text-sm font-medium text-clay">
+        {mostrarVendida && (
+          <span className="absolute left-3 top-3 z-10 rounded-full bg-charcoal px-3 py-1 text-xs tracking-wide text-cream">
+            Vendida
+          </span>
+        )}
+        {enOferta && (
+          <span className="absolute right-3 top-3 z-10 rounded-full bg-clay px-3 py-1 text-xs font-medium tracking-wide text-cream">
+            -{obra.descuento_porcentaje}%
+          </span>
+        )}
+
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal/85 via-charcoal/35 to-transparent p-4 pt-12">
+          <h3 className="font-serif text-cream">{obra.titulo}</h3>
+          <p className="mt-1 flex items-baseline gap-2 text-sm font-medium text-cream/90">
             {enOferta && (
-              <span className="text-charcoal/40 line-through">
+              <span className="text-cream/60 line-through">
                 {formatearEUR(obra.precio)}
               </span>
             )}
