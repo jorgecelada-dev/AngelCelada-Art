@@ -1,7 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion, type PanInfo } from "framer-motion";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValue,
+  animate as animarValor,
+  type PanInfo,
+} from "framer-motion";
 import NextImage from "next/image";
 import type { Entorno, Obra } from "@/types";
 import { dibujarCover } from "@/lib/canvas";
@@ -27,8 +33,28 @@ export default function VisualizacionObra({
   const [activeTab, setActiveTab] = useState<Entorno["tipo"]>("salon");
   const [loading, setLoading] = useState(true);
   const [slideIndex, setSlideIndex] = useState(0);
-  const trackRef = useRef<HTMLDivElement>(null);
   const [trackWidth, setTrackWidth] = useState(0);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
+  // Ref de callback en vez de useRef + useEffect: el div del carril vive
+  // dentro de un AnimatePresence (mode="wait"), así que un efecto atado a
+  // "loading" puede disparar antes de que ese nodo exista todavía en el
+  // DOM (y no se reintenta luego, dejando trackWidth en 0 para siempre).
+  // Con una ref de callback medimos justo cuando el nodo real se monta.
+  const trackRef = useCallback((el: HTMLDivElement | null) => {
+    resizeObserverRef.current?.disconnect();
+    resizeObserverRef.current = null;
+    if (!el) return;
+    setTrackWidth(el.offsetWidth);
+    const observer = new ResizeObserver(() => setTrackWidth(el.offsetWidth));
+    observer.observe(el);
+    resizeObserverRef.current = observer;
+  }, []);
+  // Valor de movimiento compartido entre el arrastre y la navegación por
+  // flechas/puntos: si se mezcla `drag="x"` con un prop `animate={{x}}`
+  // declarativo, el arrastre se queda con el control del valor y el
+  // `animate` deja de aplicarse después del primer render. Con un único
+  // MotionValue controlado a mano con animate() no hay ese conflicto.
+  const x = useMotionValue(0);
   const filtered = useMemo(
     () => entornos.filter((entorno) => entorno.tipo === activeTab),
     [activeTab, entornos]
@@ -42,14 +68,13 @@ export default function VisualizacionObra({
   }, [activeTab, obra.id]);
 
   useEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
-    const medir = () => setTrackWidth(el.offsetWidth);
-    medir();
-    const observer = new ResizeObserver(medir);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [loading]);
+    const controls = animarValor(x, -slideIndex * trackWidth, {
+      type: "spring",
+      stiffness: 300,
+      damping: 32,
+    });
+    return () => controls.stop();
+  }, [slideIndex, trackWidth, x]);
 
   function irASlide(indice: number) {
     setSlideIndex(Math.max(0, Math.min(indice, filtered.length - 1)));
@@ -57,10 +82,25 @@ export default function VisualizacionObra({
 
   function onDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
     const umbral = trackWidth * 0.2;
+    let destino = slideIndex;
     if (info.offset.x < -umbral) {
-      irASlide(slideIndex + 1);
+      destino = slideIndex + 1;
     } else if (info.offset.x > umbral) {
-      irASlide(slideIndex - 1);
+      destino = slideIndex - 1;
+    }
+    destino = Math.max(0, Math.min(destino, filtered.length - 1));
+
+    if (destino === slideIndex) {
+      // No cambia de índice: el arrastre ha dejado "x" a medio camino,
+      // así que hay que devolverlo a mano a su posición de reposo (si
+      // slideIndex sí cambia, ya lo hace el efecto de arriba).
+      animarValor(x, -destino * trackWidth, {
+        type: "spring",
+        stiffness: 300,
+        damping: 32,
+      });
+    } else {
+      setSlideIndex(destino);
     }
   }
 
@@ -138,8 +178,7 @@ export default function VisualizacionObra({
                   dragElastic={0.12}
                   dragMomentum={false}
                   onDragEnd={onDragEnd}
-                  animate={{ x: -slideIndex * trackWidth }}
-                  transition={{ type: "spring", stiffness: 300, damping: 32 }}
+                  style={{ x }}
                 >
                   {filtered.map((entorno) => (
                     <div
