@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import ObraForm from "../../../ObraForm";
-import type { Obra } from "@/types";
+import type { Entorno, Obra } from "@/types";
 
 export const revalidate = 0;
 
@@ -12,17 +12,23 @@ export default async function EditarObraPage({
 }) {
   const supabase = createClient();
 
-  const [{ data: obra }, { data: categorias }] = await Promise.all([
-    supabase.from("obras").select("*").eq("id", params.id).single(),
-    supabase.from("categorias").select("*").order("nombre"),
-  ]);
+  const [{ data: obra }, { data: categorias }, { data: entornos }] =
+    await Promise.all([
+      supabase.from("obras").select("*").eq("id", params.id).single(),
+      supabase.from("categorias").select("*").order("nombre"),
+      supabase.from("entornos").select("*").order("tipo").order("orden"),
+    ]);
 
   if (!obra) notFound();
 
   return (
     <div>
       <h1 className="mb-8 text-2xl font-serif">Editar obra</h1>
-      <ObraForm categorias={categorias ?? []} obra={obra as Obra} />
+      <ObraForm
+        categorias={categorias ?? []}
+        obra={obra as Obra}
+        entornos={(entornos ?? []) as Entorno[]}
+      />
     </div>
   );
 }

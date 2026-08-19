@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 // Cuando se fuerza una orientación contraria a la real de la foto (campo
@@ -10,27 +10,25 @@ import Image from "next/image";
 export default function ImagenObraRotada({
   src,
   alt,
-  anchoNatural,
-  altoNatural,
+  aspecto,
   vertical,
 }: {
   src: string;
   alt: string;
-  anchoNatural: number;
-  altoNatural: number;
+  // Proporción ancho/alto final deseada (ya en la orientación forzada, tras
+  // rotar) — la misma fuente de verdad que usa el resto del sitio
+  // (calcularAspectoYRotacion), no los píxeles crudos de la foto. Si no
+  // coincidieran, el recuadro quedaría con un tamaño distinto al real y
+  // sobraría espacio alrededor de la imagen rotada.
+  aspecto: number;
   vertical: boolean;
 }) {
-  const contenedorRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState<{ width: number; height: number } | null>(
     null
   );
 
   useEffect(() => {
     function calcular() {
-      // Este componente solo se usa cuando hay que rotar, así que el
-      // resultado final es siempre la proporción natural invertida.
-      const aspectoFinal = altoNatural / anchoNatural;
-
       const maxW = vertical
         ? Math.min(window.innerWidth * 0.85, 480)
         : Math.min(window.innerWidth * 0.85, 1024);
@@ -39,10 +37,10 @@ export default function ImagenObraRotada({
         : Math.min(window.innerHeight * 0.8, 700);
 
       let width = maxW;
-      let height = width / aspectoFinal;
+      let height = width / aspecto;
       if (height > maxH) {
         height = maxH;
-        width = height * aspectoFinal;
+        width = height * aspecto;
       }
 
       setSize({ width, height });
@@ -51,26 +49,21 @@ export default function ImagenObraRotada({
     calcular();
     window.addEventListener("resize", calcular);
     return () => window.removeEventListener("resize", calcular);
-  }, [anchoNatural, altoNatural, vertical]);
+  }, [aspecto, vertical]);
 
   if (!size) {
-    // Placeholder con la proporción ya intercambiada mientras se mide,
+    // Placeholder con la proporción final ya correcta mientras se mide,
     // para evitar un salto de layout.
     return (
       <div
-        ref={contenedorRef}
         className="mx-auto w-full max-w-md"
-        style={{ aspectRatio: `${altoNatural} / ${anchoNatural}` }}
+        style={{ aspectRatio: String(aspecto) }}
       />
     );
   }
 
   return (
-    <div
-      ref={contenedorRef}
-      className="relative mx-auto"
-      style={{ width: size.width, height: size.height }}
-    >
+    <div className="relative mx-auto" style={{ width: size.width, height: size.height }}>
       <div
         className="absolute left-1/2 top-1/2"
         style={{

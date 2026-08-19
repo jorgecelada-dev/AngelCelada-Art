@@ -217,7 +217,7 @@ export default function VisualizacionObra({
                     aria-label="Entorno anterior"
                     whileHover={{ scale: 1.08 }}
                     whileTap={{ scale: 0.9 }}
-                    className="absolute left-2 top-[calc(50%-1rem)] hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-charcoal shadow-md transition-opacity hover:bg-white disabled:opacity-0 md:flex"
+                    className="absolute left-2 top-1/2 hidden h-10 w-10 -mt-5 items-center justify-center rounded-full bg-white/90 text-charcoal shadow-md transition-opacity hover:bg-white disabled:opacity-0 md:flex"
                   >
                     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
@@ -230,7 +230,7 @@ export default function VisualizacionObra({
                     aria-label="Entorno siguiente"
                     whileHover={{ scale: 1.08 }}
                     whileTap={{ scale: 0.9 }}
-                    className="absolute right-2 top-[calc(50%-1rem)] hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-charcoal shadow-md transition-opacity hover:bg-white disabled:opacity-0 md:flex"
+                    className="absolute right-2 top-1/2 hidden h-10 w-10 -mt-5 items-center justify-center rounded-full bg-white/90 text-charcoal shadow-md transition-opacity hover:bg-white disabled:opacity-0 md:flex"
                   >
                     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />

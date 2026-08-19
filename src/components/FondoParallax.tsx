@@ -3,10 +3,10 @@
 import { useEffect, useRef } from "react";
 
 const MANCHAS = [
-  { color: "#C97C5D", speed: 0.12, top: "-5%", left: "-8%", size: 460 },
-  { color: "#7C8B5E", speed: 0.28, top: "35%", right: "-12%", size: 520 },
-  { color: "#B08D57", speed: 0.08, top: "70%", left: "0%", size: 380 },
-  { color: "#7C8B5E", speed: 0.2, top: "10%", right: "20%", size: 260 },
+  { color: "#C97C5D", speed: 0.12, top: "-5%", left: "-8%", size: 520 },
+  { color: "#7C8B5E", speed: 0.28, top: "35%", right: "-12%", size: 580 },
+  { color: "#B08D57", speed: 0.08, top: "70%", left: "0%", size: 440 },
+  { color: "#7C8B5E", speed: 0.2, top: "10%", right: "20%", size: 300 },
 ] as const;
 
 // Fondo decorativo con manchas orgánicas que se desplazan a distinta
@@ -49,7 +49,7 @@ export default function FondoParallax() {
           ref={(el) => {
             manchaRefs.current[i] = el;
           }}
-          className="absolute rounded-full opacity-[0.12] blur-3xl will-change-transform"
+          className="absolute rounded-full opacity-[0.32] blur-2xl will-change-transform"
           style={{
             top: mancha.top,
             left: "left" in mancha ? mancha.left : undefined,

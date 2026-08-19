@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import MosaicoObras from "@/components/MosaicoObras";
+import FiltrosObras from "@/components/FiltrosObras";
 import CabeceraPagina from "@/components/CabeceraPagina";
 import type { Categoria, Obra } from "@/types";
 
@@ -87,7 +87,7 @@ export default async function ObrasPage({
           </p>
         )}
 
-        <MosaicoObras obras={obras} />
+        <FiltrosObras obras={obras} />
       </section>
     </>
   );

@@ -44,6 +44,10 @@ export default function EspacioEjemploViewer({
     );
   }
 
+  const obrasVisibles = obras.filter(
+    (obra) => !obra.entornos_ocultos?.includes(entorno.id)
+  );
+
   return (
     <div>
       <div className="mb-4 flex flex-wrap gap-2">
@@ -89,7 +93,7 @@ export default function EspacioEjemploViewer({
         </div>
       )}
 
-      <CicladorObras entorno={entorno} obras={obras} />
+      <CicladorObras entorno={entorno} obras={obrasVisibles} />
     </div>
   );
 }

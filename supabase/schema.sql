@@ -62,6 +62,11 @@ alter table obras add column if not exists descuento_porcentaje integer check (d
 -- Precio de la lámina (copia impresa) de la obra. Si es NULL, no se vende
 -- lámina de esa obra. Sigue disponible aunque el original ya esté vendido.
 alter table obras add column if not exists lamina_precio numeric(10, 2);
+-- IDs de "entornos" que NO deben mostrarse para esta obra en "Visualiza
+-- esta obra en tu espacio" (por defecto, vacío = se ven todos).
+alter table obras add column if not exists entornos_ocultos uuid[] not null default '{}';
+-- Color predominante de la obra, para el filtro de búsqueda en /obras.
+alter table obras add column if not exists color_principal text;
 
 -- ------------------------------------------------------------
 -- Tabla: obra_detalles (fotos de detalle/proceso de cada obra,
@@ -138,6 +143,18 @@ create table if not exists pedidos (
 alter table pedidos add column if not exists tipo text not null default 'original' check (tipo in ('original', 'lamina'));
 
 -- ------------------------------------------------------------
+-- Tabla: contenido_sobre_mi (textos editables de la página "Sobre mí",
+-- fila única de contenido con id fijo para poder hacer upsert siempre)
+-- ------------------------------------------------------------
+create table if not exists contenido_sobre_mi (
+  id uuid primary key default '00000000-0000-0000-0000-000000000001',
+  historia text,
+  background text,
+  tecnicas text,
+  updated_at timestamptz not null default now()
+);
+
+-- ------------------------------------------------------------
 -- Row Level Security (RLS)
 -- ------------------------------------------------------------
 alter table categorias enable row level security;
@@ -146,6 +163,7 @@ alter table obra_detalles enable row level security;
 alter table entornos enable row level security;
 alter table mensajes_contacto enable row level security;
 alter table pedidos enable row level security;
+alter table contenido_sobre_mi enable row level security;
 
 -- Lectura pública de categorías y obras disponibles (para la web pública)
 drop policy if exists "categorias_lectura_publica" on categorias;
@@ -203,6 +221,17 @@ create policy "mensajes_lectura_autenticados" on mensajes_contacto
 drop policy if exists "pedidos_lectura_autenticados" on pedidos;
 create policy "pedidos_lectura_autenticados" on pedidos
   for select using (auth.role() = 'authenticated');
+
+-- El texto de "Sobre mí" lo lee cualquiera (página pública) pero solo el
+-- artista autenticado puede editarlo.
+drop policy if exists "sobre_mi_lectura_publica" on contenido_sobre_mi;
+create policy "sobre_mi_lectura_publica" on contenido_sobre_mi
+  for select using (true);
+
+drop policy if exists "sobre_mi_escritura_autenticados" on contenido_sobre_mi;
+create policy "sobre_mi_escritura_autenticados" on contenido_sobre_mi
+  for all using (auth.role() = 'authenticated')
+  with check (auth.role() = 'authenticated');
 
 -- ------------------------------------------------------------
 -- Datos de ejemplo (opcional, bórralo cuando subas obras reales)

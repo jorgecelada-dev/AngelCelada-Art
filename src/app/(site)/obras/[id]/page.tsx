@@ -10,6 +10,7 @@ import RevelarEnVista from "@/components/RevelarEnVista";
 import GaleriaDetalles from "@/components/GaleriaDetalles";
 import FondoParallax from "@/components/FondoParallax";
 import { formatearEUR, precioFinal, tieneDescuentoActivo } from "@/lib/precio";
+import { calcularAspectoYRotacion } from "@/lib/orientacion";
 
 export const revalidate = 0;
 
@@ -45,7 +46,10 @@ export default async function ObraDetailPage({
     .order("tipo")
     .order("orden");
 
-  const entornos = (entornosData ?? []) as Entorno[];
+  const entornosOcultos = new Set(obra.entornos_ocultos ?? []);
+  const entornos = ((entornosData ?? []) as Entorno[]).filter(
+    (entorno) => !entornosOcultos.has(entorno.id)
+  );
 
   const { data: detallesData } = await supabase
     .from("obra_detalles")
@@ -69,22 +73,12 @@ export default async function ObraDetailPage({
     obra.imagen_ancho_px && obra.imagen_alto_px
   );
 
-  const naturalEsVertical = tieneDimensionesReales
-    ? obra.imagen_alto_px! > obra.imagen_ancho_px!
-    : null;
-
-  const esVertical =
-    obra.orientacion === "vertical"
-      ? true
-      : obra.orientacion === "horizontal"
-      ? false
-      : Boolean(naturalEsVertical);
-
-  // Si se fuerza una orientación contraria a la real de la foto, hay que
-  // rotarla de verdad (no solo cambiar el recuadro), igual que en la
-  // previsualización del panel de edición.
-  const necesitaRotar =
-    naturalEsVertical !== null && naturalEsVertical !== esVertical;
+  // Misma fuente de verdad que las tarjetas y el mosaico: las medidas
+  // reales en cm mandan si existen, y solo se rota la foto de verdad
+  // cuando su orientación natural no coincide con la que corresponde.
+  const { aspecto, necesitaRotarFoto: necesitaRotar } =
+    calcularAspectoYRotacion(obra);
+  const esVertical = aspecto < 1;
 
   const imagen = obra.imagen_url ? (
     tieneDimensionesReales ? (
@@ -92,8 +86,7 @@ export default async function ObraDetailPage({
         <ImagenObraRotada
           src={obra.imagen_url}
           alt={obra.titulo}
-          anchoNatural={obra.imagen_ancho_px!}
-          altoNatural={obra.imagen_alto_px!}
+          aspecto={aspecto}
           vertical={esVertical}
         />
       ) : (

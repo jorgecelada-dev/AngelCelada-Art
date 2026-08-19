@@ -19,6 +19,8 @@ export type Obra = {
   estado: string | null;
   descuento_porcentaje: number | null;
   lamina_precio: number | null;
+  entornos_ocultos: string[];
+  color_principal: string | null;
   disponible: boolean;
   destacada: boolean;
   imagen_url: string | null;
@@ -65,6 +67,14 @@ export type MensajeContacto = {
   encargo_tipo: "personalizado" | "pack" | null;
   leido: boolean;
   created_at: string;
+};
+
+export type ContenidoSobreMi = {
+  id: string;
+  historia: string | null;
+  background: string | null;
+  tecnicas: string | null;
+  updated_at: string;
 };
 
 export type Pedido = {

@@ -3,8 +3,16 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { Categoria, Obra } from "@/types";
+import type { Categoria, Entorno, Obra } from "@/types";
 import DetalleImagenesManager from "./DetalleImagenesManager";
+import { COLORES_OBRA } from "@/lib/colores";
+
+const TIPO_LABEL: Record<Entorno["tipo"], string> = {
+  salon: "Salón",
+  comedor: "Comedor",
+  oficina: "Oficina",
+  despacho: "Despacho",
+};
 
 function formatearCm(valor: number): string {
   return Number(valor.toFixed(2)).toString();
@@ -30,9 +38,11 @@ function leerDimensionesImagen(
 
 export default function ObraForm({
   categorias,
+  entornos,
   obra,
 }: {
   categorias: Categoria[];
+  entornos?: Entorno[];
   obra?: Obra;
 }) {
   const router = useRouter();
@@ -40,6 +50,9 @@ export default function ObraForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [imagenFile, setImagenFile] = useState<File | null>(null);
+  const [entornosOcultos, setEntornosOcultos] = useState<Set<string>>(
+    () => new Set(obra?.entornos_ocultos ?? [])
+  );
   const [anchoCm, setAnchoCm] = useState<string>(
     obra?.ancho_cm?.toString() ?? ""
   );
@@ -165,6 +178,8 @@ export default function ObraForm({
         lamina_precio: fd.get("lamina_precio")
           ? Number(fd.get("lamina_precio"))
           : null,
+        entornos_ocultos: Array.from(entornosOcultos),
+        color_principal: (fd.get("color_principal") as string) || null,
         disponible,
         destacada: fd.get("destacada") === "on",
         categoria_id: (fd.get("categoria_id") as string) || null,
@@ -293,7 +308,7 @@ export default function ObraForm({
               {previewNecesitaRotar && " — foto rotada para forzar esta orientación"}
             </p>
             <div
-              className={`relative overflow-hidden rounded-xl border border-charcoal/10 bg-charcoal/5 ${
+              className={`relative overflow-hidden rounded-xl bg-charcoal/5 shadow-[0_20px_45px_-15px_rgba(0,0,0,0.45)] ${
                 previewEsVertical
                   ? "h-[213px] w-40"
                   : "h-48 w-64"
@@ -327,6 +342,17 @@ export default function ObraForm({
                   className="h-full w-full object-contain"
                 />
               )}
+              {/* Mapa de luces automático: simula un foco de galería
+                  (realce arriba a la izquierda + leve viñeta abajo) sobre
+                  cualquier imagen, sin necesidad de analizarla. */}
+              <div
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  background:
+                    "radial-gradient(120% 90% at 28% 12%, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 55%), radial-gradient(140% 100% at 50% 115%, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 60%)",
+                  mixBlendMode: "overlay",
+                }}
+              />
             </div>
           </div>
         )}
@@ -416,6 +442,80 @@ export default function ObraForm({
         <p className="mt-1 text-xs text-charcoal/50">
           Si lo rellenas, en la ficha de la obra se podrá comprar también una
           copia impresa a este precio, aunque el original ya esté vendido.
+        </p>
+      </div>
+
+      {entornos && entornos.length > 0 && (
+        <div>
+          <label className="block text-sm font-medium">
+            Entornos donde se puede visualizar
+          </label>
+          <p className="mt-1 text-xs text-charcoal/50">
+            Desmarca los que no quieras que aparezcan para esta obra en
+            &quot;Visualiza esta obra en tu espacio&quot;.
+          </p>
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {entornos.map((entorno) => {
+              const visible = !entornosOcultos.has(entorno.id);
+              const repetido =
+                entornos.filter((e) => e.tipo === entorno.tipo).length > 1;
+              const indiceDelTipo =
+                entornos
+                  .filter((e) => e.tipo === entorno.tipo)
+                  .findIndex((e) => e.id === entorno.id) + 1;
+              return (
+                <label
+                  key={entorno.id}
+                  className="flex items-center gap-2 rounded-lg border border-charcoal/10 bg-white/60 px-3 py-2 text-sm"
+                >
+                  <input
+                    type="checkbox"
+                    checked={visible}
+                    onChange={(e) => {
+                      setEntornosOcultos((prev) => {
+                        const siguiente = new Set(prev);
+                        if (e.target.checked) {
+                          siguiente.delete(entorno.id);
+                        } else {
+                          siguiente.add(entorno.id);
+                        }
+                        return siguiente;
+                      });
+                    }}
+                  />
+                  {entorno.imagen_url && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={entorno.imagen_url}
+                      alt=""
+                      className="h-8 w-10 flex-none rounded object-cover"
+                    />
+                  )}
+                  {TIPO_LABEL[entorno.tipo]}
+                  {repetido && ` #${indiceDelTipo}`}
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div>
+        <label className="block text-sm font-medium">Color principal</label>
+        <select
+          name="color_principal"
+          defaultValue={obra?.color_principal ?? ""}
+          className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3"
+        >
+          <option value="">Sin especificar</option>
+          {COLORES_OBRA.map((c) => (
+            <option key={c.valor} value={c.valor}>
+              {c.label}
+            </option>
+          ))}
+        </select>
+        <p className="mt-1 text-xs text-charcoal/50">
+          Se usa para el filtro de búsqueda por color en /obras.
         </p>
       </div>
 
