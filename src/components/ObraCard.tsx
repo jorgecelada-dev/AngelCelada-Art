@@ -125,7 +125,11 @@ export default function ObraCard({
                 alt={obra.titulo}
                 fill
                 className="object-cover"
-                sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                // La foto va dentro de un recuadro sobredimensionado al
+                // 300% (para poder rotarla y cubrir la celda entera), así
+                // que necesita una resolución bastante mayor que la celda
+                // visible o se pixela al estirarla.
+                sizes="1400px"
                 quality={95}
               />
             </div>
@@ -135,7 +139,10 @@ export default function ObraCard({
               alt={obra.titulo}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
-              sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+              // Algunas celdas del mosaico ocupan el doble de ancho (2x1),
+              // así que se pide bastante más resolución de la que ocuparía
+              // una celda de una sola columna para que no se pixelen.
+              sizes="(min-width: 1024px) 50vw, (min-width: 640px) 66vw, 100vw"
               quality={95}
             />
           )
