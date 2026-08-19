@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
@@ -53,8 +53,24 @@ export default function ObraCard({
   const [cargada, setCargada] = useState(false);
   const timeoutRef = useRef<number | null>(null);
   const cierreTimeoutRef = useRef<number | null>(null);
+  const [tamanoCelda, setTamanoCelda] = useState<{ w: number; h: number } | null>(null);
 
   const { aspecto, necesitaRotarFoto } = calcularAspectoYRotacion(obra);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el || !necesitaRotarFoto) return;
+    // Para rotar la foto y que cubra toda la celda hace falta saber su
+    // forma real en píxeles: en celdas no cuadradas (2x1, 1x2 del bento),
+    // un simple recuadro sobredimensionado y rotado no vale, porque al
+    // rotar una caja no cuadrada su encaje cambia y la imagen queda
+    // recortada de más (efecto "zoom" excesivo).
+    const actualizar = () => setTamanoCelda({ w: el.offsetWidth, h: el.offsetHeight });
+    actualizar();
+    const observer = new ResizeObserver(actualizar);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [necesitaRotarFoto]);
 
   function onMouseEnter() {
     if (cierreTimeoutRef.current) {
@@ -109,30 +125,29 @@ export default function ObraCard({
         {obra.imagen_url ? (
           necesitaRotarFoto ? (
             // La foto es lo contrario de la proporción real del cuadro (en
-            // cm): se rota 90º y se sobredimensiona centrada para que
-            // siga cubriendo toda la celda del mosaico sea cual sea su
-            // forma, en vez de recortarla mal o dejarla mal orientada.
-            <div
-              className="absolute left-1/2 top-1/2 transition-transform duration-300 group-hover:scale-105"
-              style={{
-                width: "300%",
-                height: "300%",
-                transform: "translate(-50%, -50%) rotate(90deg)",
-              }}
-            >
-              <Image
-                src={obra.imagen_url}
-                alt={obra.titulo}
-                fill
-                className="object-cover"
-                // La foto va dentro de un recuadro sobredimensionado al
-                // 300% (para poder rotarla y cubrir la celda entera), así
-                // que necesita una resolución bastante mayor que la celda
-                // visible o se pixela al estirarla.
-                sizes="1400px"
-                quality={95}
-              />
-            </div>
+            // cm): se rota 90º dentro de un recuadro con el ancho y el
+            // alto de la celda intercambiados (esa es la clave: al rotar,
+            // esas dimensiones se intercambian de vuelta y encajan exacto
+            // en la celda real, sea cuadrada, 2x1 o 1x2).
+            tamanoCelda && (
+              <div
+                className="absolute left-1/2 top-1/2 transition-transform duration-300 group-hover:scale-105"
+                style={{
+                  width: tamanoCelda.h,
+                  height: tamanoCelda.w,
+                  transform: "translate(-50%, -50%) rotate(90deg)",
+                }}
+              >
+                <Image
+                  src={obra.imagen_url}
+                  alt={obra.titulo}
+                  fill
+                  className="object-cover"
+                  sizes="1400px"
+                  quality={95}
+                />
+              </div>
+            )
           ) : (
             <Image
               src={obra.imagen_url}
