@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import MobileMenu from "./MobileMenu";
 
 const links = [
@@ -9,23 +12,34 @@ const links = [
 ];
 
 export default function Navbar() {
+  const pathname = usePathname();
+
   return (
     <header className="sticky top-0 z-40 border-b border-charcoal/10 bg-cream/90 backdrop-blur">
       <div className="container-site relative flex h-20 items-center justify-between">
-        <Link href="/" className="font-serif text-xl tracking-wide">
+        <Link href="/" className="font-serif text-xl font-bold tracking-wide">
           ArteCelada
         </Link>
 
         <nav className="hidden gap-8 md:flex">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm tracking-wide text-charcoal/80 transition hover:text-charcoal"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {links.map((link) => {
+            const activo =
+              pathname === link.href || pathname?.startsWith(`${link.href}/`);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={activo ? "page" : undefined}
+                className={`text-sm tracking-wide transition ${
+                  activo
+                    ? "font-bold text-charcoal"
+                    : "text-charcoal/80 hover:text-charcoal"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
 
         <Link href="/obras" className="btn-primary hidden md:inline-flex">

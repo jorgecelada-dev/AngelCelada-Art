@@ -1,16 +1,21 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Work_Sans } from "next/font/google";
+import { Domine, PT_Serif } from "next/font/google";
 import "./globals.css";
 
-const playfair = Playfair_Display({
+// Pareja tipográfica de estilo periódico: Domine para titulares (con
+// pesos gruesos para la negrita) y PT Serif para el cuerpo de texto.
+const domine = Domine({
   subsets: ["latin"],
-  variable: "--font-playfair",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-heading",
   display: "swap",
 });
 
-const workSans = Work_Sans({
+const ptSerif = PT_Serif({
   subsets: ["latin"],
-  variable: "--font-worksans",
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-body",
   display: "swap",
 });
 
@@ -26,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className={`${playfair.variable} ${workSans.variable}`}>
+    <html lang="es" className={`${domine.variable} ${ptSerif.variable}`}>
       <body className="font-sans">{children}</body>
     </html>
   );

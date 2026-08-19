@@ -15,8 +15,8 @@ const config: Config = {
         gold: "#B08D57",
       },
       fontFamily: {
-        serif: ["var(--font-playfair)", "Georgia", "serif"],
-        sans: ["var(--font-worksans)", "system-ui", "sans-serif"],
+        serif: ["var(--font-heading)", "Georgia", "serif"],
+        sans: ["var(--font-body)", "Georgia", "serif"],
       },
       backgroundImage: {
         "organic-texture":
