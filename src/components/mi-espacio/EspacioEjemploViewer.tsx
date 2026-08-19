@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Entorno, Obra } from "@/types";
 import { dibujarCover } from "@/lib/canvas";
+import { formatearEUR, precioFinal } from "@/lib/precio";
 
 const TABS = [
   { key: "salon", label: "Salón" },
@@ -247,10 +248,7 @@ function CicladorObras({
             <p className="text-charcoal/60">{obra.medidas}</p>
           </div>
           <p className="font-medium text-clay">
-            {new Intl.NumberFormat("es-ES", {
-              style: "currency",
-              currency: "EUR",
-            }).format(obra.precio)}
+            {formatearEUR(precioFinal(obra))}
           </p>
         </div>
       )}

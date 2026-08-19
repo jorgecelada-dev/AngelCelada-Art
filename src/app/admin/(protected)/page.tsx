@@ -3,6 +3,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import type { Obra } from "@/types";
 import DeleteObraButton from "./DeleteObraButton";
+import { formatearEUR, precioFinal, tieneDescuentoActivo } from "@/lib/precio";
 
 export const revalidate = 0;
 
@@ -54,13 +55,20 @@ export default async function AdminDashboardPage() {
                 </td>
                 <td className="p-4">{obra.titulo}</td>
                 <td className="p-4">
-                  {new Intl.NumberFormat("es-ES", {
-                    style: "currency",
-                    currency: "EUR",
-                  }).format(obra.precio)}
+                  {tieneDescuentoActivo(obra) ? (
+                    <span className="flex items-baseline gap-2">
+                      <span className="text-charcoal/40 line-through">
+                        {formatearEUR(obra.precio)}
+                      </span>
+                      {formatearEUR(precioFinal(obra))}
+                    </span>
+                  ) : (
+                    formatearEUR(obra.precio)
+                  )}
                 </td>
                 <td className="p-4">
                   {obra.estado ?? (obra.disponible ? "En venta" : "Vendida")}
+                  {tieneDescuentoActivo(obra) && ` (-${obra.descuento_porcentaje}%)`}
                 </td>
                 <td className="p-4">{obra.destacada ? "Sí" : "No"}</td>
                 <td className="p-4">

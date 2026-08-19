@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { Obra } from "@/types";
 import { calcularAspectoYRotacion } from "@/lib/orientacion";
+import { formatearEUR, precioFinal } from "@/lib/precio";
 
 export default function EspacioObraViewer({
   fotoUrl,
@@ -140,10 +141,7 @@ export default function EspacioObraViewer({
           <p className="text-charcoal/60">{obra.medidas}</p>
         </div>
         <p className="font-medium text-clay">
-          {new Intl.NumberFormat("es-ES", {
-            style: "currency",
-            currency: "EUR",
-          }).format(obra.precio)}
+          {formatearEUR(precioFinal(obra))}
         </p>
       </div>
       <p className="mt-1 text-center text-xs text-charcoal/40">

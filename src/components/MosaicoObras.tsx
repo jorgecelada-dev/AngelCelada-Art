@@ -44,10 +44,12 @@ function Columnas({
   columnas,
   className,
   orden,
+  variante,
 }: {
   columnas: Obra[][];
   className: string;
   orden: Map<string, number>;
+  variante: "obra" | "lamina";
 }) {
   const numColumnas = columnas.length;
 
@@ -70,7 +72,7 @@ function Columnas({
                 className={animacion}
                 style={{ animationDelay: `${Math.min(indice, 8) * 0.06}s` }}
               >
-                <ObraCard obra={obra} />
+                <ObraCard obra={obra} variante={variante} />
               </div>
             );
           })}
@@ -80,7 +82,13 @@ function Columnas({
   );
 }
 
-export default function MosaicoObras({ obras }: { obras: Obra[] }) {
+export default function MosaicoObras({
+  obras,
+  variante = "obra",
+}: {
+  obras: Obra[];
+  variante?: "obra" | "lamina";
+}) {
   const col1 = useMemo(() => distribuirEnColumnas(obras, 1), [obras]);
   const col2 = useMemo(() => distribuirEnColumnas(obras, 2), [obras]);
   const col3 = useMemo(() => distribuirEnColumnas(obras, 3), [obras]);
@@ -91,9 +99,9 @@ export default function MosaicoObras({ obras }: { obras: Obra[] }) {
 
   return (
     <>
-      <Columnas columnas={col1} className="flex sm:hidden" orden={orden} />
-      <Columnas columnas={col2} className="hidden sm:flex lg:hidden" orden={orden} />
-      <Columnas columnas={col3} className="hidden lg:flex" orden={orden} />
+      <Columnas columnas={col1} className="flex sm:hidden" orden={orden} variante={variante} />
+      <Columnas columnas={col2} className="hidden sm:flex lg:hidden" orden={orden} variante={variante} />
+      <Columnas columnas={col3} className="hidden lg:flex" orden={orden} variante={variante} />
     </>
   );
 }

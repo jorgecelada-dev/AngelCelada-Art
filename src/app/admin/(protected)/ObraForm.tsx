@@ -47,6 +47,10 @@ export default function ObraForm({
     obra?.alto_cm?.toString() ?? ""
   );
   const [orientacion, setOrientacion] = useState(obra?.orientacion ?? "");
+  const [estado, setEstadoState] = useState(obra?.estado ?? "en venta");
+  const [descuento, setDescuento] = useState(
+    obra?.descuento_porcentaje?.toString() ?? ""
+  );
   const [previewUrl, setPreviewUrl] = useState<string | null>(
     obra?.imagen_url ?? null
   );
@@ -131,6 +135,10 @@ export default function ObraForm({
 
       const estado = (fd.get("estado") as string) || "en venta";
       const disponible = estado === "en venta" || estado === "oferta";
+      const descuento_porcentaje =
+        estado === "oferta" && fd.get("descuento_porcentaje")
+          ? Number(fd.get("descuento_porcentaje"))
+          : null;
 
       const anchoCm = fd.get("ancho_cm") ? Number(fd.get("ancho_cm")) : null;
       const altoCm = fd.get("alto_cm") ? Number(fd.get("alto_cm")) : null;
@@ -153,6 +161,10 @@ export default function ObraForm({
         fecha_creacion: (fd.get("fecha_creacion") as string) || null,
         precio: Number(fd.get("precio")),
         estado,
+        descuento_porcentaje,
+        lamina_precio: fd.get("lamina_precio")
+          ? Number(fd.get("lamina_precio"))
+          : null,
         disponible,
         destacada: fd.get("destacada") === "on",
         categoria_id: (fd.get("categoria_id") as string) || null,
@@ -357,7 +369,8 @@ export default function ObraForm({
           <label className="block text-sm font-medium">Estado</label>
           <select
             name="estado"
-            defaultValue={obra?.estado ?? "en venta"}
+            value={estado}
+            onChange={(e) => setEstadoState(e.target.value)}
             className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3"
           >
             <option value="en venta">En venta</option>
@@ -366,6 +379,44 @@ export default function ObraForm({
             <option value="oferta">Oferta</option>
           </select>
         </div>
+      </div>
+
+      {estado === "oferta" && (
+        <div>
+          <label className="block text-sm font-medium">Descuento</label>
+          <select
+            name="descuento_porcentaje"
+            value={descuento}
+            onChange={(e) => setDescuento(e.target.value)}
+            className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3"
+          >
+            <option value="">Sin descuento (solo etiqueta "Oferta")</option>
+            <option value="5">5%</option>
+            <option value="10">10%</option>
+            <option value="15">15%</option>
+            <option value="20">20%</option>
+            <option value="30">30%</option>
+          </select>
+        </div>
+      )}
+
+      <div>
+        <label className="block text-sm font-medium">
+          Precio de la lámina (€, opcional)
+        </label>
+        <input
+          name="lamina_precio"
+          type="number"
+          step="0.01"
+          min="0"
+          placeholder="Ej. 25-50 · déjalo vacío para no vender lámina"
+          defaultValue={obra?.lamina_precio ?? ""}
+          className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3"
+        />
+        <p className="mt-1 text-xs text-charcoal/50">
+          Si lo rellenas, en la ficha de la obra se podrá comprar también una
+          copia impresa a este precio, aunque el original ya esté vendido.
+        </p>
       </div>
 
       <div>

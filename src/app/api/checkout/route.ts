@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripeClient } from "@/lib/stripe";
+import { precioFinal } from "@/lib/precio";
 
 export async function POST(request: Request) {
-  const { obraId } = await request.json();
+  const { obraId, tipo: tipoRaw } = await request.json();
+  const tipo: "original" | "lamina" = tipoRaw === "lamina" ? "lamina" : "original";
 
   if (!obraId) {
     return NextResponse.json({ error: "Falta obraId" }, { status: 400 });
@@ -46,13 +48,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Obra no encontrada" }, { status: 404 });
   }
 
-  if (!obra.disponible) {
+  if (tipo === "original" && !obra.disponible) {
     return NextResponse.json({ error: "Esta obra ya no está disponible" }, {
       status: 409,
     });
   }
 
+  if (tipo === "lamina" && !obra.lamina_precio) {
+    return NextResponse.json(
+      { error: "Esta obra no tiene lámina disponible" },
+      { status: 409 }
+    );
+  }
+
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const precio = tipo === "lamina" ? obra.lamina_precio : precioFinal(obra);
+  const nombreProducto =
+    tipo === "lamina" ? `${obra.titulo} (Lámina)` : obra.titulo;
 
   const session = await stripeClient.checkout.sessions.create({
     mode: "payment",
@@ -65,10 +77,10 @@ export async function POST(request: Request) {
         price_data: {
           currency: "eur",
           product_data: {
-            name: obra.titulo,
+            name: nombreProducto,
             images: obra.imagen_url ? [obra.imagen_url] : undefined,
           },
-          unit_amount: Math.round(obra.precio * 100),
+          unit_amount: Math.round(precio * 100),
         },
         quantity: 1,
       },
@@ -80,6 +92,7 @@ export async function POST(request: Request) {
     cancel_url: `${siteUrl}/obras/${obra.id}?compra=cancelada`,
     metadata: {
       obra_id: obra.id,
+      tipo,
     },
   });
 
@@ -88,8 +101,9 @@ export async function POST(request: Request) {
   await supabase.from("pedidos").insert({
     obra_id: obra.id,
     stripe_session_id: session.id,
-    importe: obra.precio,
+    importe: precio,
     estado: "pendiente",
+    tipo,
   });
 
   return NextResponse.json({ url: session.url });

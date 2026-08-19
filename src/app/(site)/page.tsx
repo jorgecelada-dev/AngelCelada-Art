@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import MosaicoObras from "@/components/MosaicoObras";
 import HeroAnimado from "@/components/HeroAnimado";
+import FondoParallax from "@/components/FondoParallax";
 import RevelarEnVista from "@/components/RevelarEnVista";
 import type { Obra } from "@/types";
 
@@ -21,6 +22,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <FondoParallax />
       <HeroAnimado />
 
       {/* Obras destacadas */}

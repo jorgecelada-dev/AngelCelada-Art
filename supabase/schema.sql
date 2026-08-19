@@ -57,6 +57,11 @@ alter table obras add column if not exists imagen_alto_px integer;
 -- Orientación real del cuadro, para forzarla a mano cuando la foto no la
 -- refleje bien (si no se indica, se deduce de imagen_ancho_px/alto_px).
 alter table obras add column if not exists orientacion text check (orientacion in ('horizontal', 'vertical'));
+-- Porcentaje de descuento cuando estado = 'oferta' (solo estos valores).
+alter table obras add column if not exists descuento_porcentaje integer check (descuento_porcentaje in (5, 10, 15, 20, 30));
+-- Precio de la lámina (copia impresa) de la obra. Si es NULL, no se vende
+-- lámina de esa obra. Sigue disponible aunque el original ya esté vendido.
+alter table obras add column if not exists lamina_precio numeric(10, 2);
 
 -- ------------------------------------------------------------
 -- Tabla: obra_detalles (fotos de detalle/proceso de cada obra,
@@ -108,6 +113,11 @@ create table if not exists mensajes_contacto (
   created_at timestamptz not null default now()
 );
 
+-- Distingue un mensaje normal de una solicitud de presupuesto (cuadro
+-- personalizado o pack de varias obras).
+alter table mensajes_contacto add column if not exists tipo text not null default 'general' check (tipo in ('general', 'presupuesto'));
+alter table mensajes_contacto add column if not exists encargo_tipo text check (encargo_tipo in ('personalizado', 'pack'));
+
 -- ------------------------------------------------------------
 -- Tabla: pedidos (compras realizadas vía Stripe)
 -- ------------------------------------------------------------
@@ -122,6 +132,10 @@ create table if not exists pedidos (
   estado text not null default 'pendiente', -- pendiente | pagado | cancelado
   created_at timestamptz not null default now()
 );
+
+-- Tipo de pedido: original (el cuadro) o lámina (copia impresa). Solo un
+-- pedido de tipo "original" marca la obra como vendida al pagarse.
+alter table pedidos add column if not exists tipo text not null default 'original' check (tipo in ('original', 'lamina'));
 
 -- ------------------------------------------------------------
 -- Row Level Security (RLS)

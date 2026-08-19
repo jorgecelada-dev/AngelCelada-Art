@@ -26,7 +26,19 @@ export default async function MensajesPage() {
             className="rounded-xl border border-charcoal/10 bg-white/50 p-5"
           >
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <p className="font-medium">{m.nombre}</p>
+              <p className="flex items-center gap-2 font-medium">
+                {m.nombre}
+                {m.tipo === "presupuesto" && (
+                  <span className="rounded-full bg-clay px-2 py-0.5 text-xs font-normal tracking-wide text-cream">
+                    Presupuesto
+                    {m.encargo_tipo === "pack"
+                      ? " · Pack"
+                      : m.encargo_tipo === "personalizado"
+                      ? " · Personalizado"
+                      : ""}
+                  </span>
+                )}
+              </p>
               <p className="text-xs text-charcoal/50">
                 {new Date(m.created_at).toLocaleString("es-ES")}
               </p>

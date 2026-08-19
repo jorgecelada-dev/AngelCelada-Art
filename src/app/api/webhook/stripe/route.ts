@@ -44,6 +44,7 @@ export async function POST(request: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const obraId = session.metadata?.obra_id;
+    const tipo = session.metadata?.tipo === "lamina" ? "lamina" : "original";
 
     await supabase
       .from("pedidos")
@@ -55,7 +56,8 @@ export async function POST(request: Request) {
       })
       .eq("stripe_session_id", session.id);
 
-    if (obraId) {
+    // Una lámina es una copia impresa: comprarla no agota el original.
+    if (obraId && tipo === "original") {
       await supabase
         .from("obras")
         .update({ disponible: false, estado: "vendido" })

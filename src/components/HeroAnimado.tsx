@@ -9,14 +9,24 @@ export default function HeroAnimado() {
         className="animate-entrada-izquierda text-sm uppercase tracking-[0.3em] text-clay"
         style={{ animationDelay: "0.05s" }}
       >
-        Arte orgánico hecho a mano
+        <span
+          className="efecto-mecanografia"
+          style={{ animationDelay: "0.7s, 2.3s" }}
+        >
+          Arte orgánico hecho a mano
+        </span>
       </span>
       <h1
         className="animate-entrada-derecha max-w-3xl text-4xl leading-tight md:text-6xl"
         style={{ animationDelay: "0.15s" }}
       >
-        <span className="texto-brillo">
-          Cuadros que nacen de la tierra, el color y el tiempo.
+        <span
+          className="efecto-revelado-texto"
+          style={{ animationDelay: "0.5s" }}
+        >
+          <span className="texto-brillo">
+            Cuadros que nacen de la tierra, el color y el tiempo.
+          </span>
         </span>
       </h1>
       <p

@@ -17,6 +17,8 @@ export type Obra = {
   fecha_creacion: string | null;
   precio: number;
   estado: string | null;
+  descuento_porcentaje: number | null;
+  lamina_precio: number | null;
   disponible: boolean;
   destacada: boolean;
   imagen_url: string | null;
@@ -59,6 +61,8 @@ export type MensajeContacto = {
   email: string;
   telefono: string | null;
   mensaje: string;
+  tipo: "general" | "presupuesto";
+  encargo_tipo: "personalizado" | "pack" | null;
   leido: boolean;
   created_at: string;
 };
@@ -72,6 +76,7 @@ export type Pedido = {
   direccion_envio: unknown;
   importe: number | null;
   estado: "pendiente" | "pagado" | "cancelado";
+  tipo: "original" | "lamina";
   created_at: string;
   obras?: Pick<Obra, "titulo" | "imagen_url"> | null;
 };

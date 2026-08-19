@@ -39,6 +39,28 @@
   .section-title {
     @apply text-3xl md:text-4xl font-serif texto-brillo;
   }
+
+  /* Máquina de escribir de una línea, con cursor parpadeante. Pensado para
+     textos cortos (garantizado sin salto de línea): revelar un bloque
+     multilínea carácter a carácter no queda bien con fuente proporcional. */
+  .efecto-mecanografia {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    vertical-align: bottom;
+    border-right: 2px solid currentColor;
+    width: 0;
+    animation: mecanografia 1.6s steps(30, end) forwards,
+      parpadeo-cursor 0.8s step-end 4;
+  }
+
+  /* Revelado tipo "barrido" para titulares largos/multilínea: no es un
+     tecleo carácter a carácter, pero da la misma sensación de "texto que
+     se escribe" sin romper el ajuste de línea responsive. */
+  .efecto-revelado-texto {
+    display: inline-block;
+    animation: revelado-texto 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
 }
 
 @keyframes brillo-texto {
@@ -49,5 +71,29 @@
   55%,
   100% {
     background-position: -200% 0;
+  }
+}
+
+@keyframes mecanografia {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes parpadeo-cursor {
+  50% {
+    border-color: transparent;
+  }
+}
+
+@keyframes revelado-texto {
+  from {
+    clip-path: inset(0 100.5% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
   }
 }

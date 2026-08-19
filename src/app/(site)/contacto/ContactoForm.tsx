@@ -3,9 +3,12 @@
 import { useState } from "react";
 
 export default function ContactoForm() {
+  const [tipo, setTipo] = useState<"general" | "presupuesto">("general");
   const [estado, setEstado] = useState<"idle" | "enviando" | "ok" | "error">(
     "idle"
   );
+
+  const esPresupuesto = tipo === "presupuesto";
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -19,6 +22,11 @@ export default function ContactoForm() {
         .value,
       mensaje: (form.elements.namedItem("mensaje") as HTMLTextAreaElement)
         .value,
+      tipo,
+      encargoTipo: esPresupuesto
+        ? (form.elements.namedItem("encargo_tipo") as HTMLSelectElement)
+            ?.value
+        : undefined,
     };
 
     try {
@@ -40,13 +48,40 @@ export default function ContactoForm() {
   if (estado === "ok") {
     return (
       <p className="rounded-xl bg-sage/10 p-4 text-sage">
-        ¡Gracias! Tu mensaje se ha enviado correctamente.
+        {esPresupuesto
+          ? "¡Gracias! He recibido tu solicitud de presupuesto y te responderé lo antes posible."
+          : "¡Gracias! Tu mensaje se ha enviado correctamente."}
       </p>
     );
   }
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
+      <div className="inline-flex rounded-full border border-charcoal/15 p-1 text-sm">
+        <button
+          type="button"
+          onClick={() => setTipo("general")}
+          className={`rounded-full px-4 py-2 transition ${
+            tipo === "general"
+              ? "bg-charcoal text-cream"
+              : "text-charcoal/70 hover:text-charcoal"
+          }`}
+        >
+          Mensaje general
+        </button>
+        <button
+          type="button"
+          onClick={() => setTipo("presupuesto")}
+          className={`rounded-full px-4 py-2 transition ${
+            esPresupuesto
+              ? "bg-charcoal text-cream"
+              : "text-charcoal/70 hover:text-charcoal"
+          }`}
+        >
+          Pedir presupuesto
+        </button>
+      </div>
+
       <div>
         <label htmlFor="nombre" className="block text-sm font-medium">
           Nombre
@@ -83,15 +118,38 @@ export default function ContactoForm() {
         />
       </div>
 
+      {esPresupuesto && (
+        <div>
+          <label htmlFor="encargo_tipo" className="block text-sm font-medium">
+            ¿Qué te gustaría encargar?
+          </label>
+          <select
+            id="encargo_tipo"
+            name="encargo_tipo"
+            required
+            defaultValue="personalizado"
+            className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3 outline-none focus:border-clay"
+          >
+            <option value="personalizado">Cuadro personalizado</option>
+            <option value="pack">Pack de varias obras</option>
+          </select>
+        </div>
+      )}
+
       <div>
         <label htmlFor="mensaje" className="block text-sm font-medium">
-          Mensaje
+          {esPresupuesto ? "Cuéntame qué tienes en mente" : "Mensaje"}
         </label>
         <textarea
           id="mensaje"
           name="mensaje"
           required
           rows={5}
+          placeholder={
+            esPresupuesto
+              ? "Tamaño aproximado, colores, estilo, plazo, presupuesto orientativo…"
+              : undefined
+          }
           className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3 outline-none focus:border-clay"
         />
       </div>
@@ -101,7 +159,11 @@ export default function ContactoForm() {
         disabled={estado === "enviando"}
         className="btn-primary w-full"
       >
-        {estado === "enviando" ? "Enviando…" : "Enviar mensaje"}
+        {estado === "enviando"
+          ? "Enviando…"
+          : esPresupuesto
+          ? "Enviar solicitud de presupuesto"
+          : "Enviar mensaje"}
       </button>
 
       {estado === "error" && (

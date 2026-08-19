@@ -6,7 +6,8 @@ import MobileMenu from "./MobileMenu";
 
 const links = [
   { href: "/obras", label: "Obras" },
-  { href: "/mi-espacio", label: "Mi espacio" },
+  { href: "/laminas", label: "Láminas" },
+  { href: "/mi-espacio", label: "Tu espacio" },
   { href: "/sobre-mi", label: "Sobre mí" },
   { href: "/contacto", label: "Contacto" },
 ];

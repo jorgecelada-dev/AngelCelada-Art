@@ -7,6 +7,7 @@ function createFallbackQueryBuilder() {
   const builder = {
     select: () => builder,
     eq: () => builder,
+    not: () => builder,
     order: () => builder,
     limit: () => builder,
     single: async () => ({ data: null, error: null }),

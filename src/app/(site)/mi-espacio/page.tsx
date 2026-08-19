@@ -3,7 +3,7 @@ import type { Entorno, Obra } from "@/types";
 import MiEspacioClient from "@/components/mi-espacio/MiEspacioClient";
 
 export const metadata = {
-  title: "Mi espacio — ArteCelada",
+  title: "Tu espacio — ArteCelada",
 };
 
 export const revalidate = 0;
@@ -29,7 +29,7 @@ export default async function MiEspacioPage() {
   return (
     <section className="container-site py-16">
       <div className="mb-10 max-w-2xl">
-        <h1 className="section-title">Mi espacio</h1>
+        <h1 className="section-title">Tu espacio</h1>
         <p className="mt-4 text-charcoal/70">
           Prueba cómo quedarían nuestros cuadros en tu propia pared, a su
           tamaño real. No hace falta registrarse ni crear cuenta, y tu foto

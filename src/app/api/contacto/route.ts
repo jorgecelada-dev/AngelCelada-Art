@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const { nombre, email, telefono, mensaje } = body ?? {};
+  const { nombre, email, telefono, mensaje, tipo, encargoTipo } = body ?? {};
 
   if (!nombre || !email || !mensaje) {
     return NextResponse.json(
@@ -12,6 +12,8 @@ export async function POST(request: Request) {
     );
   }
 
+  const esPresupuesto = tipo === "presupuesto";
+
   const supabase = createAdminClient();
 
   const { error } = await supabase.from("mensajes_contacto").insert({
@@ -19,6 +21,8 @@ export async function POST(request: Request) {
     email,
     telefono: telefono || null,
     mensaje,
+    tipo: esPresupuesto ? "presupuesto" : "general",
+    encargo_tipo: esPresupuesto && encargoTipo ? encargoTipo : null,
   });
 
   if (error) {

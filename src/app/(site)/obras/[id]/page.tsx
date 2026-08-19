@@ -8,6 +8,8 @@ import ImagenObraRotada from "@/components/ImagenObraRotada";
 import EntradaImagen from "@/components/EntradaImagen";
 import RevelarEnVista from "@/components/RevelarEnVista";
 import GaleriaDetalles from "@/components/GaleriaDetalles";
+import FondoParallax from "@/components/FondoParallax";
+import { formatearEUR, precioFinal, tieneDescuentoActivo } from "@/lib/precio";
 
 export const revalidate = 0;
 
@@ -53,10 +55,9 @@ export default async function ObraDetailPage({
 
   const detalles = (detallesData ?? []) as ObraDetalle[];
 
-  const precioFormateado = new Intl.NumberFormat("es-ES", {
-    style: "currency",
-    currency: "EUR",
-  }).format(obra.precio);
+  const enOferta = tieneDescuentoActivo(obra);
+  const precioFormateado = formatearEUR(precioFinal(obra));
+  const precioOriginalFormateado = formatearEUR(obra.precio);
 
   const estadoLabel = obra.estado
     ? ESTADO_LABEL[obra.estado] ?? obra.estado
@@ -146,7 +147,19 @@ export default async function ObraDetailPage({
         </p>
       )}
 
-      <p className="mt-6 text-2xl font-medium">{precioFormateado}</p>
+      <p className="mt-6 flex items-baseline gap-3 text-2xl font-medium">
+        {enOferta && (
+          <span className="text-lg text-charcoal/40 line-through">
+            {precioOriginalFormateado}
+          </span>
+        )}
+        {precioFormateado}
+        {enOferta && (
+          <span className="rounded-full bg-clay px-3 py-1 text-xs font-medium tracking-wide text-cream">
+            -{obra.descuento_porcentaje}%
+          </span>
+        )}
+      </p>
       <p className="mt-1 text-sm text-charcoal/60">{estadoLabel}</p>
 
       <dl className="mt-8 space-y-3 text-sm text-charcoal/70">
@@ -177,8 +190,8 @@ export default async function ObraDetailPage({
       )}
 
       <div className="mt-10">
-        {obra.disponible ? (
-          <BuyButton obraId={obra.id} />
+        {obra.disponible || obra.lamina_precio ? (
+          <BuyButton obra={obra} />
         ) : (
           <span className="btn-secondary pointer-events-none opacity-60">
             Obra vendida
@@ -224,6 +237,7 @@ export default async function ObraDetailPage({
 
   return (
     <>
+      <FondoParallax />
       {principal}
 
       {detalles.length > 0 && (

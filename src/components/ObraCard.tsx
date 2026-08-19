@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Obra } from "@/types";
 import { calcularAspectoYRotacion } from "@/lib/orientacion";
+import { formatearEUR, precioFinal, tieneDescuentoActivo } from "@/lib/precio";
 
 type Rect = { top: number; left: number; width: number; height: number };
 
@@ -40,7 +41,13 @@ function calcularRectExpandido(cardRect: DOMRect, aspecto: number): Rect {
   return { top, left, width, height };
 }
 
-export default function ObraCard({ obra }: { obra: Obra }) {
+export default function ObraCard({
+  obra,
+  variante = "obra",
+}: {
+  obra: Obra;
+  variante?: "obra" | "lamina";
+}) {
   const cardRef = useRef<HTMLAnchorElement>(null);
   const [rect, setRect] = useState<Rect | null>(null);
   const [cargada, setCargada] = useState(false);
@@ -77,12 +84,14 @@ export default function ObraCard({ obra }: { obra: Obra }) {
     }, 150);
   }
 
-  const precioFormateado = obra.disponible
-    ? new Intl.NumberFormat("es-ES", {
-        style: "currency",
-        currency: "EUR",
-      }).format(obra.precio)
+  const esLamina = variante === "lamina";
+  const enOferta = !esLamina && obra.disponible && tieneDescuentoActivo(obra);
+  const precioFormateado = esLamina
+    ? `${formatearEUR(obra.lamina_precio!)} · Lámina`
+    : obra.disponible
+    ? formatearEUR(precioFinal(obra))
     : "No disponible";
+  const mostrarVendida = !esLamina && !obra.disponible;
 
   return (
     <div
@@ -133,16 +142,21 @@ export default function ObraCard({ obra }: { obra: Obra }) {
                 quality={95}
               />
             )}
-            {!obra.disponible && (
+            {mostrarVendida && (
               <span className="absolute left-3 top-3 rounded-full bg-charcoal px-3 py-1 text-xs tracking-wide text-cream">
                 Vendida
+              </span>
+            )}
+            {enOferta && (
+              <span className="absolute right-3 top-3 rounded-full bg-clay px-3 py-1 text-xs font-medium tracking-wide text-cream">
+                -{obra.descuento_porcentaje}%
               </span>
             )}
           </motion.div>
         ) : (
           <div className="relative flex aspect-[4/5] w-full items-center justify-center bg-charcoal/5 text-charcoal/30">
             Sin imagen
-            {!obra.disponible && (
+            {mostrarVendida && (
               <span className="absolute left-3 top-3 rounded-full bg-charcoal px-3 py-1 text-xs tracking-wide text-cream">
                 Vendida
               </span>
@@ -155,7 +169,12 @@ export default function ObraCard({ obra }: { obra: Obra }) {
           {obra.tecnica && (
             <p className="mt-1 text-sm text-charcoal/60">{obra.tecnica}</p>
           )}
-          <p className="mt-2 text-sm font-medium text-clay">
+          <p className="mt-2 flex items-baseline gap-2 text-sm font-medium text-clay">
+            {enOferta && (
+              <span className="text-charcoal/40 line-through">
+                {formatearEUR(obra.precio)}
+              </span>
+            )}
             {precioFormateado}
           </p>
         </div>
@@ -222,7 +241,14 @@ export default function ObraCard({ obra }: { obra: Obra }) {
 
                   <div className="absolute bottom-0 left-0 right-0 bg-cream px-5 py-4">
                     <h3 className="font-serif text-xl">{obra.titulo}</h3>
-                    <p className="mt-1 text-clay">{precioFormateado}</p>
+                    <p className="mt-1 flex items-baseline gap-2 text-clay">
+                      {enOferta && (
+                        <span className="text-charcoal/40 line-through">
+                          {formatearEUR(obra.precio)}
+                        </span>
+                      )}
+                      {precioFormateado}
+                    </p>
                     {obra.medidas && (
                       <p className="mt-1 text-sm text-charcoal/60">
                         {obra.medidas}
