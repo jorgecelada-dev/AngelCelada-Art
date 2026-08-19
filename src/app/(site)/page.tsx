@@ -29,7 +29,14 @@ export default async function HomePage() {
       {obras.length > 0 && (
         <section className="container-site py-16">
           <RevelarEnVista className="mb-10 flex items-end justify-between">
-            <h2 className="section-title">Obras destacadas</h2>
+            <h2 className="section-title">
+              <span
+                className="efecto-revelado-texto"
+                style={{ animationDelay: "0.15s" }}
+              >
+                Obras destacadas
+              </span>
+            </h2>
             <Link href="/obras" className="text-sm underline underline-offset-4">
               Ver todas
             </Link>

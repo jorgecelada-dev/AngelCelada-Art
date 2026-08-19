@@ -139,7 +139,14 @@ export default async function ObraDetailPage({
 
   const datos = (
     <RevelarEnVista delay={0.15} direccion="derecha" className="overflow-x-clip">
-      <h1 className="section-title">{obra.titulo}</h1>
+      <h1 className="section-title">
+        <span
+          className="efecto-revelado-texto"
+          style={{ animationDelay: "0.15s" }}
+        >
+          {obra.titulo}
+        </span>
+      </h1>
 
       {obra.categorias?.nombre && (
         <p className="mt-2 text-sm uppercase tracking-widest text-clay">
@@ -185,7 +192,12 @@ export default async function ObraDetailPage({
 
       {obra.descripcion && (
         <p className="mt-8 leading-relaxed text-charcoal/80">
-          {obra.descripcion}
+          <span
+            className="efecto-revelado-texto"
+            style={{ animationDelay: "0.3s" }}
+          >
+            {obra.descripcion}
+          </span>
         </p>
       )}
 
@@ -243,7 +255,14 @@ export default async function ObraDetailPage({
       {detalles.length > 0 && (
         <section className="container-site pb-16">
           <RevelarEnVista>
-            <h2 className="section-title text-2xl">Detalles de la obra</h2>
+            <h2 className="section-title text-2xl">
+              <span
+                className="efecto-revelado-texto"
+                style={{ animationDelay: "0.15s" }}
+              >
+                Detalles de la obra
+              </span>
+            </h2>
           </RevelarEnVista>
           <GaleriaDetalles detalles={detalles} titulo={obra.titulo} />
         </section>

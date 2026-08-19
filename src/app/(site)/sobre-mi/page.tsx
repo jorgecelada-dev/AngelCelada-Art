@@ -5,7 +5,14 @@ export const metadata = {
 export default function SobreMiPage() {
   return (
     <section className="container-site max-w-3xl py-16">
-      <h1 className="section-title">Sobre mí</h1>
+      <h1 className="section-title">
+        <span
+          className="efecto-revelado-texto"
+          style={{ animationDelay: "0.15s" }}
+        >
+          Sobre mí
+        </span>
+      </h1>
 
       {/*
         TODO (artista): sustituye todos estos textos de ejemplo por tu
@@ -20,11 +27,13 @@ export default function SobreMiPage() {
             Mi historia
           </h2>
           <p>
-            Escribe aquí de dónde vienes, cómo empezaste a pintar y qué te
-            llevó a especializarte en arte orgánico. Este es el espacio para
-            conectar emocionalmente con quien visita la web: qué sientes al
-            crear, qué momento de tu vida marcó tu forma de pintar, y por qué
-            eliges materiales naturales.
+            <span className="efecto-revelado-texto">
+              Escribe aquí de dónde vienes, cómo empezaste a pintar y qué te
+              llevó a especializarte en arte orgánico. Este es el espacio para
+              conectar emocionalmente con quien visita la web: qué sientes al
+              crear, qué momento de tu vida marcó tu forma de pintar, y por qué
+              eliges materiales naturales.
+            </span>
           </p>
         </div>
 
@@ -33,9 +42,11 @@ export default function SobreMiPage() {
             Background
           </h2>
           <p>
-            Formación, exposiciones, premios o menciones relevantes,
-            colaboraciones, años de trayectoria. Puedes usar una lista breve
-            si prefieres un formato de currículum artístico.
+            <span className="efecto-revelado-texto">
+              Formación, exposiciones, premios o menciones relevantes,
+              colaboraciones, años de trayectoria. Puedes usar una lista breve
+              si prefieres un formato de currículum artístico.
+            </span>
           </p>
         </div>
 
@@ -44,10 +55,12 @@ export default function SobreMiPage() {
             Técnicas y materiales
           </h2>
           <p>
-            Describe el proceso: qué pigmentos naturales usas (tierras,
-            óxidos, carbón vegetal, resinas), sobre qué superficies pintas
-            (lino, madera, papel artesanal), y qué hace único tu proceso
-            creativo frente al arte convencional.
+            <span className="efecto-revelado-texto">
+              Describe el proceso: qué pigmentos naturales usas (tierras,
+              óxidos, carbón vegetal, resinas), sobre qué superficies pintas
+              (lino, madera, papel artesanal), y qué hace único tu proceso
+              creativo frente al arte convencional.
+            </span>
           </p>
         </div>
       </div>

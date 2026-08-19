@@ -38,10 +38,22 @@ export default async function ObrasPage({
   return (
     <section className="container-site py-16">
       <RevelarEnVista className="mb-10 text-center">
-        <h1 className="section-title">Colecciones</h1>
+        <h1 className="section-title">
+          <span
+            className="efecto-revelado-texto"
+            style={{ animationDelay: "0.15s" }}
+          >
+            Colecciones
+          </span>
+        </h1>
         <p className="mx-auto mt-4 max-w-2xl text-charcoal/70">
-          Cada pieza es única e irrepetible, elaborada con pigmentos y
-          materiales de origen natural.
+          <span
+            className="efecto-revelado-texto"
+            style={{ animationDelay: "0.25s" }}
+          >
+            Cada pieza es única e irrepetible, elaborada con pigmentos y
+            materiales de origen natural.
+          </span>
         </p>
       </RevelarEnVista>
 

@@ -33,9 +33,14 @@ export default function HeroAnimado() {
         className="animate-entrada-izquierda max-w-xl text-charcoal/70"
         style={{ animationDelay: "0.28s" }}
       >
-        Bienvenido/a a mi espacio. Aquí encontrarás cada obra original,
-        pintada con materiales naturales, junto con la historia que hay
-        detrás de cada una.
+        <span
+          className="efecto-revelado-texto"
+          style={{ animationDelay: "0.85s" }}
+        >
+          Bienvenido/a a mi espacio. Aquí encontrarás cada obra original,
+          pintada con materiales naturales, junto con la historia que hay
+          detrás de cada una.
+        </span>
       </p>
       <div
         className="animate-entrada-suave flex flex-wrap justify-center gap-4"

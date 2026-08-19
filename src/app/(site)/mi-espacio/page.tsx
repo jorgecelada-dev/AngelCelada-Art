@@ -29,11 +29,23 @@ export default async function MiEspacioPage() {
   return (
     <section className="container-site py-16">
       <div className="mb-10 max-w-2xl">
-        <h1 className="section-title">Tu espacio</h1>
+        <h1 className="section-title">
+          <span
+            className="efecto-revelado-texto"
+            style={{ animationDelay: "0.15s" }}
+          >
+            Tu espacio
+          </span>
+        </h1>
         <p className="mt-4 text-charcoal/70">
-          Prueba cómo quedarían nuestros cuadros en tu propia pared, a su
-          tamaño real. No hace falta registrarse ni crear cuenta, y tu foto
-          nunca sale de tu navegador.
+          <span
+            className="efecto-revelado-texto"
+            style={{ animationDelay: "0.25s" }}
+          >
+            Prueba cómo quedarían nuestros cuadros en tu propia pared, a su
+            tamaño real. No hace falta registrarse ni crear cuenta, y tu foto
+            nunca sale de tu navegador.
+          </span>
         </p>
       </div>
 
