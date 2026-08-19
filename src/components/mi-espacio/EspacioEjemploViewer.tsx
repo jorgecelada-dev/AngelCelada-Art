@@ -2,7 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Entorno, Obra } from "@/types";
-import { dibujarCover } from "@/lib/canvas";
+import {
+  dibujarCover,
+  muestrearTonoAmbiente,
+  dibujarSombraSuave,
+  aplicarTinteAmbiente,
+  FILTRO_INTEGRACION,
+} from "@/lib/canvas";
 import { formatearEUR, precioFinal } from "@/lib/precio";
 
 const TABS = [
@@ -131,6 +137,7 @@ function CicladorObras({
     let cancelado = false;
 
     const bg = new window.Image();
+    bg.crossOrigin = "anonymous";
     bg.src = entorno.imagen_url ?? "";
     bg.onload = () => {
       if (cancelado) return;
@@ -161,15 +168,15 @@ function CicladorObras({
       const offsetX = rectX + rectW / 2 - obraW / 2;
       const offsetY = rectY + rectH / 2 - obraH / 2;
 
-      ctx.save();
-      ctx.shadowColor = "rgba(0,0,0,0.25)";
-      ctx.shadowBlur = 20;
-      ctx.shadowOffsetY = 12;
-      ctx.translate(offsetX, offsetY);
-      ctx.rect(0, 0, obraW, obraH);
-      ctx.fillStyle = "rgba(255,255,255,0.95)";
-      ctx.fill();
-      ctx.restore();
+      const tonoAmbiente = muestrearTonoAmbiente(
+        ctx,
+        offsetX,
+        offsetY,
+        obraW,
+        obraH
+      );
+
+      dibujarSombraSuave(ctx, offsetX, offsetY, obraW, obraH);
 
       const img = new window.Image();
       img.crossOrigin = "anonymous";
@@ -181,11 +188,15 @@ function CicladorObras({
         ctx.beginPath();
         ctx.rect(0, 0, obraW, obraH);
         ctx.clip();
+        ctx.filter = FILTRO_INTEGRACION;
         dibujarCover(ctx, img, 0, 0, obraW, obraH);
         ctx.restore();
 
+        aplicarTinteAmbiente(ctx, offsetX, offsetY, obraW, obraH, tonoAmbiente);
+
         if (entorno.overlay_luz_url) {
           const overlay = new window.Image();
+          overlay.crossOrigin = "anonymous";
           overlay.src = entorno.overlay_luz_url;
           overlay.onload = () => {
             if (cancelado) return;

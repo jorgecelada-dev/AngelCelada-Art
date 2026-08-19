@@ -10,7 +10,13 @@ import {
 } from "framer-motion";
 import NextImage from "next/image";
 import type { Entorno, Obra } from "@/types";
-import { dibujarCover } from "@/lib/canvas";
+import {
+  dibujarCover,
+  muestrearTonoAmbiente,
+  dibujarSombraSuave,
+  aplicarTinteAmbiente,
+  FILTRO_INTEGRACION,
+} from "@/lib/canvas";
 
 const TABS = [
   { key: "salon", label: "Salón" },
@@ -296,6 +302,7 @@ function PreviewCanvas({
     canvas.height = height;
 
     const bg = new window.Image();
+    bg.crossOrigin = "anonymous";
     bg.src = entorno.imagen_url ?? "";
     bg.onload = () => {
       if (cancelado) return;
@@ -331,15 +338,17 @@ function PreviewCanvas({
       const offsetX = rectX + rectW / 2 - obraW / 2;
       const offsetY = rectY + rectH / 2 - obraH / 2;
 
-      ctx.save();
-      ctx.shadowColor = "rgba(0,0,0,0.25)";
-      ctx.shadowBlur = 16;
-      ctx.shadowOffsetY = 10;
-      ctx.translate(offsetX, offsetY);
-      ctx.rect(0, 0, obraW, obraH);
-      ctx.fillStyle = "rgba(255,255,255,0.95)";
-      ctx.fill();
-      ctx.restore();
+      // Color medio de la pared alrededor del hueco, muestreado ANTES de
+      // dibujar el cuadro, para poder teñirlo luego con la misma luz.
+      const tonoAmbiente = muestrearTonoAmbiente(
+        ctx,
+        offsetX,
+        offsetY,
+        obraW,
+        obraH
+      );
+
+      dibujarSombraSuave(ctx, offsetX, offsetY, obraW, obraH);
 
       const img = new window.Image();
       img.crossOrigin = "anonymous";
@@ -347,18 +356,19 @@ function PreviewCanvas({
       img.onload = () => {
         if (cancelado) return;
         ctx.save();
-        ctx.shadowColor = "rgba(0,0,0,0.18)";
-        ctx.shadowBlur = 12;
-        ctx.shadowOffsetY = 8;
         ctx.translate(offsetX, offsetY);
         ctx.beginPath();
         ctx.rect(0, 0, obraW, obraH);
         ctx.clip();
+        ctx.filter = FILTRO_INTEGRACION;
         ctx.drawImage(img, 0, 0, obraW, obraH);
         ctx.restore();
 
+        aplicarTinteAmbiente(ctx, offsetX, offsetY, obraW, obraH, tonoAmbiente);
+
         if (entorno.overlay_luz_url) {
           const overlay = new window.Image();
+          overlay.crossOrigin = "anonymous";
           overlay.src = entorno.overlay_luz_url;
           overlay.onload = () => {
             if (cancelado) return;
