@@ -1,6 +1,9 @@
-import type { ReactNode } from "react";
+"use client";
 
-// CSS puro (ver RevelarEnVista.tsx): se aplica desde el primer pintado.
+import type { ReactNode } from "react";
+import { useEnVista } from "@/lib/useEnVista";
+
+// CSS puro ligado al scroll (ver RevelarEnVista.tsx / useEnVista.ts).
 export default function EntradaImagen({
   children,
   className,
@@ -8,8 +11,15 @@ export default function EntradaImagen({
   children: ReactNode;
   className?: string;
 }) {
+  const { ref, visible } = useEnVista<HTMLDivElement>();
+
   return (
-    <div className={`animate-entrada-izquierda ${className ?? ""}`}>
+    <div
+      ref={ref}
+      className={`animar-al-scroll animate-entrada-izquierda ${
+        visible ? "en-vista" : ""
+      } ${className ?? ""}`}
+    >
       {children}
     </div>
   );

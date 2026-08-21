@@ -19,6 +19,21 @@
     @apply mx-auto w-full max-w-6xl px-6;
   }
 
+  /* Pausa una animación de entrada hasta que el elemento entra en el
+     viewport (ver src/lib/useEnVista.ts). Se queda congelada en su
+     fotograma inicial (oculta) hasta entonces, sin flash: el estado
+     "oculto" ya está en el CSS desde el primer pintado. */
+  /* !important es necesario: el shorthand "animation" de las utilidades
+     de Tailwind (animate-entrada-*) reinicia animation-play-state a
+     "running" en cuanto se aplica, así que una regla normal no basta
+     para mantenerla pausada. */
+  .animar-al-scroll {
+    animation-play-state: paused !important;
+  }
+  .animar-al-scroll.en-vista {
+    animation-play-state: running !important;
+  }
+
   .btn-primary {
     @apply inline-flex items-center justify-center rounded-full bg-clay px-6 py-3 text-sm font-medium tracking-wide text-cream transition hover:bg-charcoal;
   }

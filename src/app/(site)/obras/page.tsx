@@ -72,6 +72,17 @@ export default async function ObrasPage({
       />
 
       <section className="container-site py-16">
+        {coleccionActiva?.descripcion && (
+          <div className="mx-auto mb-12 max-w-2xl text-center">
+            <p className="text-sm uppercase tracking-widest text-clay">
+              {coleccionActiva.nombre}
+            </p>
+            <p className="mt-3 text-charcoal/70">
+              {coleccionActiva.descripcion}
+            </p>
+          </div>
+        )}
+
         {error && (
           <p className="text-center text-red-600">
             No se pudieron cargar las obras. Revisa la configuración de

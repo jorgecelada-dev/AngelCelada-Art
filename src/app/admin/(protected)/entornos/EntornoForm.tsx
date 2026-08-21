@@ -15,6 +15,59 @@ import { OBJETOS_REFERENCIA } from "@/lib/referencias";
 const CANVAS_LOGICO_ANCHO = 600;
 const CANVAS_LOGICO_ALTO = 450;
 
+// Misma cuenta exacta que hace PreviewCanvas en la web pública (ver
+// VisualizacionObra.tsx): el cuadro se centra dentro del rectángulo de
+// pared, a su tamaño real según la escala, reducido si no cabe en el 95%
+// del rectángulo y agrandado si quedaría demasiado pequeño para verse.
+// Replicarla aquí permite previsualizar en vivo cómo quedaría una obra
+// real, en vez de tener que adivinarlo o probarlo en la ficha pública.
+function calcularCajaMuestra(params: {
+  paredX: number;
+  paredY: number;
+  paredAncho: number;
+  paredAlto: number;
+  escalaCmPorPx: number;
+  anchoObraCm: number;
+  altoObraCm: number;
+}) {
+  const width = CANVAS_LOGICO_ANCHO;
+  const height = CANVAS_LOGICO_ALTO;
+  const rectX = (params.paredX / 100) * width;
+  const rectY = (params.paredY / 100) * height;
+  const rectW = (params.paredAncho / 100) * width;
+  const rectH = (params.paredAlto / 100) * height;
+
+  if (!params.escalaCmPorPx || !params.anchoObraCm || !params.altoObraCm) {
+    return null;
+  }
+
+  let obraW = params.anchoObraCm / params.escalaCmPorPx;
+  let obraH = params.altoObraCm / params.escalaCmPorPx;
+
+  const maxW = rectW * 0.95;
+  const maxH = rectH * 0.95;
+  const factorReduccion = Math.min(1, maxW / obraW, maxH / obraH);
+  obraW *= factorReduccion;
+  obraH *= factorReduccion;
+
+  const minDim = 50;
+  const factorMinimo = Math.max(1, minDim / Math.min(obraW, obraH));
+  obraW *= factorMinimo;
+  obraH *= factorMinimo;
+
+  const offsetX = rectX + rectW / 2 - obraW / 2;
+  const offsetY = rectY + rectH / 2 - obraH / 2;
+
+  return {
+    leftPct: (offsetX / width) * 100,
+    topPct: (offsetY / height) * 100,
+    widthPct: (obraW / width) * 100,
+    heightPct: (obraH / height) * 100,
+    fueReducida: factorReduccion < 1,
+    fueAgrandada: factorMinimo > 1,
+  };
+}
+
 type Punto = { xPct: number; yPct: number };
 
 const TIPOS = [
@@ -38,6 +91,26 @@ export default function EntornoForm({ entorno }: { entorno?: Entorno }) {
   const [paredAlto, setParedAlto] = useState(entorno?.pared_alto ?? 60);
   const [escalaCmPorPx, setEscalaCmPorPx] = useState(
     entorno?.escala_cm_por_px ?? 0.1
+  );
+
+  // Obra "de prueba" solo para la vista previa: no se guarda, es para ver
+  // en vivo si un cuadro de ese tamaño quedaría bien con la pared y la
+  // escala configuradas.
+  const [muestraAncho, setMuestraAncho] = useState(80);
+  const [muestraAlto, setMuestraAlto] = useState(100);
+
+  const cajaMuestra = useMemo(
+    () =>
+      calcularCajaMuestra({
+        paredX,
+        paredY,
+        paredAncho,
+        paredAlto,
+        escalaCmPorPx,
+        anchoObraCm: muestraAncho,
+        altoObraCm: muestraAlto,
+      }),
+    [paredX, paredY, paredAncho, paredAlto, escalaCmPorPx, muestraAncho, muestraAlto]
   );
 
   const previewRef = useRef<HTMLDivElement>(null);
@@ -222,9 +295,17 @@ export default function EntornoForm({ entorno }: { entorno?: Entorno }) {
       </div>
 
       <div>
-        <p className="mb-2 text-sm font-medium">
-          Ajusta el rectángulo sobre la zona de pared donde debe aparecer la
-          obra (en % respecto a la foto)
+        <p className="mb-1 text-sm font-medium">
+          Marca todo el hueco de pared disponible (no el tamaño del cuadro)
+        </p>
+        <p className="mb-2 text-xs text-charcoal/60">
+          El rectángulo naranja debe cubrir toda la zona de pared libre
+          donde podría colgarse algo — no el tamaño de una obra en
+          concreto. El cuadro real se centra dentro y se dibuja a su
+          tamaño verdadero según la escala; si el rectángulo queda más
+          pequeño que el cuadro, este se encoge para caber y deja de verse
+          a su tamaño real. El recuadro blanco de abajo es una obra de
+          prueba para comprobarlo en vivo.
         </p>
         <div
           ref={previewRef}
@@ -256,6 +337,20 @@ export default function EntornoForm({ entorno }: { entorno?: Entorno }) {
                 height: `${paredAlto}%`,
               }}
             />
+          )}
+
+          {!calibrando && cajaMuestra && (
+            <div
+              className="absolute flex items-center justify-center border-2 border-dashed border-white bg-white/40 text-center text-[10px] font-medium leading-tight text-charcoal shadow"
+              style={{
+                left: `${cajaMuestra.leftPct}%`,
+                top: `${cajaMuestra.topPct}%`,
+                width: `${cajaMuestra.widthPct}%`,
+                height: `${cajaMuestra.heightPct}%`,
+              }}
+            >
+              {muestraAncho}×{muestraAlto}
+            </div>
           )}
 
           {calibrando && puntoA && (
@@ -294,6 +389,50 @@ export default function EntornoForm({ entorno }: { entorno?: Entorno }) {
                 strokeWidth={2}
               />
             </svg>
+          )}
+        </div>
+
+        <div className="mt-3 rounded-lg border border-charcoal/10 bg-white/60 p-3">
+          <p className="mb-2 text-sm font-medium">
+            Obra de prueba (solo para esta vista previa, no se guarda)
+          </p>
+          <div className="flex flex-wrap items-end gap-3">
+            <div>
+              <label className="block text-xs text-charcoal/60">
+                Ancho (cm)
+              </label>
+              <input
+                type="number"
+                value={muestraAncho}
+                onChange={(e) => setMuestraAncho(Number(e.target.value))}
+                className="mt-1 w-24 rounded-lg border border-charcoal/20 bg-white px-3 py-2 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-charcoal/60">
+                Alto (cm)
+              </label>
+              <input
+                type="number"
+                value={muestraAlto}
+                onChange={(e) => setMuestraAlto(Number(e.target.value))}
+                className="mt-1 w-24 rounded-lg border border-charcoal/20 bg-white px-3 py-2 text-sm"
+              />
+            </div>
+          </div>
+          {cajaMuestra?.fueReducida && (
+            <p className="mt-2 text-xs text-clay">
+              ⚠ El rectángulo de pared es más pequeño que esta obra a su
+              tamaño real: se está encogiendo para caber. Agranda el
+              rectángulo si quieres que se vea a su tamaño verdadero.
+            </p>
+          )}
+          {cajaMuestra?.fueAgrandada && (
+            <p className="mt-2 text-xs text-charcoal/60">
+              A esta escala, una obra de {muestraAncho}×{muestraAlto} cm
+              quedaría demasiado pequeña para verse bien, así que se
+              agranda un poco por debajo de su tamaño real.
+            </p>
           )}
         </div>
 
