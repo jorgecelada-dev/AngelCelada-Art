@@ -23,7 +23,7 @@ export default async function HomePage() {
     <>
       <HeroAnimado />
 
-      {/* Obras destacadas */}
+      {/* Últimas obras */}
       {obras.length > 0 && (
         <section className="container-site py-16">
           <RevelarEnVista className="mb-10 flex items-end justify-between">
@@ -32,14 +32,14 @@ export default async function HomePage() {
                 className="efecto-revelado-texto"
                 style={{ animationDelay: "0.15s" }}
               >
-                Obras destacadas
+                Últimas obras
               </span>
             </h2>
             <Link href="/obras" className="text-sm underline underline-offset-4">
               Ver todas
             </Link>
           </RevelarEnVista>
-          <MosaicoObras obras={obras} />
+          <MosaicoObras obras={obras} cuadrada />
         </section>
       )}
 

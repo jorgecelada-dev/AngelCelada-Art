@@ -28,25 +28,30 @@ export default function MosaicoObras({
   obras,
   variante = "obra",
   compacto = false,
+  cuadrada = false,
 }: {
   obras: Obra[];
   variante?: "obra" | "lamina";
   // Columnas más estrechas, para cuando el mosaico convive con un panel
   // lateral (el filtro de /obras) y hay menos ancho disponible.
   compacto?: boolean;
+  // Celdas cuadradas uniformes en vez del bento de tamaños variables,
+  // manteniendo la resolución de imagen igual de generosa.
+  cuadrada?: boolean;
 }) {
-  if (variante === "lamina") {
-    // Las láminas van todas en celdas cuadradas iguales, encajadas en
-    // filas de 4 (menos en pantallas pequeñas, donde se reduce a 2/3).
+  if (variante === "lamina" || cuadrada) {
+    // Celdas cuadradas iguales, encajadas en filas de 4 (menos en
+    // pantallas pequeñas, donde se reduce a 2/3).
+    const esLamina = variante === "lamina";
     return (
       <div className="grid grid-cols-2 gap-4 overflow-x-clip sm:grid-cols-3 lg:grid-cols-4">
         {obras.map((obra, i) => (
           <div
             key={obra.id}
-            className={`aspect-square overflow-hidden ${animacionParaIndice(i)}`}
+            className={`aspect-square overflow-hidden ${esLamina ? "" : "rounded-lg"} ${animacionParaIndice(i)}`}
             style={{ animationDelay: `${Math.min(i, 8) * 0.06}s` }}
           >
-            <ObraCard obra={obra} variante="lamina" />
+            <ObraCard obra={obra} variante={variante} />
           </div>
         ))}
       </div>

@@ -38,7 +38,7 @@ export default async function ObrasPage({
   return (
     <>
       <CabeceraPagina
-        titulo="Colecciones"
+        titulo="Obras"
         imagen="/img/cabeceras/naranja.png"
         pills={
           colecciones.length > 0 && (

@@ -130,7 +130,7 @@ export default async function ObraDetailPage({
   );
 
   const datos = (
-    <RevelarEnVista delay={0.15} direccion="derecha" className="overflow-x-clip">
+    <RevelarEnVista delay={0.15} direccion="derecha" className="min-w-0 overflow-x-clip">
       <h1 className="section-title">
         <span
           className="efecto-revelado-texto"
@@ -231,7 +231,7 @@ export default async function ObraDetailPage({
         {datos}
 
         {obra.ancho_cm && obra.alto_cm && (
-          <div>
+          <div className="min-w-0">
             <VisualizacionObra obra={obra} entornos={entornos} />
           </div>
         )}

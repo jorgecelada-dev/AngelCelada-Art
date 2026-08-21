@@ -171,9 +171,9 @@ export default function VisualizacionObra({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.35, ease: "easeOut" }}
-              className="relative"
+              className="relative w-full"
             >
-              <div ref={trackRef} className="overflow-hidden">
+              <div ref={trackRef} className="w-full overflow-hidden">
                 <motion.div
                   className="flex"
                   drag={filtered.length > 1 ? "x" : false}
@@ -189,7 +189,12 @@ export default function VisualizacionObra({
                   {filtered.map((entorno) => (
                     <div
                       key={entorno.id}
-                      style={{ width: trackWidth || "100%" }}
+                      // Nunca "100%": dentro de un flex row sin ancho
+                      // propio, un hijo al 100% crea una dependencia
+                      // circular con el ancestro (que a su vez depende del
+                      // contenido) y algunos navegadores la "resuelven"
+                      // agrandando el elemento a un tamaño absurdo.
+                      style={{ width: trackWidth }}
                       className="flex-shrink-0 px-1"
                     >
                       <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-charcoal/5">
