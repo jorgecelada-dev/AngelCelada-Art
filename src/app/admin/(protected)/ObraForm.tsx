@@ -18,6 +18,22 @@ function formatearCm(valor: number): string {
   return Number(valor.toFixed(2)).toString();
 }
 
+// Las fotos nuevas del artista vienen nombradas como "Titulo_37x37.jpg"
+// (ancho x alto reales del cuadro, en cm, justo antes de la extensión).
+// Si el nombre del archivo sigue ese patrón, se detectan solas.
+function extraerMedidasDelNombre(
+  nombreArchivo: string
+): { ancho: number; alto: number } | null {
+  const match = nombreArchivo.match(
+    /(\d+(?:[.,]\d+)?)\s*x\s*(\d+(?:[.,]\d+)?)(?=\.\w+$)/i
+  );
+  if (!match) return null;
+  const ancho = Number(match[1].replace(",", "."));
+  const alto = Number(match[2].replace(",", "."));
+  if (!ancho || !alto) return null;
+  return { ancho, alto };
+}
+
 function leerDimensionesImagen(
   file: File
 ): Promise<{ width: number; height: number }> {
@@ -59,6 +75,7 @@ export default function ObraForm({
   const [altoCm, setAltoCm] = useState<string>(
     obra?.alto_cm?.toString() ?? ""
   );
+  const [medidasDetectadas, setMedidasDetectadas] = useState(false);
   const [orientacion, setOrientacion] = useState(obra?.orientacion ?? "");
   const [estado, setEstadoState] = useState(obra?.estado ?? "en venta");
   const [descuento, setDescuento] = useState(
@@ -78,6 +95,7 @@ export default function ObraForm({
 
   async function onImagenChange(file: File | null) {
     setImagenFile(file);
+    setMedidasDetectadas(false);
     if (!file) {
       setPreviewUrl(obra?.imagen_url ?? null);
       setPreviewDims(
@@ -92,6 +110,13 @@ export default function ObraForm({
       setPreviewDims(await leerDimensionesImagen(file));
     } catch {
       setPreviewDims(null);
+    }
+
+    const medidas = extraerMedidasDelNombre(file.name);
+    if (medidas) {
+      setAnchoCm(formatearCm(medidas.ancho));
+      setAltoCm(formatearCm(medidas.alto));
+      setMedidasDetectadas(true);
     }
   }
 
@@ -255,7 +280,10 @@ export default function ObraForm({
             type="number"
             step="0.01"
             value={anchoCm}
-            onChange={(e) => setAnchoCm(e.target.value)}
+            onChange={(e) => {
+              setAnchoCm(e.target.value);
+              setMedidasDetectadas(false);
+            }}
             className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3"
           />
         </div>
@@ -268,16 +296,25 @@ export default function ObraForm({
             type="number"
             step="0.01"
             value={altoCm}
-            onChange={(e) => setAltoCm(e.target.value)}
+            onChange={(e) => {
+              setAltoCm(e.target.value);
+              setMedidasDetectadas(false);
+            }}
             className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3"
           />
         </div>
       </div>
 
+      {medidasDetectadas && (
+        <p className="-mt-2 text-xs text-sage">
+          ✓ Medidas detectadas automáticamente del nombre del archivo.
+        </p>
+      )}
+
       <p className="-mt-2 text-xs text-charcoal/50">
         {anchoCm && altoCm
           ? `Se guardará como "Medidas: ${formatearCm(Number(anchoCm))} x ${formatearCm(Number(altoCm))} cm". También es lo que se usa para encajarla en "Visualiza en tu espacio".`
-          : "Rellena ambos campos para calcular las medidas que se mostrarán."}
+          : 'Rellena ambos campos a mano, o sube una foto nombrada "Titulo_ANCHOxALTO.jpg" para que se rellenen solos.'}
       </p>
 
       <div>
