@@ -82,10 +82,12 @@ function TarjetaObra({
 function ObraArrastrable({
   obra,
   contenedor,
+  esObjetivo,
   onQuitar,
 }: {
   obra: Obra;
   contenedor: NombreContenedor;
+  esObjetivo?: boolean;
   onQuitar?: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -101,12 +103,20 @@ function ObraArrastrable({
       <div
         {...attributes}
         {...listeners}
-        className="h-full w-full cursor-grab touch-none active:cursor-grabbing"
+        className={`h-full w-full cursor-grab touch-none rounded-lg active:cursor-grabbing ${
+          esObjetivo ? "ring-2 ring-sage ring-offset-2" : ""
+        }`}
       >
         <TarjetaObra obra={obra} contenedor={contenedor} />
       </div>
 
-      {contenedor === "grid" && onQuitar && (
+      {esObjetivo && (
+        <span className="pointer-events-none absolute right-1.5 top-1.5 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-sage text-cream">
+          ✓
+        </span>
+      )}
+
+      {contenedor === "grid" && onQuitar && !esObjetivo && (
         <button
           type="button"
           onClick={onQuitar}
@@ -156,6 +166,7 @@ export default function MosaicoOrdenador({
   // quedarse un render por detrás de las actualizaciones en onDragOver.
   const gruposRef = useRef(grupos);
   const [activa, setActiva] = useState<Obra | null>(null);
+  const [objetivoId, setObjetivoId] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
 
   function actualizarGrupos(actualizar: (prev: Grupos) => Grupos) {
@@ -186,6 +197,14 @@ export default function MosaicoOrdenador({
     setActiva(obra);
   }
 
+  // Solo pinta la marca visual de "aquí se soltaría" (no reordena nada
+  // por sí sola), así que puede actualizarse en cada evento sin riesgo de
+  // bucle: no cambia el tamaño ni la posición de ninguna celda.
+  function onDragOverIndicador(event: DragOverEvent) {
+    const { over } = event;
+    setObjetivoId(over && !esNombreContenedor(over.id) ? String(over.id) : null);
+  }
+
   // Solo mueve la obra de un contenedor a otro mientras se arrastra (para
   // que el hueco en el panel/cuadrícula se vea al momento). El
   // reordenamiento DENTRO del mismo contenedor se resuelve al soltar, en
@@ -194,6 +213,8 @@ export default function MosaicoOrdenador({
   // objetivo bajo el cursor puede oscilar muy rápido entre dos vecinas
   // cuando la celda activa es mucho más grande que las de alrededor.
   function onDragOver(event: DragOverEvent) {
+    onDragOverIndicador(event);
+
     const { active, over } = event;
     if (!over || active.id === over.id) return;
     const desde = encontrarContenedor(active.id);
@@ -224,6 +245,7 @@ export default function MosaicoOrdenador({
   function onDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     setActiva(null);
+    setObjetivoId(null);
     if (!over) return;
 
     const desde = encontrarContenedor(active.id);
@@ -242,6 +264,16 @@ export default function MosaicoOrdenador({
       }
     }
 
+    persistir(siguiente.grid, siguiente.panel);
+  }
+
+  function colocarTodasAutomaticamente() {
+    if (grupos.panel.length === 0) return;
+    const siguiente = {
+      grid: [...grupos.grid, ...grupos.panel],
+      panel: [],
+    };
+    actualizarGrupos(() => siguiente);
     persistir(siguiente.grid, siguiente.panel);
   }
 
@@ -297,9 +329,20 @@ export default function MosaicoOrdenador({
 
       <div className="mt-4 grid grid-cols-1 gap-8 lg:grid-cols-[260px_1fr]">
         <div>
-          <h2 className="mb-3 text-sm font-medium text-charcoal/70">
-            Sin colocar ({grupos.panel.length})
-          </h2>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h2 className="text-sm font-medium text-charcoal/70">
+              Sin colocar ({grupos.panel.length})
+            </h2>
+            {grupos.panel.length > 0 && (
+              <button
+                type="button"
+                onClick={colocarTodasAutomaticamente}
+                className="text-xs text-clay underline underline-offset-2 hover:text-charcoal"
+              >
+                Colocar todas
+              </button>
+            )}
+          </div>
           <SortableContext items={grupos.panel.map((o) => o.id)} strategy={verticalListSortingStrategy}>
             <Contenedor
               id="panel"
@@ -312,7 +355,12 @@ export default function MosaicoOrdenador({
               }
             >
               {grupos.panel.map((obra) => (
-                <ObraArrastrable key={obra.id} obra={obra} contenedor="panel" />
+                <ObraArrastrable
+                  key={obra.id}
+                  obra={obra}
+                  contenedor="panel"
+                  esObjetivo={objetivoId === obra.id}
+                />
               ))}
             </Contenedor>
           </SortableContext>
@@ -343,6 +391,7 @@ export default function MosaicoOrdenador({
                   key={obra.id}
                   obra={obra}
                   contenedor="grid"
+                  esObjetivo={objetivoId === obra.id}
                   onQuitar={() => quitarDelMosaico(obra.id)}
                 />
               ))}
