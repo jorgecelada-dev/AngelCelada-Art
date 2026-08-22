@@ -17,7 +17,7 @@ export default async function HomePage() {
     .eq("visible", true)
     .order("orden_manual", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false })
-    .limit(3);
+    .limit(4);
 
   const obras = (destacadas ?? []) as Obra[];
 

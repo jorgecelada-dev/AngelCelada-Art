@@ -42,6 +42,31 @@
     @apply inline-flex items-center justify-center rounded-full border border-charcoal/20 px-6 py-3 text-sm font-medium tracking-wide text-charcoal transition hover:border-charcoal;
   }
 
+  /* CTA principal del hero: un brillo cruza el botón cada pocos segundos
+     y un halo respira alrededor, para que destaque sin animación de JS.
+     Mismo motivo del brillo que el titular (texto-brillo), como firma
+     visual repetida. */
+  .btn-brillo {
+    position: relative;
+    overflow: hidden;
+    animation: halo-clay 3.2s ease-in-out infinite;
+  }
+  .btn-brillo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    left: -75%;
+    width: 40%;
+    background: linear-gradient(
+      115deg,
+      transparent,
+      rgba(255, 255, 255, 0.55),
+      transparent
+    );
+    transform: skewX(-20deg);
+    animation: brillo-boton 3.6s ease-in-out infinite;
+  }
+
   .texto-brillo {
     background: linear-gradient(100deg, #2b2b28 40%, #b08d57 50%, #2b2b28 60%);
     background-size: 250% 100%;
@@ -110,5 +135,25 @@
   }
   to {
     clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes brillo-boton {
+  0%,
+  40% {
+    left: -75%;
+  }
+  100% {
+    left: 130%;
+  }
+}
+
+@keyframes halo-clay {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(176, 141, 87, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(176, 141, 87, 0);
   }
 }

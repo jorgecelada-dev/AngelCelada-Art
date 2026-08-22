@@ -43,20 +43,14 @@ export default function HeroAnimado() {
         </span>
       </p>
       <div
-        className="animate-entrada-suave flex flex-wrap justify-center gap-4"
+        className="animate-entrada-suave flex justify-center"
         style={{ animationDelay: "0.42s" }}
       >
         <Link
           href="/obras"
-          className="btn-primary transition-transform duration-200 hover:scale-105 active:scale-95"
+          className="btn-primary btn-brillo transition-transform duration-200 hover:scale-105 active:scale-95"
         >
           Ver colecciones
-        </Link>
-        <Link
-          href="/sobre-mi"
-          className="btn-secondary transition-transform duration-200 hover:scale-105 active:scale-95"
-        >
-          Conocer mi historia
         </Link>
       </div>
     </section>
