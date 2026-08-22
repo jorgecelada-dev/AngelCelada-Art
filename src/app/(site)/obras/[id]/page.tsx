@@ -5,6 +5,7 @@ import type { Entorno, Obra, ObraDetalle } from "@/types";
 import BuyButton from "./BuyButton";
 import VisualizacionObra from "@/components/VisualizacionObra";
 import BotonVolver from "@/components/BotonVolver";
+import BotonFavorito from "@/components/BotonFavorito";
 import ImagenObraRotada from "@/components/ImagenObraRotada";
 import EntradaImagen from "@/components/EntradaImagen";
 import RevelarEnVista from "@/components/RevelarEnVista";
@@ -130,6 +131,18 @@ export default async function ObraDetailPage({
     </div>
   );
 
+  // "inline-block" para que el recuadro se ciña exactamente al tamaño
+  // real de la imagen (no al ancho completo del contenedor flex que la
+  // centra), así el corazón queda pegado a su esquina de verdad y no
+  // flotando en el hueco vacío alrededor cuando la foto es más estrecha
+  // que la columna.
+  const imagenConFavorito = (
+    <div className="relative inline-block">
+      {imagen}
+      <BotonFavorito obraId={obra.id} />
+    </div>
+  );
+
   const datos = (
     <RevelarEnVista delay={0.15} direccion="derecha" className="min-w-0 overflow-x-clip">
       <h1 className="section-title">
@@ -218,14 +231,14 @@ export default async function ObraDetailPage({
   const principal = esVertical ? (
     <section className="container-site grid grid-cols-1 items-start gap-12 py-16 md:grid-cols-2">
       <EntradaImagen className="flex items-start justify-center overflow-hidden rounded-2xl bg-charcoal/5">
-        {imagen}
+        {imagenConFavorito}
       </EntradaImagen>
       {datos}
     </section>
   ) : (
     <section className="container-site py-16">
       <EntradaImagen className="flex w-full items-center justify-center overflow-hidden rounded-2xl bg-charcoal/5">
-        {imagen}
+        {imagenConFavorito}
       </EntradaImagen>
 
       <div className="mt-12 grid grid-cols-1 items-start gap-12 md:grid-cols-[1fr_1.3fr]">
