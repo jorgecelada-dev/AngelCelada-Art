@@ -12,6 +12,12 @@ import BotonFavorito from "./BotonFavorito";
 
 type Rect = { top: number; left: number; width: number; height: number };
 
+// Alto fijo aproximado de la franja de datos (título + precio/medidas)
+// que va DEBAJO de la imagen ampliada, nunca superpuesta — así la foto
+// se ve siempre completa. Se descuenta aquí para que el conjunto
+// (imagen + franja) siga cabiendo y quedando centrado en la pantalla.
+const ALTURA_INFO = 88;
+
 function calcularRectExpandido(cardRect: DOMRect, aspecto: number): Rect {
   // Crece de forma clara respecto al tamaño actual de la tarjeta en
   // pantalla (el mosaico ya puede tener tarjetas grandes de por sí).
@@ -20,7 +26,7 @@ function calcularRectExpandido(cardRect: DOMRect, aspecto: number): Rect {
   let height = width / aspecto;
 
   const maxW = Math.min(window.innerWidth * 0.85, 780);
-  const maxH = Math.min(window.innerHeight * 0.8, 780);
+  const maxH = Math.min(window.innerHeight * 0.8, 780) - ALTURA_INFO;
   if (width > maxW) {
     width = maxW;
     height = width / aspecto;
@@ -30,12 +36,13 @@ function calcularRectExpandido(cardRect: DOMRect, aspecto: number): Rect {
     width = height * aspecto;
   }
 
+  const alturaTotal = height + ALTURA_INFO;
   const left = Math.max(
     Math.min(window.innerWidth / 2 - width / 2, window.innerWidth - width - 16),
     16
   );
   const top = Math.max(
-    Math.min(window.innerHeight / 2 - height / 2, window.innerHeight - height - 16),
+    Math.min(window.innerHeight / 2 - alturaTotal / 2, window.innerHeight - alturaTotal - 16),
     16
   );
 
@@ -219,22 +226,49 @@ export default function ObraCard({
                   top: rect.top,
                   left: rect.left,
                   width: rect.width,
-                  height: rect.height,
                 }}
-                className="pointer-events-none z-50 overflow-hidden bg-charcoal/5 shadow-2xl ring-1 ring-charcoal/10"
+                className="pointer-events-none z-50 overflow-hidden rounded-lg bg-cream shadow-2xl ring-1 ring-charcoal/10"
               >
-                <Link href={`/obras/${obra.id}`} className="block h-full w-full">
-                  {necesitaRotarFoto ? (
-                    // Misma proporción real que la tarjeta: si hace falta rotar
-                    // ahí, también hace falta rotar aquí.
-                    <div
-                      className="absolute left-1/2 top-1/2"
-                      style={{
-                        width: `${(1 / aspecto) * 100}%`,
-                        height: `${aspecto * 100}%`,
-                        transform: "translate(-50%, -50%) rotate(90deg)",
-                      }}
-                    >
+                {/* ALTURA_INFO de calcularRectExpandido es solo una
+                    estimación para centrar el conjunto en pantalla; el
+                    alto real de esta franja lo decide su propio
+                    contenido (flex-none, sin recorte), así que un título
+                    largo o unas medidas de más nunca se cortan. */}
+                <Link
+                  href={`/obras/${obra.id}`}
+                  className="pointer-events-auto flex w-full flex-col"
+                >
+                  {/* La imagen ocupa un bloque de alto fijo propio (el
+                      calculado para ella); la franja de datos va debajo,
+                      en el flujo normal, nunca superpuesta encima. */}
+                  <div
+                    className="relative flex-none overflow-hidden bg-charcoal/5"
+                    style={{ height: rect.height }}
+                  >
+                    {necesitaRotarFoto ? (
+                      // Misma proporción real que la tarjeta: si hace falta
+                      // rotar ahí, también hace falta rotar aquí.
+                      <div
+                        className="absolute left-1/2 top-1/2"
+                        style={{
+                          width: `${(1 / aspecto) * 100}%`,
+                          height: `${aspecto * 100}%`,
+                          transform: "translate(-50%, -50%) rotate(90deg)",
+                        }}
+                      >
+                        <Image
+                          src={obra.imagen_url}
+                          alt={obra.titulo}
+                          fill
+                          className={`object-contain transition-opacity duration-200 ${
+                            cargada ? "opacity-100" : "opacity-0"
+                          }`}
+                          sizes="780px"
+                          quality={100}
+                          onLoad={() => setCargada(true)}
+                        />
+                      </div>
+                    ) : (
                       <Image
                         src={obra.imagen_url}
                         alt={obra.titulo}
@@ -246,24 +280,12 @@ export default function ObraCard({
                         quality={100}
                         onLoad={() => setCargada(true)}
                       />
-                    </div>
-                  ) : (
-                    <Image
-                      src={obra.imagen_url}
-                      alt={obra.titulo}
-                      fill
-                      className={`object-contain transition-opacity duration-200 ${
-                        cargada ? "opacity-100" : "opacity-0"
-                      }`}
-                      sizes="780px"
-                      quality={100}
-                      onLoad={() => setCargada(true)}
-                    />
-                  )}
+                    )}
+                  </div>
 
-                  <div className="absolute bottom-0 left-0 right-0 bg-cream px-5 py-4">
-                    <h3 className="font-serif text-xl">{obra.titulo}</h3>
-                    <p className="mt-1 flex items-baseline gap-2 text-clay">
+                  <div className="flex-none px-5 py-3">
+                    <h3 className="truncate font-serif text-lg">{obra.titulo}</h3>
+                    <p className="mt-0.5 flex items-baseline gap-2 text-sm text-clay">
                       {enOferta && (
                         <span className="text-charcoal/40 line-through">
                           {formatearEUR(obra.precio)}
@@ -272,9 +294,7 @@ export default function ObraCard({
                       {precioFormateado}
                     </p>
                     {obra.medidas && (
-                      <p className="mt-1 text-sm text-charcoal/60">
-                        {obra.medidas}
-                      </p>
+                      <p className="text-xs text-charcoal/60">{obra.medidas}</p>
                     )}
                   </div>
                 </Link>
