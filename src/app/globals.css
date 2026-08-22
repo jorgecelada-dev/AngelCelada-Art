@@ -102,19 +102,20 @@
     animation: revelado-texto 1s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
-  /* Capas del fondo del hero (FondoHeroAnimado): deriva horizontal en
-     bucle perfecto (el SVG tesela en horizontal, así que no hay salto
-     al volver a 0) + un balanceo/respiración vertical. El nombre de
-     cada animación (dirección de deriva, amplitud de balanceo) lo pone
-     el propio componente por capa, aquí solo el timing genérico. */
-  .fondo-hero-capa {
+  /* Capas de fondo con olas (FondoOndas, usado por el hero y por el
+     fondo global): deriva horizontal en bucle perfecto (el SVG tesela
+     en horizontal, así que no hay salto al volver a 0) + un
+     balanceo/respiración vertical. El nombre de cada animación
+     (dirección de deriva, amplitud de balanceo) lo pone el propio
+     componente por capa, aquí solo el timing genérico. */
+  .fondo-ondas-capa {
     animation-timing-function: linear, ease-in-out;
     animation-iteration-count: infinite, infinite;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fondo-hero-capa {
+  .fondo-ondas-capa {
     animation: none !important;
   }
 }

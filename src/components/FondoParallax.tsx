@@ -1,72 +1,35 @@
-"use client";
+import FondoOndas, { type CapaOnda } from "./FondoOndas";
 
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import type { MotionValue } from "framer-motion";
+// Fondo global de toda la web pública: mismo sistema que el hero de
+// portada (FondoOndas) — deriva horizontal + balanceo, en CSS puro, sin
+// depender del scroll ni de JS. Dieciséis capas (todo public/img/capa-
+// 01..16.svg) para que la página se sienta más llena. Direcciones y
+// amplitudes de balanceo bien repartidas entre "izq"/"der" y
+// "suave"/"medio"/"amplio" para que la diferencia entre capas se note,
+// y velocidades algo más lentas que el hero (esto se ve mucho tiempo en
+// pantalla, no solo en la portada).
+const CAPAS: CapaOnda[] = [
+  { src: "/img/capa-08.svg", height: 580, opacity: 0.5, direccion: "izq", derivaS: 62, flotar: "suave", flotarS: 24, delay: 0 },
+  { src: "/img/capa-04.svg", height: 600, opacity: 0.55, direccion: "der", derivaS: 44, flotar: "amplio", flotarS: 18, delay: -3 },
+  { src: "/img/capa-06.svg", height: 540, opacity: 0.45, direccion: "izq", derivaS: 54, flotar: "medio", flotarS: 27, delay: -9 },
+  { src: "/img/capa-02.svg", height: 550, opacity: 0.6, direccion: "der", derivaS: 37, flotar: "suave", flotarS: 20, delay: -5 },
+  { src: "/img/capa-05.svg", height: 500, opacity: 0.32, direccion: "izq", derivaS: 47, flotar: "medio", flotarS: 15, delay: -12 },
+  { src: "/img/capa-10.svg", height: 480, opacity: 0.5, direccion: "der", derivaS: 30, flotar: "suave", flotarS: 22, delay: -6 },
+  { src: "/img/capa-03.svg", height: 460, opacity: 0.5, direccion: "izq", derivaS: 41, flotar: "amplio", flotarS: 30, delay: -15 },
+  { src: "/img/capa-07.svg", height: 470, opacity: 0.16, direccion: "der", derivaS: 52, flotar: "medio", flotarS: 19, delay: -8 },
+  { src: "/img/capa-01.svg", height: 500, opacity: 0.55, direccion: "izq", derivaS: 34, flotar: "suave", flotarS: 25, delay: -4 },
+  { src: "/img/capa-09.svg", height: 440, opacity: 0.28, direccion: "der", derivaS: 58, flotar: "amplio", flotarS: 13, delay: -11 },
+  { src: "/img/capa-11.svg", height: 470, opacity: 0.5, direccion: "izq", derivaS: 39, flotar: "medio", flotarS: 21, delay: -7 },
+  { src: "/img/capa-12.svg", height: 540, opacity: 0.52, direccion: "der", derivaS: 49, flotar: "suave", flotarS: 28, delay: -14 },
+  { src: "/img/capa-13.svg", height: 510, opacity: 0.26, direccion: "izq", derivaS: 32, flotar: "amplio", flotarS: 17, delay: -2 },
+  { src: "/img/capa-14.svg", height: 560, opacity: 0.38, direccion: "der", derivaS: 56, flotar: "medio", flotarS: 23, delay: -10 },
+  { src: "/img/capa-15.svg", height: 460, opacity: 0.12, direccion: "izq", derivaS: 45, flotar: "suave", flotarS: 31, delay: -16 },
+  { src: "/img/capa-16.svg", height: 520, opacity: 0.35, direccion: "der", derivaS: 27, flotar: "medio", flotarS: 16, delay: -13 },
+];
 
-// Diez capas independientes (public/img/capa-01..10.svg), cada una UNA
-// sola cinta ondulada sobre fondo transparente — no varias bandas
-// metidas en un mismo SVG, para que cada una se pueda desplazar a su
-// propia velocidad y el paralaje entre ellas se note de verdad al hacer
-// scroll. Alturas de tesela distintas por capa para que no repitan
-// todas al mismo ritmo. Velocidades bien separadas (0.02 a 0.34) para
-// que el desfase entre capas sea claramente visible.
-const CAPAS = [
-  { src: "/img/capa-08.svg", height: 580, speed: 0.02, opacity: 0.55 },
-  { src: "/img/capa-04.svg", height: 600, speed: 0.05, opacity: 0.6 },
-  { src: "/img/capa-06.svg", height: 540, speed: 0.08, opacity: 0.6 },
-  { src: "/img/capa-02.svg", height: 550, speed: 0.11, opacity: 0.65 },
-  { src: "/img/capa-05.svg", height: 500, speed: 0.15, opacity: 0.55 },
-  { src: "/img/capa-10.svg", height: 480, speed: 0.18, opacity: 0.6 },
-  { src: "/img/capa-03.svg", height: 460, speed: 0.21, opacity: 0.6 },
-  { src: "/img/capa-07.svg", height: 470, speed: 0.25, opacity: 0.55 },
-  { src: "/img/capa-01.svg", height: 500, speed: 0.29, opacity: 0.6 },
-  { src: "/img/capa-09.svg", height: 440, speed: 0.34, opacity: 0.5 },
-] as const;
-
-function Capa({
-  capa,
-  scrollY,
-  activo,
-}: {
-  capa: (typeof CAPAS)[number];
-  scrollY: MotionValue<number>;
-  activo: boolean;
-}) {
-  const y = useTransform(scrollY, (v) => (activo ? v * capa.speed : 0));
-
-  return (
-    <motion.div
-      className="absolute inset-x-0 -top-64 -bottom-64 will-change-transform"
-      style={{
-        y,
-        backgroundImage: `url(${capa.src})`,
-        backgroundRepeat: "repeat",
-        backgroundSize: `1440px ${capa.height}px`,
-        opacity: capa.opacity,
-      }}
-    />
-  );
-}
-
-// Fondo decorativo de la portada: diez capas onduladas (tipo capas de
-// papel recortado) que cubren toda la página y se desplazan cada una a
-// su propia velocidad al hacer scroll, con Motion. Sin interacción,
-// para que nunca interfiera con el contenido real ni con la lectura de
-// pantalla.
+// Fondo decorativo de toda la web: capas onduladas (tipo capas de papel
+// recortado) que se mueven solas, muy sutil, sin interacción, para que
+// nunca interfiera con el contenido real ni con la lectura de pantalla.
 export default function FondoParallax() {
-  const prefiereMenosMovimiento = useReducedMotion();
-  const { scrollY } = useScroll();
-
-  return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-      {CAPAS.map((capa) => (
-        <Capa
-          key={capa.src}
-          capa={capa}
-          scrollY={scrollY}
-          activo={!prefiereMenosMovimiento}
-        />
-      ))}
-    </div>
-  );
+  return <FondoOndas capas={CAPAS} />;
 }
