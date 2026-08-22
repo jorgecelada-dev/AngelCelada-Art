@@ -24,6 +24,7 @@ export default async function ObrasPage({
   let query = supabase
     .from("obras")
     .select("*")
+    .eq("visible", true)
     .order("created_at", { ascending: false });
 
   if (coleccionActivaId) {

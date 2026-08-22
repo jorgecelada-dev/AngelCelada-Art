@@ -67,6 +67,12 @@ alter table obras add column if not exists lamina_precio numeric(10, 2);
 alter table obras add column if not exists entornos_ocultos uuid[] not null default '{}';
 -- Color predominante de la obra, para el filtro de búsqueda en /obras.
 alter table obras add column if not exists color_principal text;
+-- Visibilidad manual: si es false, la obra no aparece en ningún sitio de
+-- la web pública (mosaico, portada, láminas, tu espacio, ficha propia),
+-- ni aunque esté marcada como destacada.
+alter table obras add column if not exists visible boolean not null default true;
+
+create index if not exists idx_obras_visible on obras(visible);
 
 -- ------------------------------------------------------------
 -- Tabla: obra_detalles (fotos de detalle/proceso de cada obra,

@@ -54,14 +54,10 @@ function CeldaObra({
 export default function MosaicoObras({
   obras,
   variante = "obra",
-  compacto = false,
   cuadrada = false,
 }: {
   obras: Obra[];
   variante?: "obra" | "lamina";
-  // Columnas más estrechas, para cuando el mosaico convive con un panel
-  // lateral (el filtro de /obras) y hay menos ancho disponible.
-  compacto?: boolean;
   // Celdas cuadradas uniformes en vez del bento de tamaños variables,
   // manteniendo la resolución de imagen igual de generosa.
   cuadrada?: boolean;
@@ -85,13 +81,9 @@ export default function MosaicoObras({
     );
   }
 
-  const colsClase = compacto
-    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
-    : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4";
-
   return (
     <div
-      className={`grid auto-rows-[170px] gap-4 overflow-x-clip [grid-auto-flow:dense] sm:auto-rows-[190px] lg:auto-rows-[230px] ${colsClase}`}
+      className="grid auto-rows-[170px] grid-cols-2 gap-4 overflow-x-clip [grid-auto-flow:dense] sm:auto-rows-[190px] sm:grid-cols-3 lg:auto-rows-[230px] lg:grid-cols-4"
     >
       {obras.map((obra, i) => (
         <CeldaObra

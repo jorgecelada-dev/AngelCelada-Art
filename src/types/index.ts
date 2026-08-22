@@ -23,6 +23,7 @@ export type Obra = {
   color_principal: string | null;
   disponible: boolean;
   destacada: boolean;
+  visible: boolean;
   imagen_url: string | null;
   imagen_ancho_px: number | null;
   imagen_alto_px: number | null;

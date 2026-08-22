@@ -14,6 +14,7 @@ export default async function HomePage() {
     .from("obras")
     .select("*")
     .eq("destacada", true)
+    .eq("visible", true)
     .order("created_at", { ascending: false })
     .limit(3);
 

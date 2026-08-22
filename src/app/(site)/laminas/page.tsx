@@ -16,6 +16,7 @@ export default async function LaminasPage() {
   const { data, error } = await supabase
     .from("obras")
     .select("*")
+    .eq("visible", true)
     .not("lamina_precio", "is", null)
     .order("created_at", { ascending: false });
 

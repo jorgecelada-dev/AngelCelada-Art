@@ -17,6 +17,7 @@ export default async function MiEspacioPage() {
       .from("obras")
       .select("*")
       .eq("disponible", true)
+      .eq("visible", true)
       .order("created_at", { ascending: false }),
     supabase.from("entornos").select("*").order("tipo").order("orden"),
   ]);

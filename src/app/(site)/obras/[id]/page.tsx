@@ -35,7 +35,7 @@ export default async function ObraDetailPage({
 
   const obra = data as Obra | null;
 
-  if (!obra) {
+  if (!obra || !obra.visible) {
     notFound();
   }
 
