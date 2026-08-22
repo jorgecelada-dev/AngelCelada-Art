@@ -11,16 +11,16 @@ import type { MotionValue } from "framer-motion";
 // todas al mismo ritmo. Velocidades bien separadas (0.02 a 0.34) para
 // que el desfase entre capas sea claramente visible.
 const CAPAS = [
-  { src: "/img/capa-08.svg", height: 680, speed: 0.02, opacity: 0.55 },
-  { src: "/img/capa-04.svg", height: 700, speed: 0.05, opacity: 0.6 },
-  { src: "/img/capa-06.svg", height: 640, speed: 0.08, opacity: 0.6 },
-  { src: "/img/capa-02.svg", height: 650, speed: 0.11, opacity: 0.65 },
-  { src: "/img/capa-05.svg", height: 600, speed: 0.15, opacity: 0.55 },
-  { src: "/img/capa-10.svg", height: 580, speed: 0.18, opacity: 0.6 },
-  { src: "/img/capa-03.svg", height: 560, speed: 0.21, opacity: 0.6 },
-  { src: "/img/capa-07.svg", height: 570, speed: 0.25, opacity: 0.55 },
-  { src: "/img/capa-01.svg", height: 600, speed: 0.29, opacity: 0.6 },
-  { src: "/img/capa-09.svg", height: 540, speed: 0.34, opacity: 0.5 },
+  { src: "/img/capa-08.svg", height: 580, speed: 0.02, opacity: 0.55 },
+  { src: "/img/capa-04.svg", height: 600, speed: 0.05, opacity: 0.6 },
+  { src: "/img/capa-06.svg", height: 540, speed: 0.08, opacity: 0.6 },
+  { src: "/img/capa-02.svg", height: 550, speed: 0.11, opacity: 0.65 },
+  { src: "/img/capa-05.svg", height: 500, speed: 0.15, opacity: 0.55 },
+  { src: "/img/capa-10.svg", height: 480, speed: 0.18, opacity: 0.6 },
+  { src: "/img/capa-03.svg", height: 460, speed: 0.21, opacity: 0.6 },
+  { src: "/img/capa-07.svg", height: 470, speed: 0.25, opacity: 0.55 },
+  { src: "/img/capa-01.svg", height: 500, speed: 0.29, opacity: 0.6 },
+  { src: "/img/capa-09.svg", height: 440, speed: 0.34, opacity: 0.5 },
 ] as const;
 
 function Capa({
