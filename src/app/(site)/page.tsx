@@ -27,7 +27,7 @@ export default async function HomePage() {
 
       {/* Últimas obras */}
       {obras.length > 0 && (
-        <section className="container-site py-16">
+        <section className="container-site pb-16 pt-2 md:pt-4">
           <RevelarEnVista className="mb-10 flex items-end justify-between">
             <h2 className="section-title">
               <span

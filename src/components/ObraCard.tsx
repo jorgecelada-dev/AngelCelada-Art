@@ -8,6 +8,7 @@ import Link from "next/link";
 import type { Obra } from "@/types";
 import { calcularAspectoYRotacion } from "@/lib/orientacion";
 import { formatearEUR, precioFinal, tieneDescuentoActivo } from "@/lib/precio";
+import BotonFavorito from "./BotonFavorito";
 
 type Rect = { top: number; left: number; width: number; height: number };
 
@@ -201,15 +202,7 @@ export default function ObraCard({
         </div>
       </Link>
 
-      {tieneAr && !esLamina && (
-        <Link
-          href={`/mi-espacio?ar=${obra.id}`}
-          onClick={(e) => e.stopPropagation()}
-          className="absolute bottom-3 right-3 z-10 rounded-full bg-cream/90 px-3 py-1.5 text-xs font-medium tracking-wide text-charcoal shadow-md transition hover:bg-cream"
-        >
-          Ver en AR
-        </Link>
-      )}
+      {!esLamina && <BotonFavorito obraId={obra.id} />}
 
       {typeof document !== "undefined" &&
         createPortal(
@@ -285,6 +278,15 @@ export default function ObraCard({
                     )}
                   </div>
                 </Link>
+
+                {tieneAr && !esLamina && (
+                  <Link
+                    href={`/mi-espacio?ar=${obra.id}`}
+                    className="pointer-events-auto absolute right-4 top-4 z-10 rounded-full bg-cream/95 px-3 py-1.5 text-xs font-medium tracking-wide text-charcoal shadow-md transition hover:bg-cream"
+                  >
+                    Ver en AR
+                  </Link>
+                )}
               </motion.div>
             )}
           </AnimatePresence>,

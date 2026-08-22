@@ -6,6 +6,7 @@ import type { Entorno, Obra } from "@/types";
 import EspacioEjemploViewer from "./EspacioEjemploViewer";
 import SubirHabitacion from "./SubirHabitacion";
 import ArViewer from "./ArViewer";
+import SeccionFavoritos from "./SeccionFavoritos";
 
 type Modo = "elegir" | "ejemplo" | "subir" | "ar";
 
@@ -28,36 +29,40 @@ export default function MiEspacioClient({
 
   if (modo === "elegir") {
     return (
-      <div className="flex flex-wrap gap-4">
-        <button
-          type="button"
-          onClick={() => setModo("subir")}
-          className="btn-primary"
-        >
-          Subir mi habitación
-        </button>
-        <button
-          type="button"
-          onClick={() => setModo("ejemplo")}
-          className="btn-secondary"
-        >
-          Espacios de ejemplo
-        </button>
-        {hayObrasConAr && (
+      <div>
+        <SeccionFavoritos obras={obras} />
+        <div className="flex flex-wrap gap-4">
           <button
             type="button"
-            onClick={() => setModo("ar")}
+            onClick={() => setModo("subir")}
+            className="btn-primary"
+          >
+            Subir mi habitación
+          </button>
+          <button
+            type="button"
+            onClick={() => setModo("ejemplo")}
             className="btn-secondary"
           >
-            Ver en AR
+            Espacios de ejemplo
           </button>
-        )}
+          {hayObrasConAr && (
+            <button
+              type="button"
+              onClick={() => setModo("ar")}
+              className="btn-secondary"
+            >
+              Ver en AR
+            </button>
+          )}
+        </div>
       </div>
     );
   }
 
   return (
     <div>
+      <SeccionFavoritos obras={obras} />
       <button
         type="button"
         onClick={() => setModo("elegir")}
