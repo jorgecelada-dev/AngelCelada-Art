@@ -101,6 +101,24 @@
     display: inline-block;
     animation: revelado-texto 1s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
+
+  /* Capas del fondo del hero (FondoHeroAnimado): deriva horizontal en
+     bucle perfecto (el SVG tesela en horizontal, así que no hay salto
+     al volver a 0) + un balanceo/respiración vertical suave. Cada capa
+     usa su propia duración/retraso (por eso solo se define la forma de
+     la animación aquí, no los tiempos), para que no se sientan
+     sincronizadas entre sí. */
+  .fondo-hero-capa {
+    animation-name: deriva-horizontal, flotar-capa;
+    animation-timing-function: linear, ease-in-out;
+    animation-iteration-count: infinite, infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fondo-hero-capa {
+    animation: none !important;
+  }
 }
 
 @keyframes brillo-texto {
@@ -155,5 +173,24 @@
   }
   50% {
     box-shadow: 0 0 0 10px rgba(176, 141, 87, 0);
+  }
+}
+
+@keyframes deriva-horizontal {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: -1440px;
+  }
+}
+
+@keyframes flotar-capa {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    transform: translateY(-16px) scaleY(1.018);
   }
 }
