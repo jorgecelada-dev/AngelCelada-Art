@@ -25,12 +25,24 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { createClient } from "@/lib/supabase/client";
-import { claseCelda } from "@/components/MosaicoObras";
+import { formaCelda } from "@/components/MosaicoObras";
 import { calcularAspectoYRotacion } from "@/lib/orientacion";
 import type { Obra } from "@/types";
 
 type NombreContenedor = "panel" | "grid";
 type Grupos = Record<NombreContenedor, Obra[]>;
+type Vista = "movil" | "tablet" | "web";
+
+const COLUMNAS_POR_VISTA: Record<Vista, number> = {
+  movil: 2,
+  tablet: 3,
+  web: 4,
+};
+const ANCHO_POR_VISTA: Record<Vista, number | undefined> = {
+  movil: 380,
+  tablet: 620,
+  web: undefined,
+};
 
 function esNombreContenedor(id: UniqueIdentifier): id is NombreContenedor {
   return id === "panel" || id === "grid";
@@ -38,7 +50,10 @@ function esNombreContenedor(id: UniqueIdentifier): id is NombreContenedor {
 
 // Miniatura de una obra, usada tanto en la lista del panel como en la
 // cuadrícula. En la cuadrícula ocupa toda la celda (la forma la marca el
-// contenedor con col-span/row-span, no esta pieza).
+// contenedor con col-span/row-span, no esta pieza). draggable={false} en
+// las imágenes es necesario: sin él, el navegador arrastra su propia
+// miniatura fantasma de la imagen a la vez que la librería, y las dos se
+// pisan (efecto de parpadeo/zoom raro durante el arrastre).
 function TarjetaObra({
   obra,
   contenedor,
@@ -51,7 +66,12 @@ function TarjetaObra({
       <div className="relative h-full w-full overflow-hidden rounded-lg bg-charcoal/10">
         {obra.imagen_url && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={obra.imagen_url} alt="" className="h-full w-full object-cover" />
+          <img
+            src={obra.imagen_url}
+            alt=""
+            draggable={false}
+            className="h-full w-full select-none object-cover"
+          />
         )}
         <span className="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-charcoal/85 to-transparent px-2 pb-1.5 pt-5 text-xs text-cream">
           {obra.titulo}
@@ -67,7 +87,8 @@ function TarjetaObra({
         <img
           src={obra.imagen_url}
           alt=""
-          className="h-11 w-11 flex-none rounded-md object-cover"
+          draggable={false}
+          className="h-11 w-11 flex-none select-none rounded-md object-cover"
         />
       )}
       <span className="min-w-0 truncate text-sm">{obra.titulo}</span>
@@ -76,35 +97,48 @@ function TarjetaObra({
 }
 
 // El punto de agarre cubre toda la tarjeta salvo el botón de quitar; en
-// la cuadrícula aplica exactamente la misma clase col-span/row-span que
-// usa el mosaico real (claseCelda), para que la forma y el hueco que deja
-// cada obra sean idénticos a como se van a ver en la web.
+// la cuadrícula aplica el mismo ancho/alto en celdas que usa el mosaico
+// real (formaCelda), recortado al número de columnas que se esté
+// simulando (móvil/tablet/web), para que la forma y el hueco que deja
+// cada obra sean idénticos a como se van a ver en la web a ese tamaño.
 function ObraArrastrable({
   obra,
   contenedor,
+  columnas,
   esObjetivo,
   onQuitar,
 }: {
   obra: Obra;
   contenedor: NombreContenedor;
+  columnas?: number;
   esObjetivo?: boolean;
   onQuitar?: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: obra.id });
-  const claseForma = contenedor === "grid" ? claseCelda(obra) : "";
+
+  const estiloForma: React.CSSProperties = {};
+  if (contenedor === "grid" && columnas) {
+    const forma = formaCelda(obra);
+    estiloForma.gridColumn = `span ${Math.min(forma.col, columnas)}`;
+    estiloForma.gridRow = `span ${forma.row}`;
+  }
 
   return (
     <div
       ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`relative ${claseForma} ${isDragging ? "z-10 opacity-30" : ""}`}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        ...estiloForma,
+      }}
+      className={`relative ${isDragging ? "z-10 opacity-30" : ""}`}
     >
       <div
         {...attributes}
         {...listeners}
         className={`h-full w-full cursor-grab touch-none rounded-lg active:cursor-grabbing ${
-          esObjetivo ? "ring-2 ring-sage ring-offset-2" : ""
+          esObjetivo ? "ring-2 ring-inset ring-sage" : ""
         }`}
       >
         <TarjetaObra obra={obra} contenedor={contenedor} />
@@ -136,16 +170,18 @@ function Contenedor({
   vacio,
   hayContenido,
   className,
+  style,
 }: {
   id: NombreContenedor;
   children: React.ReactNode;
   vacio: React.ReactNode;
   hayContenido: boolean;
   className: string;
+  style?: React.CSSProperties;
 }) {
   const { setNodeRef } = useDroppable({ id });
   return (
-    <div ref={setNodeRef} className={`min-h-[120px] rounded-xl ${className}`}>
+    <div ref={setNodeRef} style={style} className={`min-h-[120px] rounded-xl ${className}`}>
       {hayContenido ? children : vacio}
     </div>
   );
@@ -166,8 +202,11 @@ export default function MosaicoOrdenador({
   // quedarse un render por detrás de las actualizaciones en onDragOver.
   const gruposRef = useRef(grupos);
   const [activa, setActiva] = useState<Obra | null>(null);
+  const [activaTamano, setActivaTamano] = useState<{ width: number; height: number } | null>(null);
   const [objetivoId, setObjetivoId] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const [vista, setVista] = useState<Vista>("web");
+  const columnas = COLUMNAS_POR_VISTA[vista];
 
   function actualizarGrupos(actualizar: (prev: Grupos) => Grupos) {
     setGrupos((prev) => {
@@ -195,6 +234,12 @@ export default function MosaicoOrdenador({
       grupos.grid.find((o) => o.id === event.active.id) ??
       null;
     setActiva(obra);
+    // Tamaño real de la tarjeta que se acaba de coger, para que la vista
+    // que sigue al cursor empiece exactamente del mismo tamaño en vez de
+    // dar un salto (a un ancho fijo pequeño) al levantarla — eso es lo
+    // que se sentía como un "zoom" raro con las piezas grandes.
+    const rect = event.active.rect.current.initial;
+    setActivaTamano(rect ? { width: rect.width, height: rect.height } : null);
   }
 
   // Solo pinta la marca visual de "aquí se soltaría" (no reordena nada
@@ -245,6 +290,7 @@ export default function MosaicoOrdenador({
   function onDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     setActiva(null);
+    setActivaTamano(null);
     setObjetivoId(null);
     if (!over) return;
 
@@ -367,19 +413,49 @@ export default function MosaicoOrdenador({
         </div>
 
         <div>
-          <h2 className="mb-3 text-sm font-medium text-charcoal/70">
-            Mosaico de /obras y portada
-          </h2>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-sm font-medium text-charcoal/70">
+              Mosaico de /obras y portada
+            </h2>
+            <div className="flex rounded-full border border-charcoal/15 p-0.5 text-xs">
+              {(
+                [
+                  ["movil", "Móvil"],
+                  ["tablet", "Tablet"],
+                  ["web", "Web"],
+                ] as const
+              ).map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setVista(id)}
+                  className={`rounded-full px-3 py-1.5 transition ${
+                    vista === id
+                      ? "bg-charcoal text-cream"
+                      : "text-charcoal/60 hover:text-charcoal"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
           <p className="mb-3 text-xs text-charcoal/50">
             La forma de cada casilla (1x1, 1x2, 2x1, 2x2, 1x3, 3x1) la
             decide la proporción y el tamaño real de cada obra, igual que
-            en la web: aquí solo se elige el orden.
+            en la web: aquí solo se elige el orden. Cambia de vista arriba
+            para comprobar cómo queda a cada ancho — el orden es el mismo
+            en los tres, solo cambia cuántas columnas hay.
           </p>
           <SortableContext items={grupos.grid.map((o) => o.id)} strategy={rectSortingStrategy}>
             <Contenedor
               id="grid"
               hayContenido={grupos.grid.length > 0}
-              className="grid auto-rows-[90px] grid-cols-4 gap-2 [grid-auto-flow:dense] border-2 border-dashed border-charcoal/15 p-3"
+              className="grid auto-rows-[90px] gap-2 [grid-auto-flow:dense] border-2 border-dashed border-charcoal/15 p-3 transition-[max-width] duration-300"
+              style={{
+                gridTemplateColumns: `repeat(${columnas}, minmax(0, 1fr))`,
+                maxWidth: ANCHO_POR_VISTA[vista],
+              }}
               vacio={
                 <p className="p-6 text-center text-xs text-charcoal/40">
                   Arrastra aquí obras del panel de la izquierda para fijar su posición.
@@ -391,6 +467,7 @@ export default function MosaicoOrdenador({
                   key={obra.id}
                   obra={obra}
                   contenedor="grid"
+                  columnas={columnas}
                   esObjetivo={objetivoId === obra.id}
                   onQuitar={() => quitarDelMosaico(obra.id)}
                 />
@@ -402,12 +479,15 @@ export default function MosaicoOrdenador({
 
       <DragOverlay>
         {activa && (
-          // Fuera de la cuadrícula col-span/row-span no tiene efecto, así
-          // que aquí se aproxima la forma con la proporción real de la
-          // obra en vez de la clase de celda.
+          // Fuera de la cuadrícula, col-span/row-span no tiene efecto: se
+          // usa el tamaño real (en píxeles) que tenía la tarjeta al
+          // cogerla, para que no dé un salto de tamaño raro al levantarla.
           <div
-            className="w-40 max-w-[40vw]"
-            style={{ aspectRatio: calcularAspectoYRotacion(activa).aspecto }}
+            style={
+              activaTamano
+                ? { width: activaTamano.width, height: activaTamano.height }
+                : { width: 160, aspectRatio: calcularAspectoYRotacion(activa).aspecto }
+            }
           >
             <TarjetaObra obra={activa} contenedor="grid" />
           </div>
