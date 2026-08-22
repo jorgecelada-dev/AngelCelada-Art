@@ -4,11 +4,20 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Obra } from "@/types";
 import MosaicoObras from "./MosaicoObras";
 import { COLORES_OBRA } from "@/lib/colores";
+import { UMBRAL_GRANDE_CM } from "@/lib/tamano";
 
 const TAMANOS = [
   { valor: "pequeno", label: "Pequeño (hasta 50 cm)", test: (max: number) => max <= 50 },
-  { valor: "mediano", label: "Mediano (50-100 cm)", test: (max: number) => max > 50 && max <= 100 },
-  { valor: "grande", label: "Grande (más de 100 cm)", test: (max: number) => max > 100 },
+  {
+    valor: "mediano",
+    label: "Mediano (50-100 cm)",
+    test: (max: number) => max > 50 && max <= UMBRAL_GRANDE_CM,
+  },
+  {
+    valor: "grande",
+    label: "Grande (más de 100 cm)",
+    test: (max: number) => max > UMBRAL_GRANDE_CM,
+  },
 ] as const;
 
 type Grupo = "tamano" | "color" | "anio";

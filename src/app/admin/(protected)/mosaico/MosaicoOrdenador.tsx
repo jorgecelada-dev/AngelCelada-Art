@@ -6,7 +6,7 @@ import {
   DragOverlay,
   KeyboardSensor,
   PointerSensor,
-  closestCenter,
+  closestCorners,
   useDroppable,
   useSensor,
   useSensors,
@@ -25,6 +25,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { createClient } from "@/lib/supabase/client";
+import { claseCelda } from "@/components/MosaicoObras";
+import { calcularAspectoYRotacion } from "@/lib/orientacion";
 import type { Obra } from "@/types";
 
 type NombreContenedor = "panel" | "grid";
@@ -35,8 +37,8 @@ function esNombreContenedor(id: UniqueIdentifier): id is NombreContenedor {
 }
 
 // Miniatura de una obra, usada tanto en la lista del panel como en la
-// cuadrícula. El punto de agarre a la izquierda/arriba es lo único que
-// arrastra; el resto de la tarjeta queda libre (para el botón de quitar).
+// cuadrícula. En la cuadrícula ocupa toda la celda (la forma la marca el
+// contenedor con col-span/row-span, no esta pieza).
 function TarjetaObra({
   obra,
   contenedor,
@@ -46,7 +48,7 @@ function TarjetaObra({
 }) {
   if (contenedor === "grid") {
     return (
-      <div className="relative aspect-square overflow-hidden rounded-lg bg-charcoal/10">
+      <div className="relative h-full w-full overflow-hidden rounded-lg bg-charcoal/10">
         {obra.imagen_url && (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={obra.imagen_url} alt="" className="h-full w-full object-cover" />
@@ -73,6 +75,10 @@ function TarjetaObra({
   );
 }
 
+// El punto de agarre cubre toda la tarjeta salvo el botón de quitar; en
+// la cuadrícula aplica exactamente la misma clase col-span/row-span que
+// usa el mosaico real (claseCelda), para que la forma y el hueco que deja
+// cada obra sean idénticos a como se van a ver en la web.
 function ObraArrastrable({
   obra,
   contenedor,
@@ -84,17 +90,18 @@ function ObraArrastrable({
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: obra.id });
+  const claseForma = contenedor === "grid" ? claseCelda(obra) : "";
 
   return (
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`relative ${isDragging ? "z-10 opacity-30" : ""}`}
+      className={`relative ${claseForma} ${isDragging ? "z-10 opacity-30" : ""}`}
     >
       <div
         {...attributes}
         {...listeners}
-        className="cursor-grab touch-none active:cursor-grabbing"
+        className="h-full w-full cursor-grab touch-none active:cursor-grabbing"
       >
         <TarjetaObra obra={obra} contenedor={contenedor} />
       </div>
@@ -261,7 +268,7 @@ export default function MosaicoOrdenador({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCenter}
+      collisionDetection={closestCorners}
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDragEnd={onDragEnd}
@@ -299,11 +306,16 @@ export default function MosaicoOrdenador({
           <h2 className="mb-3 text-sm font-medium text-charcoal/70">
             Mosaico de /obras y portada
           </h2>
+          <p className="mb-3 text-xs text-charcoal/50">
+            La forma de cada casilla (1x1, 1x2, 2x1, 2x2, 1x3, 3x1) la
+            decide la proporción y el tamaño real de cada obra, igual que
+            en la web: aquí solo se elige el orden.
+          </p>
           <SortableContext items={grupos.grid.map((o) => o.id)} strategy={rectSortingStrategy}>
             <Contenedor
               id="grid"
               hayContenido={grupos.grid.length > 0}
-              className="grid grid-cols-3 gap-2 border-2 border-dashed border-charcoal/15 p-3 sm:grid-cols-4"
+              className="grid auto-rows-[90px] grid-cols-4 gap-2 [grid-auto-flow:dense] border-2 border-dashed border-charcoal/15 p-3"
               vacio={
                 <p className="p-6 text-center text-xs text-charcoal/40">
                   Arrastra aquí obras del panel de la izquierda para fijar su posición.
@@ -325,7 +337,13 @@ export default function MosaicoOrdenador({
 
       <DragOverlay>
         {activa && (
-          <div className="w-40">
+          // Fuera de la cuadrícula col-span/row-span no tiene efecto, así
+          // que aquí se aproxima la forma con la proporción real de la
+          // obra en vez de la clase de celda.
+          <div
+            className="w-40 max-w-[40vw]"
+            style={{ aspectRatio: calcularAspectoYRotacion(activa).aspecto }}
+          >
             <TarjetaObra obra={activa} contenedor="grid" />
           </div>
         )}

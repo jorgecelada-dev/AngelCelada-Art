@@ -2,17 +2,30 @@
 
 import type { Obra } from "@/types";
 import { calcularAspectoYRotacion } from "@/lib/orientacion";
+import { esObraGrande } from "@/lib/tamano";
 import { useEnVista } from "@/lib/useEnVista";
 import ObraCard from "./ObraCard";
 
-// Clasifica cada obra en una celda del bento (1x1, 1x2 o 2x1) según su
-// proporción real, sobre una cuadrícula imaginaria de 4 columnas, para
-// que el mosaico tenga variedad de tamaños en vez de ser uniforme.
-function claseCelda(obra: Obra): string {
+// Clasifica cada obra en una celda del bento (1x1, 1x2, 2x1, 2x2, 1x3 o
+// 3x1) según su proporción real y, para las cuadradas, su tamaño físico,
+// sobre una cuadrícula imaginaria de 4 columnas, para que el mosaico
+// tenga variedad de tamaños en vez de ser uniforme. Se exporta para que
+// el panel de arrastrar del admin ("Mosaico") calcule exactamente la
+// misma forma y el orden manual se vea ahí tal cual se verá en la web.
+export function claseCelda(obra: Obra): string {
   const { aspecto } = calcularAspectoYRotacion(obra);
+
+  if (aspecto <= 0.4) return "row-span-3"; // 1x3: muy vertical
   if (aspecto < 0.8) return "row-span-2"; // 1x2: vertical
-  if (aspecto <= 1.25) return ""; // 1x1: cuadrada
-  return "col-span-2"; // 2x1: horizontal
+  if (aspecto <= 1.25) {
+    // Cuadrada: solo las grandes de verdad (>100cm de lado) se agrandan
+    // a 2x2, para que destaquen sin que todo lo cuadrado ocupe el doble.
+    return esObraGrande(obra) ? "col-span-2 row-span-2" : ""; // 2x2 : 1x1
+  }
+  if (aspecto < 2.5) return "col-span-2"; // 2x1: horizontal
+  // 3x1: muy horizontal. Limitado a 2 columnas en el breakpoint base
+  // (solo 2 columnas ahí) para no desbordar la cuadrícula.
+  return "col-span-2 sm:col-span-3";
 }
 
 // Alterna la dirección de entrada para que el conjunto converja, sin
