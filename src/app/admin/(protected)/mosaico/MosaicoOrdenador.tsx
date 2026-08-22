@@ -186,26 +186,24 @@ export default function MosaicoOrdenador({
     setActiva(obra);
   }
 
-  // Reordena en vivo mientras se arrastra (tanto dentro del mismo
-  // contenedor como entre el panel y la cuadrícula), para que el hueco se
-  // vea al momento en vez de solo al soltar.
+  // Solo mueve la obra de un contenedor a otro mientras se arrastra (para
+  // que el hueco en el panel/cuadrícula se vea al momento). El
+  // reordenamiento DENTRO del mismo contenedor se resuelve al soltar, en
+  // onDragEnd: hacerlo aquí (en cada evento de arrastre) provocaba un
+  // bucle infinito de renders con piezas grandes (2x2, 3x1...), porque el
+  // objetivo bajo el cursor puede oscilar muy rápido entre dos vecinas
+  // cuando la celda activa es mucho más grande que las de alrededor.
   function onDragOver(event: DragOverEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
     const desde = encontrarContenedor(active.id);
     const hacia = encontrarContenedor(over.id);
-    if (!desde || !hacia) return;
+    if (!desde || !hacia || desde === hacia) return;
 
     actualizarGrupos((prev) => {
       const origen = prev[desde];
       const indiceActivo = origen.findIndex((o) => o.id === active.id);
       if (indiceActivo === -1) return prev;
-
-      if (desde === hacia) {
-        const indiceOver = origen.findIndex((o) => o.id === over.id);
-        if (indiceOver === -1 || indiceActivo === indiceOver) return prev;
-        return { ...prev, [hacia]: arrayMove(origen, indiceActivo, indiceOver) };
-      }
 
       const destino = prev[hacia];
       const indiceOver = destino.findIndex((o) => o.id === over.id);
@@ -224,11 +222,27 @@ export default function MosaicoOrdenador({
   }
 
   function onDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
     setActiva(null);
-    if (!event.over) return;
-    // El orden ya quedó resuelto en vivo durante onDragOver; aquí solo
-    // toca guardar el resultado final.
-    persistir(gruposRef.current.grid, gruposRef.current.panel);
+    if (!over) return;
+
+    const desde = encontrarContenedor(active.id);
+    const hacia = encontrarContenedor(over.id);
+    if (!desde || !hacia) return;
+
+    let siguiente = gruposRef.current;
+
+    if (desde === hacia) {
+      const lista = siguiente[hacia];
+      const indiceActivo = lista.findIndex((o) => o.id === active.id);
+      const indiceOver = lista.findIndex((o) => o.id === over.id);
+      if (indiceActivo !== -1 && indiceOver !== -1 && indiceActivo !== indiceOver) {
+        siguiente = { ...siguiente, [hacia]: arrayMove(lista, indiceActivo, indiceOver) };
+        actualizarGrupos(() => siguiente);
+      }
+    }
+
+    persistir(siguiente.grid, siguiente.panel);
   }
 
   function quitarDelMosaico(obraId: string) {

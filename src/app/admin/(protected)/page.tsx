@@ -3,6 +3,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import type { Obra } from "@/types";
 import DeleteObraButton from "./DeleteObraButton";
+import ToggleVisibleButton from "./ToggleVisibleButton";
 import { formatearEUR, precioFinal, tieneDescuentoActivo } from "@/lib/precio";
 
 export const revalidate = 0;
@@ -19,11 +20,8 @@ export default async function AdminDashboardPage() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8">
         <h1 className="text-2xl font-serif">Tus obras ({obras.length})</h1>
-        <Link href="/admin/nueva-obra" className="btn-primary">
-          + Añadir obra
-        </Link>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-charcoal/10">
@@ -35,6 +33,7 @@ export default async function AdminDashboardPage() {
               <th className="p-4">Precio</th>
               <th className="p-4">Estado</th>
               <th className="p-4">Destacada</th>
+              <th className="p-4">Visible</th>
               <th className="p-4"></th>
             </tr>
           </thead>
@@ -72,6 +71,9 @@ export default async function AdminDashboardPage() {
                 </td>
                 <td className="p-4">{obra.destacada ? "Sí" : "No"}</td>
                 <td className="p-4">
+                  <ToggleVisibleButton obraId={obra.id} visibleInicial={obra.visible} />
+                </td>
+                <td className="p-4">
                   <div className="flex gap-3">
                     <Link
                       href={`/admin/obras/${obra.id}/editar`}
@@ -87,7 +89,7 @@ export default async function AdminDashboardPage() {
 
             {obras.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-6 text-center text-charcoal/60">
+                <td colSpan={7} className="p-6 text-center text-charcoal/60">
                   Todavía no has añadido ninguna obra.
                 </td>
               </tr>
