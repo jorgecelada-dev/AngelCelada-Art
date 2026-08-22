@@ -1,29 +1,22 @@
-import Image from "next/image";
 import type { ReactNode } from "react";
+import FondoCabecera from "./FondoCabecera";
 
 export default function CabeceraPagina({
   titulo,
-  imagen,
   pills,
 }: {
   titulo: string;
-  imagen: string;
   pills?: ReactNode;
 }) {
   return (
     <div className="relative overflow-hidden">
-      <div className="relative flex h-28 items-center justify-center md:h-36">
-        <Image
-          src={imagen}
-          alt=""
-          fill
-          priority
-          quality={95}
-          className="object-cover"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-charcoal/70 via-charcoal/25 to-charcoal/10" />
-        <h1 className="relative z-10 px-6 text-center font-serif text-2xl font-bold text-cream drop-shadow-[0_2px_16px_rgba(0,0,0,0.4)] md:text-4xl">
+      <div
+        className={`relative flex flex-col items-center justify-center gap-5 px-6 text-center ${
+          pills ? "py-10 md:py-14" : "py-9 md:py-12"
+        }`}
+      >
+        <FondoCabecera />
+        <h1 className="relative z-10 font-serif text-2xl font-bold text-cream drop-shadow-[0_2px_16px_rgba(0,0,0,0.4)] md:text-4xl">
           <span
             className="efecto-revelado-texto"
             style={{ animationDelay: "0.15s" }}
@@ -31,15 +24,13 @@ export default function CabeceraPagina({
             {titulo}
           </span>
         </h1>
-      </div>
 
-      {pills && (
-        <div className="bg-clay/15 py-4">
-          <div className="container-site flex flex-wrap justify-center gap-2">
+        {pills && (
+          <div className="relative z-10 flex flex-wrap justify-center gap-2">
             {pills}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

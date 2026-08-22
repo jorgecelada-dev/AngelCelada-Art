@@ -24,7 +24,7 @@ export default async function LaminasPage() {
 
   return (
     <>
-      <CabeceraPagina titulo="Láminas" imagen="/img/cabeceras/beige.png" />
+      <CabeceraPagina titulo="Láminas" />
 
       <section className="container-site py-16">
         <RevelarEnVista className="mb-12 text-center">
