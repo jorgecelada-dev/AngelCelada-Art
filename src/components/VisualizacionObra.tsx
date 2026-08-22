@@ -12,6 +12,7 @@ import NextImage from "next/image";
 import type { Entorno, Obra } from "@/types";
 import {
   dibujarCover,
+  dibujarContenido,
   muestrearTonoAmbiente,
   dibujarSombraSuave,
   aplicarTinteAmbiente,
@@ -366,7 +367,11 @@ function PreviewCanvas({
         ctx.rect(0, 0, obraW, obraH);
         ctx.clip();
         ctx.filter = FILTRO_INTEGRACION;
-        ctx.drawImage(img, 0, 0, obraW, obraH);
+        // Nunca recorta ni deforma: si la proporción real de la foto no
+        // coincide exacto con la del recuadro (medidas en cm), antes se
+        // estiraba para rellenarlo — con formatos muy alargados (ej.
+        // panorámicos) eso "aplastaba" la obra hasta casi cortarla.
+        dibujarContenido(ctx, img, 0, 0, obraW, obraH);
         ctx.restore();
 
         aplicarTinteAmbiente(ctx, offsetX, offsetY, obraW, obraH, tonoAmbiente);

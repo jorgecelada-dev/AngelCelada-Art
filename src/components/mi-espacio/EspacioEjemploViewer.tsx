@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Entorno, Obra } from "@/types";
 import {
   dibujarCover,
+  dibujarContenido,
   muestrearTonoAmbiente,
   dibujarSombraSuave,
   aplicarTinteAmbiente,
@@ -189,7 +190,11 @@ function CicladorObras({
         ctx.rect(0, 0, obraW, obraH);
         ctx.clip();
         ctx.filter = FILTRO_INTEGRACION;
-        dibujarCover(ctx, img, 0, 0, obraW, obraH);
+        // Nunca recorta la obra: dibujarCover recortaba cuando la
+        // proporción real de la foto no coincidía exacto con la del
+        // recuadro (medidas en cm) — muy visible en formatos alargados
+        // (ej. panorámicos), donde cortaba trozos reales de la obra.
+        dibujarContenido(ctx, img, 0, 0, obraW, obraH);
         ctx.restore();
 
         aplicarTinteAmbiente(ctx, offsetX, offsetY, obraW, obraH, tonoAmbiente);

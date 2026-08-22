@@ -31,6 +31,42 @@ export function dibujarCover(
   ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
+// Dibuja la imagen COMPLETA contenida dentro del recuadro (nunca la
+// recorta), centrada, dejando un margen en el eje que sobre si su
+// proporción no coincide exactamente con la del recuadro. Al contrario
+// que dibujarCover (pensado para fondos, donde recortar no importa),
+// esta es la que hay que usar para la obra en sí: el recuadro se calcula
+// a partir de sus medidas reales en cm, que no siempre coinciden exacto
+// con la proporción de la foto (encuadre, margen del marco...) — con
+// dibujarCover eso recortaba la obra de verdad en cuadros con una
+// proporción muy alargada (ej. formatos panorámicos).
+export function dibujarContenido(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  dx: number,
+  dy: number,
+  dw: number,
+  dh: number
+) {
+  const imgRatio = img.naturalWidth / img.naturalHeight;
+  const boxRatio = dw / dh;
+
+  let drawW: number;
+  let drawH: number;
+  if (imgRatio > boxRatio) {
+    drawW = dw;
+    drawH = dw / imgRatio;
+  } else {
+    drawH = dh;
+    drawW = dh * imgRatio;
+  }
+
+  const offsetX = dx + (dw - drawW) / 2;
+  const offsetY = dy + (dh - drawH) / 2;
+
+  ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
+}
+
 // Color medio de la pared alrededor de donde va a ir el cuadro, muestreado
 // ANTES de dibujarlo. Sirve para teñir luego la obra con la misma luz
 // ambiental de la foto real (cálida, fría, tenue...) en vez de que quede
