@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Categoria, Entorno, Obra } from "@/types";
 import DetalleImagenesManager from "./DetalleImagenesManager";
+import GenerarVistaArButton from "./GenerarVistaArButton";
 import { COLORES_OBRA } from "@/lib/colores";
 import { calcularAspectoYRotacion } from "@/lib/orientacion";
 import { formatearEUR } from "@/lib/precio";
@@ -472,6 +473,8 @@ export default function ObraForm({
               />
               Mostrar en portada
             </label>
+
+            {obra && <GenerarVistaArButton obra={obra} />}
           </Seccion>
 
           <div>

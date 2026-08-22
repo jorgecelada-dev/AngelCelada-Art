@@ -82,6 +82,13 @@ alter table obras add column if not exists orden_manual integer;
 
 create index if not exists idx_obras_orden_manual on obras(orden_manual);
 
+-- Modelos 3D generados desde el panel admin (botón "Generar vista AR" en
+-- ObraForm) para el modo "Ver en AR" de /mi-espacio: NULL = todavía no
+-- generado, esa obra no aparece como opción en ese modo. glb para
+-- Android (WebXR/Scene Viewer), usdz para iPhone (AR Quick Look).
+alter table obras add column if not exists modelo_ar_glb_url text;
+alter table obras add column if not exists modelo_ar_usdz_url text;
+
 -- ------------------------------------------------------------
 -- Tabla: obra_detalles (fotos de detalle/proceso de cada obra,
 -- mostradas en la ficha pública bajo "Detalles de la obra")

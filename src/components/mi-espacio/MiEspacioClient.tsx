@@ -4,8 +4,9 @@ import { useState } from "react";
 import type { Entorno, Obra } from "@/types";
 import EspacioEjemploViewer from "./EspacioEjemploViewer";
 import SubirHabitacion from "./SubirHabitacion";
+import ArViewer from "./ArViewer";
 
-type Modo = "elegir" | "ejemplo" | "subir";
+type Modo = "elegir" | "ejemplo" | "subir" | "ar";
 
 export default function MiEspacioClient({
   obras,
@@ -15,6 +16,9 @@ export default function MiEspacioClient({
   entornos: Entorno[];
 }) {
   const [modo, setModo] = useState<Modo>("elegir");
+  const hayObrasConAr = obras.some(
+    (obra) => obra.modelo_ar_glb_url && obra.modelo_ar_usdz_url
+  );
 
   if (modo === "elegir") {
     return (
@@ -33,6 +37,15 @@ export default function MiEspacioClient({
         >
           Espacios de ejemplo
         </button>
+        {hayObrasConAr && (
+          <button
+            type="button"
+            onClick={() => setModo("ar")}
+            className="btn-secondary"
+          >
+            Ver en AR
+          </button>
+        )}
       </div>
     );
   }
@@ -49,6 +62,8 @@ export default function MiEspacioClient({
 
       {modo === "ejemplo" ? (
         <EspacioEjemploViewer entornos={entornos} obras={obras} />
+      ) : modo === "ar" ? (
+        <ArViewer obras={obras} />
       ) : (
         <SubirHabitacion obras={obras} />
       )}
