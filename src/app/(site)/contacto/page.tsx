@@ -1,4 +1,5 @@
 import ContactoForm from "./ContactoForm";
+import CabeceraPagina from "@/components/CabeceraPagina";
 
 export const metadata = {
   title: "Contacto — ArteCelada",
@@ -6,29 +7,25 @@ export const metadata = {
 
 export default function ContactoPage() {
   return (
-    <section className="container-site max-w-xl py-16">
-      <h1 className="section-title">
-        <span
-          className="efecto-revelado-texto"
-          style={{ animationDelay: "0.15s" }}
-        >
-          Contacto
-        </span>
-      </h1>
-      <p className="mt-4 text-charcoal/70">
-        <span
-          className="efecto-revelado-texto"
-          style={{ animationDelay: "0.25s" }}
-        >
-          ¿Tienes alguna pregunta sobre una obra, un encargo personalizado o
-          quieres visitar el estudio? Escríbeme y te responderé lo antes
-          posible.
-        </span>
-      </p>
+    <>
+      <CabeceraPagina titulo="Contacto" seccion="contacto" />
 
-      <div className="mt-10">
-        <ContactoForm />
-      </div>
-    </section>
+      <section className="container-site max-w-xl py-16">
+        <p className="text-charcoal/70">
+          <span
+            className="efecto-revelado-texto"
+            style={{ animationDelay: "0.15s" }}
+          >
+            ¿Tienes alguna pregunta sobre una obra, un encargo personalizado o
+            quieres visitar el estudio? Escríbeme y te responderé lo antes
+            posible.
+          </span>
+        </p>
+
+        <div className="mt-10">
+          <ContactoForm />
+        </div>
+      </section>
+    </>
   );
 }

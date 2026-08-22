@@ -41,6 +41,7 @@ export default async function ObrasPage({
     <>
       <CabeceraPagina
         titulo="Obras"
+        seccion="obras"
         pills={
           colecciones.length > 0 && (
             <>

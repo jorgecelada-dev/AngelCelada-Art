@@ -30,7 +30,7 @@ export default async function MiEspacioPage() {
 
   return (
     <>
-      <CabeceraPagina titulo="Tu espacio" />
+      <CabeceraPagina titulo="Tu espacio" seccion="espacio" />
 
       <section className="container-site py-16">
         <p className="mx-auto mb-10 max-w-2xl text-center text-charcoal/70">

@@ -32,7 +32,7 @@ export default async function SobreMiPage() {
 
   return (
     <>
-      <CabeceraPagina titulo="Sobre mí" />
+      <CabeceraPagina titulo="Sobre mí" seccion="sobre-mi" />
 
       <section className="container-site max-w-3xl py-16">
         <div className="mt-10 space-y-12 whitespace-pre-line leading-relaxed text-charcoal/80">

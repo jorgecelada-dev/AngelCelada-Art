@@ -1,11 +1,13 @@
 import type { ReactNode } from "react";
-import FondoCabecera from "./FondoCabecera";
+import FondoCabecera, { type SeccionCabecera } from "./FondoCabecera";
 
 export default function CabeceraPagina({
   titulo,
+  seccion,
   pills,
 }: {
   titulo: string;
+  seccion: SeccionCabecera;
   pills?: ReactNode;
 }) {
   return (
@@ -15,7 +17,7 @@ export default function CabeceraPagina({
           pills ? "py-10 md:py-14" : "py-9 md:py-12"
         }`}
       >
-        <FondoCabecera />
+        <FondoCabecera seccion={seccion} />
         <h1 className="relative z-10 font-serif text-2xl font-bold text-cream drop-shadow-[0_2px_16px_rgba(0,0,0,0.4)] md:text-4xl">
           <span
             className="efecto-revelado-texto"
