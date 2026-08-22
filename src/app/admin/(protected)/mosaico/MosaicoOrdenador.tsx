@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -151,8 +151,20 @@ export default function MosaicoOrdenador({
     grid: obrasIniciales.filter((o) => o.orden_manual !== null),
     panel: obrasIniciales.filter((o) => o.orden_manual === null),
   }));
+  // Refleja siempre el último estado calculado, para poder persistir en
+  // onDragEnd sin depender del cierre (closure) de grupos, que puede
+  // quedarse un render por detrás de las actualizaciones en onDragOver.
+  const gruposRef = useRef(grupos);
   const [activa, setActiva] = useState<Obra | null>(null);
   const [guardando, setGuardando] = useState(false);
+
+  function actualizarGrupos(actualizar: (prev: Grupos) => Grupos) {
+    setGrupos((prev) => {
+      const siguiente = actualizar(prev);
+      gruposRef.current = siguiente;
+      return siguiente;
+    });
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -174,22 +186,28 @@ export default function MosaicoOrdenador({
     setActiva(obra);
   }
 
-  // Mueve la obra de un contenedor a otro mientras se arrastra, para que
-  // el hueco se vea en tiempo real (el reordenamiento dentro del mismo
-  // contenedor se resuelve al soltar, en onDragEnd).
+  // Reordena en vivo mientras se arrastra (tanto dentro del mismo
+  // contenedor como entre el panel y la cuadrícula), para que el hueco se
+  // vea al momento en vez de solo al soltar.
   function onDragOver(event: DragOverEvent) {
     const { active, over } = event;
-    if (!over) return;
+    if (!over || active.id === over.id) return;
     const desde = encontrarContenedor(active.id);
     const hacia = encontrarContenedor(over.id);
-    if (!desde || !hacia || desde === hacia) return;
+    if (!desde || !hacia) return;
 
-    setGrupos((prev) => {
+    actualizarGrupos((prev) => {
       const origen = prev[desde];
-      const destino = prev[hacia];
       const indiceActivo = origen.findIndex((o) => o.id === active.id);
       if (indiceActivo === -1) return prev;
 
+      if (desde === hacia) {
+        const indiceOver = origen.findIndex((o) => o.id === over.id);
+        if (indiceOver === -1 || indiceActivo === indiceOver) return prev;
+        return { ...prev, [hacia]: arrayMove(origen, indiceActivo, indiceOver) };
+      }
+
+      const destino = prev[hacia];
       const indiceOver = destino.findIndex((o) => o.id === over.id);
       const nuevoIndice = indiceOver >= 0 ? indiceOver : destino.length;
 
@@ -206,27 +224,11 @@ export default function MosaicoOrdenador({
   }
 
   function onDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
     setActiva(null);
-    if (!over) return;
-
-    const desde = encontrarContenedor(active.id);
-    const hacia = encontrarContenedor(over.id);
-    if (!desde || !hacia) return;
-
-    let siguiente = grupos;
-
-    if (desde === hacia) {
-      const lista = grupos[hacia];
-      const indiceActivo = lista.findIndex((o) => o.id === active.id);
-      const indiceOver = lista.findIndex((o) => o.id === over.id);
-      if (indiceActivo !== -1 && indiceOver !== -1 && indiceActivo !== indiceOver) {
-        siguiente = { ...grupos, [hacia]: arrayMove(lista, indiceActivo, indiceOver) };
-        setGrupos(siguiente);
-      }
-    }
-
-    persistir(siguiente.grid, siguiente.panel);
+    if (!event.over) return;
+    // El orden ya quedó resuelto en vivo durante onDragOver; aquí solo
+    // toca guardar el resultado final.
+    persistir(gruposRef.current.grid, gruposRef.current.panel);
   }
 
   function quitarDelMosaico(obraId: string) {
@@ -236,7 +238,7 @@ export default function MosaicoOrdenador({
       grid: grupos.grid.filter((o) => o.id !== obraId),
       panel: [obra, ...grupos.panel],
     };
-    setGrupos(siguiente);
+    actualizarGrupos(() => siguiente);
     persistir(siguiente.grid, siguiente.panel);
   }
 
@@ -254,10 +256,10 @@ export default function MosaicoOrdenador({
           supabase.from("obras").update({ orden_manual: null }).eq("id", o.id)
         ),
       ]);
-      setGrupos({
+      actualizarGrupos(() => ({
         grid: gridConOrden,
         panel: panel.map((o) => (o.orden_manual !== null ? { ...o, orden_manual: null } : o)),
-      });
+      }));
     } catch (err) {
       console.error(err);
     } finally {
