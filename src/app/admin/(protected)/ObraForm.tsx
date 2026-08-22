@@ -176,20 +176,23 @@ export default function ObraForm({
     });
   const previewEsVertical = previewAspecto < 1;
 
-  // Si ya hay cm reales, esos mandan siempre sobre "orientacion" (ver
-  // calcularAspectoYRotacion), así que forzar la orientación no cambiaría
-  // nada visible: rotar de verdad significa intercambiar ancho y alto
-  // reales. Eso además propaga el giro a toda la web de golpe, porque los
-  // cm ya son la fuente de la verdad en todos los sitios (mosaico,
-  // "visualiza en tu espacio", ficha...). Sin cm todavía, la única
-  // palanca disponible es forzar la orientación.
+  // Si ya hay cm reales y no son iguales, esos mandan siempre sobre
+  // "orientacion" (ver calcularAspectoYRotacion), así que rotar de verdad
+  // significa intercambiar ancho y alto reales — eso además propaga el
+  // giro a toda la web de golpe, porque los cm ya son la fuente de la
+  // verdad en todos los sitios (mosaico, "visualiza en tu espacio",
+  // ficha...). Pero una obra cuadrada (ancho = alto) sigue siendo
+  // cuadrada intercambiados, así que ahí (y sin cm todavía) la única
+  // forma de que la foto gire de verdad es alternar "orientacion", que
+  // calcularAspectoYRotacion trata como la señal que decide para esos
+  // casos.
   function rotarPreview() {
-    if (anchoCm && altoCm) {
+    if (anchoCm && altoCm && Number(anchoCm) !== Number(altoCm)) {
       setAnchoCm(altoCm);
       setAltoCm(anchoCm);
       setMedidasDetectadas(false);
     } else {
-      setOrientacion(previewEsVertical ? "horizontal" : "vertical");
+      setOrientacion(orientacion === "vertical" ? "horizontal" : "vertical");
     }
   }
 

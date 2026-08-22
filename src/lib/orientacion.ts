@@ -43,8 +43,19 @@ export function calcularAspectoYRotacion(obra: ObraParaOrientacion) {
     ? obra.imagen_alto_px! > obra.imagen_ancho_px!
     : null;
   const cajaEsVertical = aspecto < 1;
-  const necesitaRotarFoto =
+  let necesitaRotarFoto =
     tienePx && fotoEsVertical !== null && fotoEsVertical !== cajaEsVertical;
+
+  // Una caja cuadrada (ancho = alto en cm) no tiene una orientación
+  // "natural" con la que comparar la foto: da igual girarla o no, sigue
+  // siendo cuadrada. Ahí "orientacion" pasa a decidir directamente si la
+  // foto se muestra girada 90º, en vez de quedar ignorada por los cm como
+  // en el resto de casos — si no, no habría forma de girar la foto de una
+  // obra cuadrada.
+  const esCuadrada = tieneCm && Math.abs(aspecto - 1) < 0.001;
+  if (esCuadrada && tienePx) {
+    necesitaRotarFoto = obra.orientacion === "vertical";
+  }
 
   return { aspecto, necesitaRotarFoto, tieneCm };
 }
