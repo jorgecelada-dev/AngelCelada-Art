@@ -55,7 +55,17 @@ export async function construirEscena(obra: ObraParaModelo): Promise<THREE.Scene
 
   const frente = new THREE.Mesh(
     new THREE.PlaneGeometry(anchoM, altoM),
-    new THREE.MeshStandardMaterial({ map: textura, roughness: 0.85 })
+    new THREE.MeshStandardMaterial({
+      map: textura,
+      roughness: 0.85,
+      // A veces el anclaje automático de AR Quick Look/ARKit no deja la
+      // pieza mirando exactamente hacia donde se esperaba (sobre todo en
+      // paredes lisas o poco texturizadas, con menos puntos de
+      // referencia para el seguimiento). Doble cara para que, mirado
+      // desde donde sea, siempre se vea la foto y nunca la caja lisa de
+      // detrás.
+      side: THREE.DoubleSide,
+    })
   );
   frente.position.z = GROSOR_M / 2 + 0.0005;
 
