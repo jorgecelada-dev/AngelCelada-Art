@@ -32,10 +32,19 @@ export default function MiEspacioClient({
       <div>
         <SeccionFavoritos obras={obras} />
         <div className="flex flex-wrap gap-4">
+          {hayObrasConAr && (
+            <button
+              type="button"
+              onClick={() => setModo("ar")}
+              className="btn-primary btn-brillo transition-transform duration-200 hover:scale-105 active:scale-95"
+            >
+              Ver en AR
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setModo("subir")}
-            className="btn-primary"
+            className="btn-secondary"
           >
             Subir mi habitación
           </button>
@@ -46,15 +55,6 @@ export default function MiEspacioClient({
           >
             Espacios de ejemplo
           </button>
-          {hayObrasConAr && (
-            <button
-              type="button"
-              onClick={() => setModo("ar")}
-              className="btn-secondary"
-            >
-              Ver en AR
-            </button>
-          )}
         </div>
       </div>
     );
