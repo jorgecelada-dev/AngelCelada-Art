@@ -91,13 +91,14 @@ export default function ObraCard({
   function onMouseLeave() {
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
     if (cierreTimeoutRef.current) window.clearTimeout(cierreTimeoutRef.current);
-    // Pequeño margen antes de cerrar: da tiempo a que el cursor llegue
-    // desde la tarjeta pequeña hasta la vista ampliada sin que se cierre
-    // de golpe por el hueco entre ambas.
+    // La vista ampliada no seguía el ratón: solo depende de si el ratón
+    // sigue sobre la tarjeta pequeña (no tiene sus propios
+    // onMouseEnter/onMouseLeave), así que este margen es solo para
+    // evitar parpadeos si el cursor sale y vuelve a entrar muy rápido.
     cierreTimeoutRef.current = window.setTimeout(() => {
       setRect(null);
       setCargada(false);
-    }, 150);
+    }, 100);
   }
 
   const esLamina = variante === "lamina";
@@ -208,9 +209,7 @@ export default function ObraCard({
                   width: rect.width,
                   height: rect.height,
                 }}
-                className="z-50 overflow-hidden bg-charcoal/5 shadow-2xl ring-1 ring-charcoal/10"
-                onMouseEnter={onMouseEnter}
-                onMouseLeave={onMouseLeave}
+                className="pointer-events-none z-50 overflow-hidden bg-charcoal/5 shadow-2xl ring-1 ring-charcoal/10"
               >
                 <Link href={`/obras/${obra.id}`} className="block h-full w-full">
                   {necesitaRotarFoto ? (

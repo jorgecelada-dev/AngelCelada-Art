@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Entorno, Obra, ObraDetalle } from "@/types";
 import BuyButton from "./BuyButton";
 import VisualizacionObra from "@/components/VisualizacionObra";
+import BotonVolver from "@/components/BotonVolver";
 import ImagenObraRotada from "@/components/ImagenObraRotada";
 import EntradaImagen from "@/components/EntradaImagen";
 import RevelarEnVista from "@/components/RevelarEnVista";
@@ -241,6 +242,9 @@ export default async function ObraDetailPage({
 
   return (
     <>
+      <div className="container-site pt-6">
+        <BotonVolver volverA="/obras" />
+      </div>
       {principal}
 
       {detalles.length > 0 && (
