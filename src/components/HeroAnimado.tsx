@@ -32,7 +32,11 @@ export default function HeroAnimado() {
           className="efecto-revelado-texto"
           style={{ animationDelay: "0.5s" }}
         >
-          <span className="texto-brillo">
+          {/* El brillo del texto tiene su propio ciclo infinito aparte
+              del revelado; sin retraso arrancaba antes de que el
+              titular terminara de revelarse (0.5s + 1s), así que se
+              veía ya a mitad de ciclo en cuanto aparecía el texto. */}
+          <span className="texto-brillo" style={{ animationDelay: "1.5s" }}>
             Cuadros que nacen de la tierra, el color y el tiempo.
           </span>
         </span>

@@ -34,8 +34,22 @@
     animation-play-state: running !important;
   }
 
+  /* El brillo del texto (texto-brillo) es una animación aparte, con su
+     propio ciclo infinito, anidada dentro de RevelarEnVista. Sin esto,
+     arrancaba nada más pintar la página (aunque el titular estuviera
+     bajo el pliegue, invisible todavía), así que al hacer scroll hasta
+     él ya llevaba un rato corriendo "a ciegas" y se veía a mitad de
+     ciclo en vez de desde el principio. Se pausa igual que la entrada
+     del propio contenedor, y arranca de cero en el mismo momento. */
+  .animar-al-scroll .texto-brillo {
+    animation-play-state: paused !important;
+  }
+  .animar-al-scroll.en-vista .texto-brillo {
+    animation-play-state: running !important;
+  }
+
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-full bg-clay px-6 py-3 text-sm font-medium tracking-wide text-cream transition hover:bg-charcoal;
+    @apply inline-flex items-center justify-center rounded-full bg-terracota px-6 py-3 text-sm font-medium tracking-wide text-cream transition hover:bg-terracota-oscuro;
   }
 
   .btn-secondary {
@@ -49,7 +63,7 @@
   .btn-brillo {
     position: relative;
     overflow: hidden;
-    animation: halo-clay 3.2s ease-in-out infinite;
+    animation: halo-boton 3.2s ease-in-out infinite;
   }
   .btn-brillo::after {
     content: "";
@@ -165,13 +179,13 @@
   }
 }
 
-@keyframes halo-clay {
+@keyframes halo-boton {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(176, 141, 87, 0.35);
+    box-shadow: 0 0 0 0 rgba(166, 67, 44, 0.4);
   }
   50% {
-    box-shadow: 0 0 0 10px rgba(176, 141, 87, 0);
+    box-shadow: 0 0 0 10px rgba(166, 67, 44, 0);
   }
 }
 

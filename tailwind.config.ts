@@ -13,6 +13,12 @@ const config: Config = {
         sage: "#7C8B5E",
         charcoal: "#2B2B28",
         gold: "#B08D57",
+        // Solo para los botones principales (más rojizo/quemado que
+        // "clay", que se queda para acentos de texto y etiquetas): con
+        // el fondo ya lleno de crema/beige/dorado, un naranja tan
+        // suave como clay se hundía en vez de destacar.
+        terracota: "#A6432C",
+        "terracota-oscuro": "#7C3320",
       },
       fontFamily: {
         serif: ["var(--font-heading)", "Georgia", "serif"],
