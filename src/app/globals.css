@@ -117,19 +117,26 @@
   }
 
   /* Capas de fondo con olas (FondoOndas, usado por el hero y por el
-     fondo global): deriva horizontal en bucle perfecto (el SVG tesela
-     en horizontal, así que no hay salto al volver a 0) + un
-     balanceo/respiración vertical. El nombre de cada animación
-     (dirección de deriva, amplitud de balanceo) lo pone el propio
-     componente por capa, aquí solo el timing genérico. */
-  .fondo-ondas-capa {
-    animation-timing-function: linear, ease-in-out;
-    animation-iteration-count: infinite, infinite;
+     fondo global): deriva horizontal en bucle perfecto + un
+     balanceo/respiración vertical, repartidos en dos elementos (ver
+     FondoOndas.tsx) para que las dos animaciones solo toquen
+     "transform" — nunca "background-position", que obliga a repintar
+     el SVG en cada fotograma y con varias capas colapsaba el
+     rendimiento. El nombre de cada animación (dirección, amplitud) lo
+     pone el propio componente por capa, aquí solo el timing genérico. */
+  .fondo-ondas-deriva {
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  .fondo-ondas-flotar {
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fondo-ondas-capa {
+  .fondo-ondas-deriva,
+  .fondo-ondas-flotar {
     animation: none !important;
   }
 }
@@ -189,24 +196,28 @@
   }
 }
 
+/* La envoltura es 1440px más ancha que la pantalla a cada lado (ver
+   FondoOndas.tsx), así que desplazarla un tile entero con transform
+   (en vez de con background-position) sigue sin dejar ver ningún hueco
+   al llegar al final del bucle y volver a empezar. */
 @keyframes deriva-horizontal {
   from {
-    background-position-x: 0;
+    transform: translateX(0);
   }
   to {
-    background-position-x: -1440px;
+    transform: translateX(-1440px);
   }
 }
 
-/* Dirección contraria (misma tesela, así que el bucle sigue sin salto),
-   para que unas capas deriven a la izquierda y otras a la derecha, como
-   corrientes opuestas, en vez de todo el fondo moviéndose en bloque. */
+/* Dirección contraria (mismo bucle sin salto), para que unas capas
+   deriven a la izquierda y otras a la derecha, como corrientes
+   opuestas, en vez de todo el fondo moviéndose en bloque. */
 @keyframes deriva-horizontal-inversa {
   from {
-    background-position-x: 0;
+    transform: translateX(0);
   }
   to {
-    background-position-x: 1440px;
+    transform: translateX(1440px);
   }
 }
 
