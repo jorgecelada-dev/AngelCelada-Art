@@ -26,21 +26,13 @@ const FLOTAR_NOMBRE = {
 // volver a 0) + un balanceo/respiración vertical. Cada capa tiene su
 // propia dirección (algunas a la izquierda, otras a la derecha, como
 // corrientes opuestas), velocidad y amplitud de balanceo, para que la
-// diferencia entre ellas se note de verdad. Mismo sistema en todo el
-// sitio (hero y fondo global), solo cambia qué capas se pasan.
-export default function FondoOndas({
-  capas,
-  baseOpaca = false,
-}: {
-  capas: readonly CapaOnda[];
-  // Cuando este fondo va delante de otro fondo (el hero delante del
-  // fondo global de la página), una base de color crema tapa lo que
-  // haya detrás para que no se mezclen los dos sistemas de olas.
-  baseOpaca?: boolean;
-}) {
+// diferencia entre ellas se note de verdad. Una única instancia global
+// (FondoParallax, en el layout) para toda la web: al no desmontarse
+// nunca al navegar entre páginas, la animación no da saltos ni
+// destellos.
+export default function FondoOndas({ capas }: { capas: readonly CapaOnda[] }) {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-      {baseOpaca && <div className="absolute inset-0 bg-cream" />}
       {capas.map((capa) => (
         <div
           key={capa.src}
