@@ -104,12 +104,10 @@
 
   /* Capas del fondo del hero (FondoHeroAnimado): deriva horizontal en
      bucle perfecto (el SVG tesela en horizontal, así que no hay salto
-     al volver a 0) + un balanceo/respiración vertical suave. Cada capa
-     usa su propia duración/retraso (por eso solo se define la forma de
-     la animación aquí, no los tiempos), para que no se sientan
-     sincronizadas entre sí. */
+     al volver a 0) + un balanceo/respiración vertical. El nombre de
+     cada animación (dirección de deriva, amplitud de balanceo) lo pone
+     el propio componente por capa, aquí solo el timing genérico. */
   .fondo-hero-capa {
-    animation-name: deriva-horizontal, flotar-capa;
     animation-timing-function: linear, ease-in-out;
     animation-iteration-count: infinite, infinite;
   }
@@ -185,12 +183,47 @@
   }
 }
 
-@keyframes flotar-capa {
+/* Dirección contraria (misma tesela, así que el bucle sigue sin salto),
+   para que unas capas deriven a la izquierda y otras a la derecha, como
+   corrientes opuestas, en vez de todo el fondo moviéndose en bloque. */
+@keyframes deriva-horizontal-inversa {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: 1440px;
+  }
+}
+
+/* Tres amplitudes de balanceo/respiración distintas, repartidas entre
+   capas, para que la diferencia de movimiento entre ellas se note (no
+   solo la velocidad de la deriva horizontal). */
+@keyframes flotar-suave {
   0%,
   100% {
     transform: translateY(0) scaleY(1);
   }
   50% {
-    transform: translateY(-16px) scaleY(1.018);
+    transform: translateY(-8px) scaleY(1.008);
+  }
+}
+
+@keyframes flotar-medio {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    transform: translateY(-20px) scaleY(1.022);
+  }
+}
+
+@keyframes flotar-amplio {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    transform: translateY(-34px) scaleY(1.038);
   }
 }

@@ -410,6 +410,70 @@ export default function ObraForm({
             </div>
           </div>
 
+          <Seccion titulo="Publicación">
+            <div>
+              <label className="block text-sm font-medium">
+                Imagen {esEdicion && "(deja vacío para mantener la actual)"}
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => onImagenChange(e.target.files?.[0] ?? null)}
+                className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3"
+              />
+            </div>
+
+            <div className="flex items-center justify-between gap-4 rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3">
+              <div>
+                <p className="text-sm font-medium">
+                  {visible ? "Visible en la web" : "Oculta"}
+                </p>
+                <p className="mt-0.5 text-xs text-charcoal/50">
+                  {visible
+                    ? "Se muestra en el mosaico, portada, láminas y su ficha."
+                    : "No aparece en ningún sitio de la web ni ocupa espacio en el mosaico, aunque esté destacada."}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setVisible((v) => !v)}
+                aria-label={visible ? "Ocultar obra" : "Mostrar obra"}
+                aria-pressed={visible}
+                className={`flex h-10 w-10 flex-none items-center justify-center rounded-full transition ${
+                  visible
+                    ? "bg-charcoal text-cream"
+                    : "bg-charcoal/10 text-charcoal/50"
+                }`}
+              >
+                {visible ? (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+                    <path
+                      d="M2 12s3.5-7 10-7c1.7 0 3.15.35 4.36.9M22 12s-3.5 7-10 7c-1.7 0-3.15-.35-4.36-.9M9.9 9.9a3 3 0 104.2 4.2M4.5 4.5l15 15"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+              </button>
+            </div>
+
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="destacada"
+                form="formulario-obra"
+                checked={destacada}
+                onChange={(e) => setDestacada(e.target.checked)}
+              />
+              Mostrar en portada
+            </label>
+          </Seccion>
+
           <div>
             <button
               type="submit"
@@ -714,68 +778,6 @@ export default function ObraForm({
             </div>
           </Seccion>
 
-          <Seccion titulo="Publicación">
-            <div>
-              <label className="block text-sm font-medium">
-                Imagen {esEdicion && "(deja vacío para mantener la actual)"}
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => onImagenChange(e.target.files?.[0] ?? null)}
-                className="mt-1 w-full rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3"
-              />
-            </div>
-
-            <div className="flex items-center justify-between gap-4 rounded-lg border border-charcoal/20 bg-white/60 px-4 py-3">
-              <div>
-                <p className="text-sm font-medium">
-                  {visible ? "Visible en la web" : "Oculta"}
-                </p>
-                <p className="mt-0.5 text-xs text-charcoal/50">
-                  {visible
-                    ? "Se muestra en el mosaico, portada, láminas y su ficha."
-                    : "No aparece en ningún sitio de la web ni ocupa espacio en el mosaico, aunque esté destacada."}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setVisible((v) => !v)}
-                aria-label={visible ? "Ocultar obra" : "Mostrar obra"}
-                aria-pressed={visible}
-                className={`flex h-10 w-10 flex-none items-center justify-center rounded-full transition ${
-                  visible
-                    ? "bg-charcoal text-cream"
-                    : "bg-charcoal/10 text-charcoal/50"
-                }`}
-              >
-                {visible ? (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
-                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" strokeLinecap="round" strokeLinejoin="round" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                ) : (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
-                    <path
-                      d="M2 12s3.5-7 10-7c1.7 0 3.15.35 4.36.9M22 12s-3.5 7-10 7c-1.7 0-3.15-.35-4.36-.9M9.9 9.9a3 3 0 104.2 4.2M4.5 4.5l15 15"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                )}
-              </button>
-            </div>
-
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                name="destacada"
-                checked={destacada}
-                onChange={(e) => setDestacada(e.target.checked)}
-              />
-              Mostrar en portada
-            </label>
-          </Seccion>
         </form>
       </div>
 
