@@ -176,6 +176,23 @@ export default function ObraForm({
     });
   const previewEsVertical = previewAspecto < 1;
 
+  // Si ya hay cm reales, esos mandan siempre sobre "orientacion" (ver
+  // calcularAspectoYRotacion), así que forzar la orientación no cambiaría
+  // nada visible: rotar de verdad significa intercambiar ancho y alto
+  // reales. Eso además propaga el giro a toda la web de golpe, porque los
+  // cm ya son la fuente de la verdad en todos los sitios (mosaico,
+  // "visualiza en tu espacio", ficha...). Sin cm todavía, la única
+  // palanca disponible es forzar la orientación.
+  function rotarPreview() {
+    if (anchoCm && altoCm) {
+      setAnchoCm(altoCm);
+      setAltoCm(anchoCm);
+      setMedidasDetectadas(false);
+    } else {
+      setOrientacion(previewEsVertical ? "horizontal" : "vertical");
+    }
+  }
+
   const esEdicion = Boolean(obra);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -295,6 +312,25 @@ export default function ObraForm({
                     previewEsVertical ? "h-[280px] w-[210px]" : "h-[210px] w-full"
                   }`}
                 >
+                  <button
+                    type="button"
+                    onClick={rotarPreview}
+                    aria-label="Rotar la orientación de la obra"
+                    title={
+                      anchoCm && altoCm
+                        ? "Rotar (intercambia ancho y alto reales)"
+                        : "Rotar orientación"
+                    }
+                    className="absolute right-2 top-2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-charcoal/70 text-cream transition hover:bg-charcoal"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4.5 w-4.5">
+                      <path
+                        d="M20 11a8 8 0 10-2.34 6.36M20 11V5M20 11h-6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
                   {previewNecesitaRotar ? (
                     // La foto es naturalmente lo contrario de lo forzado: se
                     // rota 90º dentro del recuadro en vez de solo encajarla
@@ -370,9 +406,25 @@ export default function ObraForm({
               )}
             </div>
           </div>
+
+          <div>
+            <button
+              type="submit"
+              form="formulario-obra"
+              disabled={loading}
+              className="btn-primary w-full"
+            >
+              {loading ? "Guardando…" : esEdicion ? "Guardar cambios" : "Publicar obra"}
+            </button>
+            {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+          </div>
         </aside>
 
-        <form onSubmit={onSubmit} className="order-2 space-y-4 lg:order-1">
+        <form
+          id="formulario-obra"
+          onSubmit={onSubmit}
+          className="order-2 space-y-4 lg:order-1"
+        >
           <Seccion titulo="Datos básicos">
             <div>
               <label className="block text-sm font-medium">Título</label>
@@ -721,13 +773,6 @@ export default function ObraForm({
               Mostrar en portada
             </label>
           </Seccion>
-
-          <div className="pt-2">
-            <button type="submit" disabled={loading} className="btn-primary">
-              {loading ? "Guardando…" : esEdicion ? "Guardar cambios" : "Publicar obra"}
-            </button>
-            {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
-          </div>
         </form>
       </div>
 

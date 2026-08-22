@@ -19,9 +19,6 @@ export default function AdminLayout({
               <Link href="/admin" className="hover:underline">
                 Obras
               </Link>
-              <Link href="/admin/nueva-obra" className="hover:underline">
-                Añadir obra
-              </Link>
               <Link href="/admin/mosaico" className="hover:underline">
                 Mosaico
               </Link>

@@ -20,8 +20,11 @@ export default async function AdminDashboardPage() {
 
   return (
     <div>
-      <div className="mb-8">
+      <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-serif">Tus obras ({obras.length})</h1>
+        <Link href="/admin/nueva-obra" className="btn-primary">
+          + Añadir obra
+        </Link>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-charcoal/10">
