@@ -1,5 +1,10 @@
 import type { Obra } from "@/types";
 
+type ObraParaOrientacion = Pick<
+  Obra,
+  "ancho_cm" | "alto_cm" | "orientacion" | "imagen_ancho_px" | "imagen_alto_px"
+>;
+
 // Decide qué proporción (ancho/alto) debe mostrarse para una obra, y si
 // hace falta rotar la foto para conseguirla.
 //
@@ -7,7 +12,11 @@ import type { Obra } from "@/types";
 // mandan siempre, ignorando incluso "orientacion"). Si no hay cm, se usa
 // "orientacion" si se forzó a mano; si tampoco, la foto tal cual; si no
 // hay ni foto, un valor por defecto vertical (4/5).
-export function calcularAspectoYRotacion(obra: Obra) {
+//
+// Solo pide los campos que realmente usa (no la Obra completa), para que
+// el formulario de edición pueda reutilizarla en la previsualización con
+// los valores que hay en pantalla en cada momento, antes de guardar.
+export function calcularAspectoYRotacion(obra: ObraParaOrientacion) {
   const tieneCm = Boolean(obra.ancho_cm && obra.alto_cm);
   const tienePx = Boolean(obra.imagen_ancho_px && obra.imagen_alto_px);
 

@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { Categoria, Entorno, Obra } from "@/types";
 import DetalleImagenesManager from "./DetalleImagenesManager";
 import { COLORES_OBRA } from "@/lib/colores";
+import { calcularAspectoYRotacion } from "@/lib/orientacion";
 
 const TIPO_LABEL: Record<Entorno["tipo"], string> = {
   salon: "Salón",
@@ -121,22 +122,20 @@ export default function ObraForm({
     }
   }
 
-  const previewNaturalEsVertical = previewDims
-    ? previewDims.height > previewDims.width
-    : null;
-
-  const previewEsVertical =
-    orientacion === "vertical"
-      ? true
-      : orientacion === "horizontal"
-      ? false
-      : Boolean(previewNaturalEsVertical);
-
-  // Si se fuerza una orientación contraria a la real de la foto, hay que
-  // rotarla en la previsualización para que se vea de verdad así.
-  const previewNecesitaRotar =
-    previewNaturalEsVertical !== null &&
-    previewNaturalEsVertical !== previewEsVertical;
+  // Misma función que usa la web pública: si hay cm reales rellenados,
+  // mandan ellos sobre la orientación forzada y sobre la foto (antes esta
+  // previsualización solo miraba la orientación forzada y la foto, así
+  // que con obras que ya tenían cm podía verse aquí distinto de cómo
+  // acaba saliendo en la web).
+  const { aspecto: previewAspecto, necesitaRotarFoto: previewNecesitaRotar } =
+    calcularAspectoYRotacion({
+      ancho_cm: anchoCm ? Number(anchoCm) : null,
+      alto_cm: altoCm ? Number(altoCm) : null,
+      orientacion: (orientacion || null) as Obra["orientacion"],
+      imagen_ancho_px: previewDims?.width ?? null,
+      imagen_alto_px: previewDims?.height ?? null,
+    });
+  const previewEsVertical = previewAspecto < 1;
 
   const esEdicion = Boolean(obra);
 
