@@ -8,6 +8,7 @@ import LogoutButton from "./LogoutButton";
 const links = [
   { href: "/admin", label: "Obras" },
   { href: "/admin/nueva-obra", label: "Añadir obra" },
+  { href: "/admin/mosaico", label: "Mosaico" },
   { href: "/admin/sobre-mi", label: "Sobre mí" },
   { href: "/admin/colecciones", label: "Colecciones" },
   { href: "/admin/entornos", label: "Entornos" },

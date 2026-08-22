@@ -15,6 +15,7 @@ export default async function HomePage() {
     .select("*")
     .eq("destacada", true)
     .eq("visible", true)
+    .order("orden_manual", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false })
     .limit(3);
 

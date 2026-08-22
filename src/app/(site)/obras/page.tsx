@@ -25,6 +25,7 @@ export default async function ObrasPage({
     .from("obras")
     .select("*")
     .eq("visible", true)
+    .order("orden_manual", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false });
 
   if (coleccionActivaId) {

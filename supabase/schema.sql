@@ -74,6 +74,14 @@ alter table obras add column if not exists visible boolean not null default true
 
 create index if not exists idx_obras_visible on obras(visible);
 
+-- Posición manual en el mosaico de /obras y en la portada, asignada desde
+-- el "Mosaico" del panel privado arrastrando las obras. NULL = sin
+-- colocar a mano, se ordena por fecha de creación detrás de las que sí
+-- tienen posición.
+alter table obras add column if not exists orden_manual integer;
+
+create index if not exists idx_obras_orden_manual on obras(orden_manual);
+
 -- ------------------------------------------------------------
 -- Tabla: obra_detalles (fotos de detalle/proceso de cada obra,
 -- mostradas en la ficha pública bajo "Detalles de la obra")

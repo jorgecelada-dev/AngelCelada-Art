@@ -22,6 +22,9 @@ export default function AdminLayout({
               <Link href="/admin/nueva-obra" className="hover:underline">
                 Añadir obra
               </Link>
+              <Link href="/admin/mosaico" className="hover:underline">
+                Mosaico
+              </Link>
               <Link href="/admin/sobre-mi" className="hover:underline">
                 Sobre mí
               </Link>
