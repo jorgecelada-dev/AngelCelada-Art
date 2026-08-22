@@ -14,11 +14,17 @@ const ModelViewerElemento = dynamic(() => import("./ModelViewerElemento"), {
   ),
 });
 
-export default function ArViewer({ obras }: { obras: Obra[] }) {
+export default function ArViewer({
+  obras,
+  obraIdInicial = null,
+}: {
+  obras: Obra[];
+  obraIdInicial?: string | null;
+}) {
   const obrasConAr = obras.filter(
     (obra) => obra.modelo_ar_glb_url && obra.modelo_ar_usdz_url
   );
-  const [obraId, setObraId] = useState<string | null>(null);
+  const [obraId, setObraId] = useState<string | null>(obraIdInicial);
   const obra = obrasConAr.find((o) => o.id === obraId) ?? null;
 
   if (obrasConAr.length === 0) {

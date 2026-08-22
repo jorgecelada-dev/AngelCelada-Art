@@ -109,6 +109,7 @@ export default function ObraCard({
     ? formatearEUR(precioFinal(obra))
     : "No disponible";
   const mostrarVendida = !esLamina && !obra.disponible;
+  const tieneAr = Boolean(obra.modelo_ar_glb_url && obra.modelo_ar_usdz_url);
 
   return (
     <div
@@ -181,16 +182,34 @@ export default function ObraCard({
 
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal/85 via-charcoal/35 to-transparent p-4 pt-12">
           <h3 className="font-serif text-cream">{obra.titulo}</h3>
-          <p className="mt-1 flex items-baseline gap-2 text-sm font-medium text-cream/90">
-            {enOferta && (
-              <span className="text-cream/60 line-through">
-                {formatearEUR(obra.precio)}
-              </span>
-            )}
-            {precioFormateado}
-          </p>
+          {esLamina ? (
+            <p className="mt-1 flex items-baseline gap-2 text-sm font-medium text-cream/90">
+              {enOferta && (
+                <span className="text-cream/60 line-through">
+                  {formatearEUR(obra.precio)}
+                </span>
+              )}
+              {precioFormateado}
+            </p>
+          ) : (
+            obra.medidas && (
+              <p className="mt-1 text-sm font-medium text-cream/90">
+                {obra.medidas}
+              </p>
+            )
+          )}
         </div>
       </Link>
+
+      {tieneAr && !esLamina && (
+        <Link
+          href={`/mi-espacio?ar=${obra.id}`}
+          onClick={(e) => e.stopPropagation()}
+          className="absolute bottom-3 right-3 z-10 rounded-full bg-cream/90 px-3 py-1.5 text-xs font-medium tracking-wide text-charcoal shadow-md transition hover:bg-cream"
+        >
+          Ver en AR
+        </Link>
+      )}
 
       {typeof document !== "undefined" &&
         createPortal(

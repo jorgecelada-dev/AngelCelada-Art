@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import type { Entorno, Obra } from "@/types";
 import EspacioEjemploViewer from "./EspacioEjemploViewer";
 import SubirHabitacion from "./SubirHabitacion";
@@ -15,7 +16,12 @@ export default function MiEspacioClient({
   obras: Obra[];
   entornos: Entorno[];
 }) {
-  const [modo, setModo] = useState<Modo>("elegir");
+  // El CTA "Ver en AR" de las tarjetas de /obras enlaza aquí con
+  // ?ar=<id>: entra directo en el modo AR con esa obra ya elegida, sin
+  // pasar por la pantalla de "elegir" ni por la rejilla de selección.
+  const searchParams = useSearchParams();
+  const obraArInicial = searchParams.get("ar");
+  const [modo, setModo] = useState<Modo>(obraArInicial ? "ar" : "elegir");
   const hayObrasConAr = obras.some(
     (obra) => obra.modelo_ar_glb_url && obra.modelo_ar_usdz_url
   );
@@ -63,7 +69,7 @@ export default function MiEspacioClient({
       {modo === "ejemplo" ? (
         <EspacioEjemploViewer entornos={entornos} obras={obras} />
       ) : modo === "ar" ? (
-        <ArViewer obras={obras} />
+        <ArViewer obras={obras} obraIdInicial={obraArInicial} />
       ) : (
         <SubirHabitacion obras={obras} />
       )}
