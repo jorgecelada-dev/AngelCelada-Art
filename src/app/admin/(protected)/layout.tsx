@@ -44,9 +44,6 @@ export default function AdminLayout({
           </div>
 
           <div className="hidden items-center gap-4 md:flex">
-            <Link href="/" className="text-sm text-clay hover:underline">
-              ← Ver web pública
-            </Link>
             <Link href="/admin/ajustes" className="text-sm hover:underline">
               Ajustes
             </Link>

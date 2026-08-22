@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Domine, PT_Serif } from "next/font/google";
+import AdminBar from "@/components/AdminBar";
 import "./globals.css";
 
 // Pareja tipográfica de estilo periódico: Domine para titulares (con
@@ -32,7 +33,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" className={`${domine.variable} ${ptSerif.variable}`}>
-      <body className="font-sans">{children}</body>
+      <body className="font-sans">
+        <AdminBar />
+        {children}
+      </body>
     </html>
   );
 }

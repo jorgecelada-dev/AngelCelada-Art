@@ -82,15 +82,6 @@ export default function AdminMobileMenu() {
                   </Link>
                 </motion.div>
               ))}
-              <motion.div variants={item}>
-                <Link
-                  href="/"
-                  onClick={() => setAbierto(false)}
-                  className="block border-b border-charcoal/10 py-3 text-sm text-clay"
-                >
-                  ← Ver web pública
-                </Link>
-              </motion.div>
               <motion.div variants={item} className="pt-3">
                 <LogoutButton />
               </motion.div>
