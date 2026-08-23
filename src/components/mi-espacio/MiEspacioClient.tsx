@@ -28,19 +28,22 @@ export default function MiEspacioClient({
   );
 
   const botonAr = hayObrasConAr && (
-    <button
-      type="button"
-      onClick={() => setModo("ar")}
-      className="btn-primary btn-brillo transition-transform duration-200 hover:scale-105 active:scale-95"
-    >
-      Ver en AR
-    </button>
+    <div className="mb-10 flex justify-center">
+      <button
+        type="button"
+        onClick={() => setModo("ar")}
+        className="btn-primary btn-brillo transition-transform duration-200 hover:scale-105 active:scale-95"
+      >
+        Ver en AR
+      </button>
+    </div>
   );
 
   if (modo === "elegir") {
     return (
       <div>
-        <SeccionFavoritos obras={obras} accion={botonAr} />
+        {botonAr}
+        <SeccionFavoritos obras={obras} />
         <div className="flex flex-wrap gap-4">
           <button
             type="button"
@@ -63,7 +66,8 @@ export default function MiEspacioClient({
 
   return (
     <div>
-      <SeccionFavoritos obras={obras} accion={botonAr} />
+      {botonAr}
+      <SeccionFavoritos obras={obras} />
       <button
         type="button"
         onClick={() => setModo("elegir")}
