@@ -27,20 +27,21 @@ export default function MiEspacioClient({
     (obra) => obra.modelo_ar_glb_url && obra.modelo_ar_usdz_url
   );
 
+  const botonAr = hayObrasConAr && (
+    <button
+      type="button"
+      onClick={() => setModo("ar")}
+      className="btn-primary btn-brillo transition-transform duration-200 hover:scale-105 active:scale-95"
+    >
+      Ver en AR
+    </button>
+  );
+
   if (modo === "elegir") {
     return (
       <div>
-        <SeccionFavoritos obras={obras} />
+        <SeccionFavoritos obras={obras} accion={botonAr} />
         <div className="flex flex-wrap gap-4">
-          {hayObrasConAr && (
-            <button
-              type="button"
-              onClick={() => setModo("ar")}
-              className="btn-primary btn-brillo transition-transform duration-200 hover:scale-105 active:scale-95"
-            >
-              Ver en AR
-            </button>
-          )}
           <button
             type="button"
             onClick={() => setModo("subir")}
@@ -62,7 +63,7 @@ export default function MiEspacioClient({
 
   return (
     <div>
-      <SeccionFavoritos obras={obras} />
+      <SeccionFavoritos obras={obras} accion={botonAr} />
       <button
         type="button"
         onClick={() => setModo("elegir")}
