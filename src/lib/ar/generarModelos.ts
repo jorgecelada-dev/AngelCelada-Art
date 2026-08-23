@@ -111,30 +111,22 @@ export async function generarGLB(contenido: THREE.Object3D): Promise<Blob> {
 }
 
 export async function generarUSDZ(contenido: THREE.Object3D): Promise<Blob> {
-  // AR Quick Look ancla siempre con la misma convención tanto en suelo
-  // como en pared: el eje +Y del propio modelo pasa a ser "hacia fuera
-  // de la superficie" (normal del plano detectado). Nuestro contenido
-  // está construido de forma natural (arriba = +Y, frente = +Z, como
-  // cualquier objeto), así que hace falta girarlo -90° en X SOLO para
-  // el USDZ: el frente (+Z) pasa a +Y ("hacia fuera", lo que Quick Look
-  // espera) y el alto (+Y) pasa a -Z. El GLB de Android no se toca: su
-  // ar-placement="wall" ya asume la orientación natural.
+  // Antes esta función giraba -90° el contenido antes de exportarlo,
+  // partiendo de que AR Quick Look reinterpreta el eje +Y del modelo
+  // como "hacia fuera de la pared". Ese giro nunca se llegó a probar de
+  // verdad en un iPhone (las pruebas anteriores fueron en Android, que
+  // usa el .glb sin pasar por aquí) y, probado ya en un iPhone real, el
+  // cuadro dejaba de verse al colocarlo en la pared — probablemente
+  // quedaba de canto o metido dentro de la superficie. En modo "Objeto"
+  // de Quick Look (vista aislada, sin anclar), el modelo YA se ve bien
+  // en su orientación natural, sin ningún giro añadido — así que se
+  // exporta tal cual, dejando que la propia pista de anclaje
+  // ("vertical", más abajo) sea la que le diga a Quick Look que lo
+  // coloque en una pared, sin que nosotros reinterpretemos sus ejes.
   //
   // Se clona en vez de reutilizar el original para no afectar al export
   // GLB, que puede estar corriendo en paralelo sobre el mismo contenido.
-  const grupoOrientadoPared = new THREE.Group();
-  grupoOrientadoPared.add(contenido.clone(true));
-  grupoOrientadoPared.rotation.x = -Math.PI / 2;
-
-  // USDZExporter trata el objeto que se le pasa directamente como "la
-  // escena": solo exporta el transform de sus hijos, no el suyo propio
-  // (igual que una THREE.Scene normal, cuyo propio transform tampoco
-  // se usa nunca). Sin este envoltorio de más, el giro de
-  // grupoOrientadoPared se descartaría en silencio, tal cual pasaba
-  // antes de este cambio (comprobado exportando y leyendo el .usda:
-  // el nodo salía con matriz identidad pese al rotation.x fijado).
-  const raiz = new THREE.Group();
-  raiz.add(grupoOrientadoPared);
+  const raiz = contenido.clone(true);
   raiz.updateMatrixWorld(true);
 
   const exportador = new USDZExporter();
