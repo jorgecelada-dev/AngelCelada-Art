@@ -17,7 +17,12 @@ const nextConfig = {
     // sin que haya tráfico real de por medio. Aquí solo los anchos que
     // de verdad se usan en el sitio (mosaico, popup ampliado, ficha de
     // obra, miniaturas de detalle) y un único formato.
-    deviceSizes: [480, 768, 1080, 1440],
+    // 2048 como techo (no el 3840 de por defecto, que ya es más ancho
+    // que cualquier caso real aquí) para no perder nitidez en pantallas
+    // retina/4K viendo la foto grande de una obra: la resolución
+    // servida sigue siendo alta, solo se recortan los pasos intermedios
+    // que este sitio nunca llega a pedir.
+    deviceSizes: [480, 768, 1080, 1440, 2048],
     imageSizes: [128, 256, 384, 640, 780],
     formats: ["image/webp"],
   },
