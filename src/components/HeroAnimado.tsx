@@ -25,8 +25,8 @@ export default function HeroAnimado() {
         </span>
       </span>
       <h1
-        className="animate-entrada-derecha max-w-3xl text-4xl leading-tight md:text-6xl"
-        style={{ animationDelay: "0.15s" }}
+        className="animate-entrada-derecha leading-tight"
+        style={{ animationDelay: "0.15s", fontSize: "clamp(1.1rem, 4.5vw, 3.75rem)" }}
       >
         <span
           className="efecto-revelado-texto"
@@ -35,8 +35,15 @@ export default function HeroAnimado() {
           {/* El brillo del texto tiene su propio ciclo infinito aparte
               del revelado; sin retraso arrancaba antes de que el
               titular terminara de revelarse (0.5s + 1s), así que se
-              veía ya a mitad de ciclo en cuanto aparecía el texto. */}
-          <span className="texto-brillo" style={{ animationDelay: "1.5s" }}>
+              veía ya a mitad de ciclo en cuanto aparecía el texto.
+              whitespace-nowrap para que cada línea quede siempre entera
+              en su fila (nunca partida a media frase); el tamaño en
+              clamp() encoge lo justo en pantallas estrechas para que
+              quepa sin desbordar ni recortarse. */}
+          <span
+            className="texto-brillo whitespace-nowrap"
+            style={{ animationDelay: "1.5s" }}
+          >
             Arte orgánico
             <br />
             Naturaleza, color y memoria.
