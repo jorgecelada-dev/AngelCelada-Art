@@ -7,26 +7,57 @@ import "@google/model-viewer";
 import { useEffect, useRef, useState } from "react";
 import type { Obra } from "@/types";
 
-type ModelViewerElement = HTMLElement & { canActivateAR?: boolean };
+type ModelViewerElement = HTMLElement;
+
+type NavigatorConWebXR = Navigator & {
+  xr?: { isSessionSupported?: (modo: string) => Promise<boolean> };
+};
 
 export default function ModelViewerElemento({ obra }: { obra: Obra }) {
   const ref = useRef<ModelViewerElement>(null);
   const [disponible, setDisponible] = useState<boolean | null>(null);
 
+  // Comprobación propia, independiente de los eventos de model-viewer:
+  // "load"/"ar-status" solo avisan cuando la disponibilidad CAMBIA
+  // (ej. de sí a no), nunca cuando nunca llegó a estar disponible desde
+  // el principio — que es justo el caso de un Android sin ARCore. Ahí
+  // ese aviso nunca llegaba a disparase, así que el botón se quedaba
+  // visible pero sin el clic conectado (model-viewer solo lo conecta si
+  // el modo AR resultó válido) y no pasaba nada al pulsarlo.
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    let cancelado = false;
     setDisponible(null);
 
-    function comprobar() {
-      setDisponible(Boolean(el?.canActivateAR));
+    async function comprobar() {
+      const esIOS =
+        typeof navigator !== "undefined" &&
+        /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+        !("MSStream" in window);
+
+      if (esIOS) {
+        // AR Quick Look viene con el propio iOS (ARKit), no hace falta
+        // instalar ni certificar nada aparte como con ARCore, así que
+        // basta con que exista el .usdz (ya garantizado por ArViewer).
+        if (!cancelado) setDisponible(true);
+        return;
+      }
+
+      const nav = navigator as NavigatorConWebXR;
+      if (nav.xr?.isSessionSupported) {
+        try {
+          const soportado = await nav.xr.isSessionSupported("immersive-ar");
+          if (!cancelado) setDisponible(soportado);
+        } catch {
+          if (!cancelado) setDisponible(false);
+        }
+      } else {
+        if (!cancelado) setDisponible(false);
+      }
     }
 
-    el.addEventListener("load", comprobar);
-    el.addEventListener("ar-status", comprobar);
+    comprobar();
     return () => {
-      el.removeEventListener("load", comprobar);
-      el.removeEventListener("ar-status", comprobar);
+      cancelado = true;
     };
   }, [obra.id]);
 
@@ -61,9 +92,11 @@ export default function ModelViewerElemento({ obra }: { obra: Obra }) {
           backgroundColor: "transparent",
         }}
       >
-        <button slot="ar-button" type="button" className="btn-primary btn-brillo">
-          Ver en tu pared
-        </button>
+        {disponible !== false && (
+          <button slot="ar-button" type="button" className="btn-primary btn-brillo">
+            Ver en tu pared
+          </button>
+        )}
       </model-viewer>
 
       {disponible === false && (
