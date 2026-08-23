@@ -25,6 +25,16 @@ const nextConfig = {
     deviceSizes: [480, 768, 1080, 1440, 2048],
     imageSizes: [128, 256, 384, 640, 780],
     formats: ["image/webp"],
+    // Por defecto Next.js solo guarda cada imagen ya optimizada 60
+    // segundos: pasado ese minuto, la siguiente visita a la MISMA foto
+    // la vuelve a transformar y a escribir en caché de cero, aunque no
+    // haya cambiado nada — así se disparaban tanto las transformaciones
+    // como (sobre todo) las escrituras en caché con solo repasar la web
+    // varias veces. Las fotos de una obra no cambian nunca sin subir un
+    // archivo nuevo (que además genera una URL nueva por el sello de
+    // tiempo en el nombre), así que no hay riesgo de servir algo
+    // desactualizado con una caché larga: 31 días.
+    minimumCacheTTL: 2678400,
   },
 };
 
