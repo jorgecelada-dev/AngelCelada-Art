@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Obra } from "@/types";
 import DeleteObraButton from "./DeleteObraButton";
 import ToggleVisibleButton from "./ToggleVisibleButton";
+import GenerarTodasVistaArButton from "./GenerarTodasVistaArButton";
 import { formatearEUR, precioFinal, tieneDescuentoActivo } from "@/lib/precio";
 
 export const revalidate = 0;
@@ -26,6 +27,8 @@ export default async function AdminDashboardPage() {
           + Añadir obra
         </Link>
       </div>
+
+      <GenerarTodasVistaArButton obras={obras} />
 
       <div className="overflow-hidden rounded-xl border border-charcoal/10">
         <table className="w-full text-left text-sm">

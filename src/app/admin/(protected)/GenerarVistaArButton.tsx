@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Obra } from "@/types";
-import { construirEscena, generarGLB, generarUSDZ } from "@/lib/ar/generarModelos";
+import { generarYSubirVistaAr } from "@/lib/ar/generarYSubirVistaAr";
 
 // Genera y sube los ficheros .glb/.usdz para el modo "Ver en AR" de
 // /mi-espacio. Acción independiente del formulario principal (como
@@ -23,43 +23,8 @@ export default function GenerarVistaArButton({ obra }: { obra: Obra }) {
     setGenerando(true);
     setError(null);
     try {
-      const escena = await construirEscena(obra);
-      const [glbBlob, usdzBlob] = await Promise.all([
-        generarGLB(escena),
-        generarUSDZ(escena),
-      ]);
-
-      const sello = Date.now();
-      const rutaGlb = `modelos-ar/${obra.id}-${sello}.glb`;
-      const rutaUsdz = `modelos-ar/${obra.id}-${sello}.usdz`;
-
-      const [subidaGlb, subidaUsdz] = await Promise.all([
-        supabase.storage
-          .from("obras")
-          .upload(rutaGlb, glbBlob, { contentType: "model/gltf-binary" }),
-        supabase.storage
-          .from("obras")
-          .upload(rutaUsdz, usdzBlob, { contentType: "model/vnd.usdz+zip" }),
-      ]);
-      if (subidaGlb.error) throw subidaGlb.error;
-      if (subidaUsdz.error) throw subidaUsdz.error;
-
-      const {
-        data: { publicUrl: nuevoGlbUrl },
-      } = supabase.storage.from("obras").getPublicUrl(rutaGlb);
-      const {
-        data: { publicUrl: nuevoUsdzUrl },
-      } = supabase.storage.from("obras").getPublicUrl(rutaUsdz);
-
-      const { error: updateError } = await supabase
-        .from("obras")
-        .update({
-          modelo_ar_glb_url: nuevoGlbUrl,
-          modelo_ar_usdz_url: nuevoUsdzUrl,
-        })
-        .eq("id", obra.id);
-      if (updateError) throw updateError;
-
+      const { glbUrl: nuevoGlbUrl, usdzUrl: nuevoUsdzUrl } =
+        await generarYSubirVistaAr(supabase, obra);
       setGlbUrl(nuevoGlbUrl);
       setUsdzUrl(nuevoUsdzUrl);
     } catch (err) {
