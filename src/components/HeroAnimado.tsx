@@ -37,7 +37,9 @@ export default function HeroAnimado() {
               titular terminara de revelarse (0.5s + 1s), así que se
               veía ya a mitad de ciclo en cuanto aparecía el texto. */}
           <span className="texto-brillo" style={{ animationDelay: "1.5s" }}>
-            Arte orgánico Naturaleza, color y memoria.
+            Arte orgánico
+            <br />
+            Naturaleza, color y memoria.
           </span>
         </span>
       </h1>
