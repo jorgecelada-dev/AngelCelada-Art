@@ -25,7 +25,7 @@ export default async function HomePage() {
     <>
       <HeroAnimado />
 
-      {/* Últimas obras */}
+      {/* Obras destacadas */}
       {obras.length > 0 && (
         <section className="container-site pb-16 pt-2 md:pt-4">
           <RevelarEnVista className="mb-10 flex items-end justify-between">
@@ -34,7 +34,7 @@ export default async function HomePage() {
                 className="efecto-revelado-texto"
                 style={{ animationDelay: "0.15s" }}
               >
-                Últimas obras
+                Obras destacadas
               </span>
             </h2>
             <Link href="/obras" className="text-sm underline underline-offset-4">

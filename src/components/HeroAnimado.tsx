@@ -21,7 +21,7 @@ export default function HeroAnimado() {
           className="efecto-mecanografia"
           style={{ animationDelay: "0.7s, 2.3s" }}
         >
-          Arte orgánico hecho a mano
+          Ángel Luis Celada. Obra gráfica 1996-actualidad
         </span>
       </span>
       <h1
@@ -37,21 +37,23 @@ export default function HeroAnimado() {
               titular terminara de revelarse (0.5s + 1s), así que se
               veía ya a mitad de ciclo en cuanto aparecía el texto. */}
           <span className="texto-brillo" style={{ animationDelay: "1.5s" }}>
-            Cuadros que nacen de la tierra, el color y el tiempo.
+            Arte orgánico. Naturaleza, color y memoria
           </span>
         </span>
       </h1>
       <p
-        className="animate-entrada-izquierda max-w-xl text-charcoal/70"
+        className="animate-entrada-izquierda max-w-2xl text-charcoal/70"
         style={{ animationDelay: "0.28s" }}
       >
         <span
           className="efecto-revelado-texto"
           style={{ animationDelay: "0.85s" }}
         >
-          Bienvenido/a a mi espacio. Aquí encontrarás cada obra original,
-          pintada con materiales naturales, junto con la historia que hay
-          detrás de cada una.
+          Bienvenido a mi espacio artístico. Aquí encontrarás algunas obras
+          realizadas a lo largo de los últimos años, resultado de un proceso
+          de exploración personal en torno a los conceptos, materiales y
+          posibilidades expresivas que articulan mi práctica artística.
+          Ojalá disfrutes con ellas como yo lo hago durante su proceso.
         </span>
       </p>
       <div
