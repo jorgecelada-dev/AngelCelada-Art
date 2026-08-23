@@ -78,7 +78,7 @@ export default function ImagenObraRotada({
           fill
           className="object-contain"
           sizes="700px"
-          quality={100}
+          quality={90}
           priority
         />
       </div>

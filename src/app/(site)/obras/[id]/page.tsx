@@ -106,7 +106,7 @@ export default async function ObraDetailPage({
               ? "(min-width: 768px) 50vw, 100vw"
               : "(min-width: 1024px) 1024px, 100vw"
           }
-          quality={100}
+          quality={90}
           priority
         />
       )
@@ -120,7 +120,7 @@ export default async function ObraDetailPage({
           fill
           className="object-cover"
           sizes="(min-width: 768px) 50vw, 100vw"
-          quality={100}
+          quality={90}
           priority
         />
       </div>

@@ -153,8 +153,8 @@ export default function ObraCard({
                   alt={obra.titulo}
                   fill
                   className="object-cover"
-                  sizes="1400px"
-                  quality={95}
+                  sizes="(min-width: 1024px) 50vw, (min-width: 640px) 66vw, 100vw"
+                  quality={90}
                 />
               </div>
             )
@@ -168,7 +168,7 @@ export default function ObraCard({
               // así que se pide bastante más resolución de la que ocuparía
               // una celda de una sola columna para que no se pixelen.
               sizes="(min-width: 1024px) 50vw, (min-width: 640px) 66vw, 100vw"
-              quality={95}
+              quality={90}
             />
           )
         ) : (
@@ -264,7 +264,7 @@ export default function ObraCard({
                             cargada ? "opacity-100" : "opacity-0"
                           }`}
                           sizes="780px"
-                          quality={100}
+                          quality={90}
                           onLoad={() => setCargada(true)}
                         />
                       </div>
@@ -277,7 +277,7 @@ export default function ObraCard({
                           cargada ? "opacity-100" : "opacity-0"
                         }`}
                         sizes="780px"
-                        quality={100}
+                        quality={90}
                         onLoad={() => setCargada(true)}
                       />
                     )}
