@@ -30,6 +30,18 @@ export default function ModelViewerElemento({ obra }: { obra: Obra }) {
     };
   }, [obra.id]);
 
+  // "scene-viewer" fuera de ar-modes a propósito: para decidir si
+  // ofrecerlo, model-viewer solo comprueba si el navegador es
+  // Android/Chrome (sniffing de user-agent), sin verificar de verdad si
+  // el aparato soporta ARCore — así que en un Android sin ARCore
+  // certificado igualmente mostraba el botón, y al pulsarlo Android
+  // mandaba a una pantalla nativa de "tu dispositivo no es compatible"
+  // en la Play Store, sin ninguna forma de detectarlo desde aquí.
+  // "webxr" sí hace la comprobación real (navigator.xr.isSessionSupported)
+  // antes de decidir si puede activarse — sin "scene-viewer" como
+  // respaldo optimista, canActivateAR refleja fielmente si el aparato
+  // puede de verdad, y el aviso de "no disponible" de abajo aparece en
+  // vez de mandar a un callejón sin salida.
   return (
     <div>
       <model-viewer
@@ -39,7 +51,7 @@ export default function ModelViewerElemento({ obra }: { obra: Obra }) {
         ios-src={obra.modelo_ar_usdz_url ?? undefined}
         alt={`Vista 3D de ${obra.titulo}`}
         ar
-        ar-modes="webxr scene-viewer quick-look"
+        ar-modes="webxr quick-look"
         ar-placement="wall"
         camera-orbit="0deg 90deg auto"
         shadow-intensity="1"
@@ -56,8 +68,9 @@ export default function ModelViewerElemento({ obra }: { obra: Obra }) {
 
       {disponible === false && (
         <p className="mt-4 rounded-lg bg-charcoal/5 px-4 py-3 text-center text-sm text-charcoal/70">
-          La vista en AR no está disponible en este navegador. Ábrelo desde
-          Chrome en Android o Safari en iPhone para verlo en tu pared.
+          La vista en AR no está disponible en este dispositivo o
+          navegador. Pruébalo desde Safari en un iPhone, o desde Chrome en
+          un Android compatible con ARCore.
         </p>
       )}
     </div>
