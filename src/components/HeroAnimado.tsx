@@ -21,7 +21,7 @@ export default function HeroAnimado() {
           className="efecto-mecanografia"
           style={{ animationDelay: "0.7s, 2.3s" }}
         >
-          Ángel Luis Celada. Obra gráfica 1996-actualidad
+          Ángel Luis Celada. Obra gráfica
         </span>
       </span>
       <h1
@@ -44,7 +44,7 @@ export default function HeroAnimado() {
             className="texto-brillo whitespace-nowrap"
             style={{ animationDelay: "1.5s" }}
           >
-            Arte orgánico
+            Arte orgánico.
             <br />
             Naturaleza, color y memoria.
           </span>
@@ -58,11 +58,10 @@ export default function HeroAnimado() {
           className="efecto-revelado-texto"
           style={{ animationDelay: "0.85s" }}
         >
-          Bienvenido a mi espacio artístico. Aquí encontrarás algunas obras
-          realizadas a lo largo de los últimos años, resultado de un proceso
-          de exploración personal en torno a los conceptos, materiales y
-          posibilidades expresivas que articulan mi práctica artística.
-          Ojalá disfrutes con ellas como yo lo hago durante su proceso.
+          Bienvenido a mi espacio artístico. Aquí encontrarás una selección
+          de obras únicas y originales, creadas a lo largo de mi trayectoria
+          artística desde 1996 hasta hoy. Espero que disfrutes con ellas
+          tanto como yo lo hago durante su creación.
         </span>
       </p>
       <div
