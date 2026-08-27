@@ -39,39 +39,7 @@ export default async function ObrasPage({
 
   return (
     <>
-      <CabeceraPagina
-        titulo="Obras"
-        seccion="obras"
-        pills={
-          colecciones.length > 0 && (
-            <>
-              <Link
-                href="/obras"
-                className={`rounded-full px-4 py-2 text-sm transition ${
-                  !coleccionActivaId
-                    ? "bg-charcoal text-cream"
-                    : "bg-white/60 text-charcoal/70 hover:bg-white"
-                }`}
-              >
-                Todas
-              </Link>
-              {colecciones.map((coleccion) => (
-                <Link
-                  key={coleccion.id}
-                  href={`/obras?coleccion=${coleccion.id}`}
-                  className={`rounded-full px-4 py-2 text-sm transition ${
-                    coleccionActivaId === coleccion.id
-                      ? "bg-charcoal text-cream"
-                      : "bg-white/60 text-charcoal/70 hover:bg-white"
-                  }`}
-                >
-                  {coleccion.nombre}
-                </Link>
-              ))}
-            </>
-          )
-        }
-      />
+      <CabeceraPagina titulo="Obras" seccion="obras" />
 
       <section className="container-site py-16">
         {coleccionActiva?.descripcion && (
@@ -98,6 +66,39 @@ export default async function ObrasPage({
               ? `Todavía no hay obras en "${coleccionActiva.nombre}".`
               : "Todavía no hay obras publicadas."}
           </p>
+        )}
+
+        {/* Antes vivía dentro de la cabecera oscura: con el nuevo fondo
+            ondulado, la parte baja de la banda podía "comerse" visualmente
+            las pastillas según cómo cayera la ola en cada pantalla. Aquí
+            debajo, justo encima del filtro de tamaño/año, no depende de
+            eso. */}
+        {colecciones.length > 0 && (
+          <div className="mb-6 flex flex-wrap gap-2">
+            <Link
+              href="/obras"
+              className={`rounded-full px-4 py-2 text-sm transition ${
+                !coleccionActivaId
+                  ? "bg-charcoal text-cream"
+                  : "bg-charcoal/5 text-charcoal/70 hover:bg-charcoal/10"
+              }`}
+            >
+              Todas
+            </Link>
+            {colecciones.map((coleccion) => (
+              <Link
+                key={coleccion.id}
+                href={`/obras?coleccion=${coleccion.id}`}
+                className={`rounded-full px-4 py-2 text-sm transition ${
+                  coleccionActivaId === coleccion.id
+                    ? "bg-charcoal text-cream"
+                    : "bg-charcoal/5 text-charcoal/70 hover:bg-charcoal/10"
+                }`}
+              >
+                {coleccion.nombre}
+              </Link>
+            ))}
+          </div>
         )}
 
         <FiltrosObras obras={obras} />
