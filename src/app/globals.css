@@ -157,7 +157,12 @@
     width: 0;
   }
   to {
-    width: 100%;
+    /* "100%" es el ancho del contenedor padre, no el del propio texto:
+       en pantallas anchas de sobra no se notaba, pero en móvil el
+       contenedor podía ser más estrecho que el texto real y recortaba
+       la última letra. max-content lo ajusta al ancho real del texto,
+       sea cual sea el contenedor. */
+    width: max-content;
   }
 }
 
